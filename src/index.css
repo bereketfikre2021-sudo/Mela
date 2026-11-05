@@ -1,0 +1,86 @@
+/*
+ * MELA design tokens.
+ *
+ * Colors are stored as space-separated RGB channels so Tailwind v3 opacity
+ * modifiers (e.g. bg-primary/50) work via the <alpha-value> placeholder used in
+ * tailwind.config.ts. Typography roles are exposed as small helper classes
+ * (heading, text-figures) so weights and tabular numerals stay consistent.
+ */
+@import '@fontsource/inter/400.css';
+@import '@fontsource/inter/600.css';
+@import '@fontsource/noto-sans-ethiopic/400.css';
+@import '@fontsource/noto-sans-ethiopic/600.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Brand */
+    --color-primary: 18 61 53;
+    --color-primary-interactive: 28 107 83;
+    --color-primary-soft: 217 240 228;
+
+    /* Surfaces & content */
+    --color-background: 247 247 242;
+    --color-surface: 255 255 255;
+    --color-border: 231 229 220;
+    --color-text: 37 42 39;
+    --color-muted: 135 150 141;
+
+    /* Semantic — restrained, derived to stay on-brand (all meet AA on their soft fill). */
+    --color-success: 28 107 83;
+    --color-success-soft: 217 240 228;
+    --color-warning: 142 90 22;
+    --color-warning-soft: 243 231 201;
+    --color-danger: 180 69 43;
+    --color-danger-soft: 241 221 211;
+    --color-info: 91 107 106;
+    --color-info-soft: 226 231 229;
+
+    /* Type — Inter for Latin/numerals, Noto Sans Ethiopic for Amharic glyphs.
+       Both fonts are self-hosted so the PWA works offline. */
+    --font-sans: 'Inter', 'Noto Sans Ethiopic', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --font-ethiopic: 'Noto Sans Ethiopic', 'Inter', system-ui, sans-serif;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-background text-text font-sans antialiased;
+    margin: 0;
+  }
+
+  /* A single, consistent focus indicator across the app. */
+  :focus-visible {
+    outline: 2px solid rgb(var(--color-primary-interactive));
+    outline-offset: 2px;
+  }
+
+  /* Respect users who prefer reduced motion. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  /* Heading role: weight 600, tight tracking. */
+  .heading {
+    @apply font-semibold tracking-tight text-text;
+  }
+
+  /* Financial figures: weight 600 with tabular numerals for alignment. */
+  .text-figures {
+    font-variant-numeric: tabular-nums;
+    @apply font-semibold;
+  }
+}
