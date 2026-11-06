@@ -1,4 +1,5 @@
 import { Boxes, LineChart, ShoppingBag, Wallet } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 
 import { Button } from '../design-system/Button'
@@ -6,6 +7,7 @@ import { Button } from '../design-system/Button'
 /** On-brand MELA welcome screen introducing the product. */
 export function WelcomePage() {
   const { t } = useTranslation()
+  const navigate = useNavigate()
 
   const features = [
     { icon: ShoppingBag, title: t('welcome.features.sales.title'), desc: t('welcome.features.sales.desc') },
@@ -21,9 +23,8 @@ export function WelcomePage() {
       <p className="mt-4 max-w-xl text-base text-secondary">{t('welcome.subheading')}</p>
       <p className="mt-3 max-w-xl text-sm text-secondary">{t('welcome.description')}</p>
 
-      {/* Disabled until onboarding is available (Phase 1). */}
       <div className="mt-7">
-        <Button size="lg" disabled>
+        <Button size="lg" onClick={() => navigate('/login')}>
           {t('welcome.cta')}
         </Button>
       </div>

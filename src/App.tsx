@@ -1,8 +1,16 @@
 import { useEffect } from 'react'
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 
 import { NotificationProvider } from './design-system/Notification'
 import { AppShell } from './layouts/AppShell'
+import { AuthProvider } from './modules/auth/AuthContext'
+import { PublicOnly, RequireBusiness, RequireProfile } from './modules/auth/RouteGuards'
+import { AppPlaceholder } from './pages/AppPlaceholder'
+import { EditBusinessProfilePage } from './pages/EditBusinessProfilePage'
+import { LoginPage } from './pages/LoginPage'
+import { OnboardingPage } from './pages/OnboardingPage'
+import { RegisterPage } from './pages/RegisterPage'
 import { WelcomePage } from './pages/WelcomePage'
 
 const brand = (
@@ -21,9 +29,56 @@ export function App() {
 
   return (
     <NotificationProvider>
-      <AppShell brand={brand}>
-        <WelcomePage />
-      </AppShell>
+      <AuthProvider>
+        <BrowserRouter>
+          <AppShell brand={brand}>
+            <Routes>
+              <Route path="/" element={<WelcomePage />} />
+              <Route
+                path="/login"
+                element={
+                  <PublicOnly>
+                    <LoginPage />
+                  </PublicOnly>
+                }
+              />
+              <Route
+                path="/register"
+                element={
+                  <PublicOnly>
+                    <RegisterPage />
+                  </PublicOnly>
+                }
+              />
+              <Route
+                path="/onboarding"
+                element={
+                  <RequireProfile>
+                    <OnboardingPage />
+                  </RequireProfile>
+                }
+              />
+              <Route
+                path="/app"
+                element={
+                  <RequireBusiness>
+                    <AppPlaceholder />
+                  </RequireBusiness>
+                }
+              />
+              <Route
+                path="/app/profile"
+                element={
+                  <RequireBusiness>
+                    <EditBusinessProfilePage />
+                  </RequireBusiness>
+                }
+              />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </AppShell>
+        </BrowserRouter>
+      </AuthProvider>
     </NotificationProvider>
   )
 }
