@@ -6,11 +6,8 @@ import { AppShell } from './layouts/AppShell'
 import { WelcomePage } from './pages/WelcomePage'
 
 const brand = (
-  <div className="flex items-center gap-2">
-    <span className="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-white" aria-hidden="true">
-      <span className="text-sm font-semibold">M</span>
-    </span>
-    <span className="text-base font-semibold tracking-tight text-text">MELA</span>
+  <div className="flex items-center">
+    <img src="/Logo.svg" alt="MELA" className="h-9 w-9" />
   </div>
 )
 
