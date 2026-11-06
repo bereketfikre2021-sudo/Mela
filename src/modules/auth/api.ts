@@ -39,6 +39,16 @@ export async function signOut(): Promise<{ error: { message: string } | null }> 
   return { error: error ? { message: error.message } : null }
 }
 
+/** Begin Google OAuth. Supabase redirects to Google; the app resumes at /auth/callback. */
+export async function signInWithGoogle(): Promise<{ error: { message: string } | null }> {
+  if (!supabase) return { error: { message: 'Supabase is not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.' } }
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: `${window.location.origin}/auth/callback` }
+  })
+  return { error: error ? { message: error.message } : null }
+}
+
 /** Load the business profile for a user (one per owner in Phase 1). */
 export async function getBusiness(
   userId: string

@@ -7,6 +7,7 @@ import { AppShell } from './layouts/AppShell'
 import { AuthProvider } from './modules/auth/AuthContext'
 import { PublicOnly, RequireBusiness, RequireProfile } from './modules/auth/RouteGuards'
 import { AppPlaceholder } from './pages/AppPlaceholder'
+import { AuthCallbackPage } from './pages/AuthCallbackPage'
 import { EditBusinessProfilePage } from './pages/EditBusinessProfilePage'
 import { LoginPage } from './pages/LoginPage'
 import { OnboardingPage } from './pages/OnboardingPage'
@@ -34,6 +35,7 @@ export function App() {
           <AppShell brand={brand}>
             <Routes>
               <Route path="/" element={<WelcomePage />} />
+              <Route path="/auth/callback" element={<AuthCallbackPage />} />
               <Route
                 path="/login"
                 element={

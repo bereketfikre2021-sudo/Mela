@@ -5,7 +5,8 @@ import { useTranslation } from 'react-i18next'
 import { Button } from '../design-system/Button'
 import { Input } from '../design-system/Input'
 import { useNotification } from '../design-system/Notification'
-import { mapAuthError, signUp } from '../modules/auth/api'
+import { GoogleIcon } from '../modules/auth/GoogleIcon'
+import { mapAuthError, signInWithGoogle, signUp } from '../modules/auth/api'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -31,6 +32,15 @@ export function RegisterPage() {
 
   function handleBlur(field: string, value: string) {
     setErrors((prev) => ({ ...prev, [field]: validateField(field, value) }))
+  }
+
+  async function handleGoogle() {
+    const { error } = await signInWithGoogle()
+    if (error) {
+      const message = mapAuthError(t, error.message)
+      setFormError(message)
+      notify({ tone: 'danger', title: message })
+    }
   }
 
   async function handleSubmit(e: FormEvent) {
@@ -70,7 +80,24 @@ export function RegisterPage() {
     <div className="mx-auto max-w-md py-6 md:py-10">
       <div className="rounded-lg border border-border bg-surface p-6 md:p-8">
         <h1 className="heading text-2xl">{t('auth.register.title')}</h1>
-        <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4" noValidate>
+        <div className="mt-6">
+          <Button
+            variant="ghost"
+            size="lg"
+            fullWidth
+            leadingIcon={<GoogleIcon />}
+            onClick={handleGoogle}
+            className="border border-border bg-surface hover:bg-background"
+          >
+            {t('auth.google')}
+          </Button>
+        </div>
+        <div className="my-6 flex items-center gap-3 text-xs text-secondary">
+          <span className="h-px flex-1 bg-border" />
+          <span>{t('auth.or')}</span>
+          <span className="h-px flex-1 bg-border" />
+        </div>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
           {formError && (
             <p role="alert" className="rounded-md bg-danger-soft px-3 py-2 text-sm text-danger">
               {formError}
