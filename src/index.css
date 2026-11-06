@@ -27,22 +27,27 @@
     --color-surface: 255 255 255;
     --color-border: 231 229 220;
     --color-text: 37 42 39;
+    /* Secondary copy (body-sized). Darker than muted so it clears WCAG AA
+       (4.5:1) on the background and on white surfaces; #87968D (muted) is
+       reserved for non-text and larger decorative uses. */
+    --color-text-secondary: 88 104 95;
     --color-muted: 135 150 141;
 
-    /* Semantic — restrained, derived to stay on-brand (all meet AA on their soft fill). */
+    /* Semantic — restrained, derived to stay on-brand; text hues meet WCAG AA
+       (4.5:1) on their soft fills at the badge text size. */
     --color-success: 28 107 83;
     --color-success-soft: 217 240 228;
     --color-warning: 142 90 22;
     --color-warning-soft: 243 231 201;
-    --color-danger: 180 69 43;
+    --color-danger: 154 58 36;
     --color-danger-soft: 241 221 211;
-    --color-info: 91 107 106;
+    --color-info: 83 99 95;
     --color-info-soft: 226 231 229;
 
-    /* Type — Inter for Latin/numerals, Noto Sans Ethiopic for Amharic glyphs.
-       Both fonts are self-hosted so the PWA works offline. */
+    /* Type — Inter handles Latin/numerals; Noto Sans Ethiopic supplies Amharic
+       glyphs via per-glyph fallback within this stack. Both fonts are
+       self-hosted so the PWA works offline. */
     --font-sans: 'Inter', 'Noto Sans Ethiopic', system-ui, -apple-system, 'Segoe UI', sans-serif;
-    --font-ethiopic: 'Noto Sans Ethiopic', 'Inter', system-ui, sans-serif;
   }
 
   html {

@@ -16,6 +16,9 @@ export default {
         surface: 'rgb(var(--color-surface) / <alpha-value>)',
         border: 'rgb(var(--color-border) / <alpha-value>)',
         text: 'rgb(var(--color-text) / <alpha-value>)',
+        // Body-sized secondary copy; meets WCAG AA on background and surface.
+        'text-secondary': 'rgb(var(--color-text-secondary) / <alpha-value>)',
+        // Reserved for non-text and larger decorative uses (icons, dots, placeholders).
         muted: 'rgb(var(--color-muted) / <alpha-value>)',
         primary: {
           DEFAULT: 'rgb(var(--color-primary) / <alpha-value>)',
@@ -31,8 +34,7 @@ export default {
         DEFAULT: 'rgb(var(--color-border) / <alpha-value>)'
       },
       fontFamily: {
-        sans: ['var(--font-sans)'],
-        ethiopic: ['var(--font-ethiopic)', 'var(--font-sans)']
+        sans: ['var(--font-sans)']
       },
       fontSize: {
         xs: ['0.75rem', { lineHeight: '1.125rem' }],

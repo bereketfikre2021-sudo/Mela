@@ -17,7 +17,7 @@ const spinnerSizes = {
 
 export function Spinner({ size = 'md', label = 'Loading', className }: SpinnerProps) {
   return (
-    <span role="status" className={cn('inline-flex items-center text-muted', className)}>
+    <span role="status" className={cn('inline-flex items-center text-secondary', className)}>
       <Loader2 className={cn('animate-spin', spinnerSizes[size])} aria-hidden="true" />
       <span className="sr-only">{label}</span>
     </span>

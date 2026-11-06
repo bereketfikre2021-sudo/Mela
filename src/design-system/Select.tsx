@@ -72,7 +72,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select
           {error}
         </p>
       ) : helperText ? (
-        <p id={helperId} className="mt-1.5 text-xs text-muted">
+        <p id={helperId} className="mt-1.5 text-xs text-secondary">
           {helperText}
         </p>
       ) : null}

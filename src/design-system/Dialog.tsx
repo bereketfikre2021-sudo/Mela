@@ -106,7 +106,7 @@ export function Dialog({
               </h2>
             )}
             {description && (
-              <p id={descId} className="mt-1 text-sm text-muted">
+              <p id={descId} className="mt-1 text-sm text-secondary">
                 {description}
               </p>
             )}

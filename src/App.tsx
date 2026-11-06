@@ -1,14 +1,9 @@
-import { useEffect, useState } from 'react'
-import { Home, Palette } from 'lucide-react'
+import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { NotificationProvider } from './design-system/Notification'
-import type { NavItem } from './design-system/BottomNav'
 import { AppShell } from './layouts/AppShell'
-import { DesignSystemPage } from './pages/DesignSystemPage'
 import { WelcomePage } from './pages/WelcomePage'
-
-type View = 'home' | 'design'
 
 const brand = (
   <div className="flex items-center gap-2">
@@ -20,13 +15,7 @@ const brand = (
 )
 
 export function App() {
-  const { t, i18n } = useTranslation()
-  const [view, setView] = useState<View>('home')
-
-  const navItems: NavItem[] = [
-    { id: 'home', label: t('nav.home'), icon: Home },
-    { id: 'design', label: t('nav.design'), icon: Palette }
-  ]
+  const { i18n } = useTranslation()
 
   // Keep <html lang> in sync with the active language (helps fonts + AT).
   useEffect(() => {
@@ -35,8 +24,8 @@ export function App() {
 
   return (
     <NotificationProvider>
-      <AppShell brand={brand} navItems={navItems} activeId={view} onNavigate={(id) => setView(id as View)}>
-        {view === 'home' ? <WelcomePage onExplore={() => setView('design')} /> : <DesignSystemPage />}
+      <AppShell brand={brand}>
+        <WelcomePage />
       </AppShell>
     </NotificationProvider>
   )

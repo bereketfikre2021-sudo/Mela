@@ -35,7 +35,7 @@ export function BottomNav({ items, activeId, onSelect, className }: BottomNavPro
                 aria-current={active ? 'page' : undefined}
                 className={cn(
                   'flex w-full flex-col items-center gap-1 py-2.5 text-xs transition-colors',
-                  active ? 'text-primary' : 'text-muted hover:text-text'
+                  active ? 'text-primary' : 'text-secondary hover:text-text'
                 )}
               >
                 <Icon className="h-5 w-5" aria-hidden="true" />

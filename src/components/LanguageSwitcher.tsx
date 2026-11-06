@@ -24,7 +24,7 @@ export function LanguageSwitcher() {
             aria-pressed={active}
             className={cn(
               'rounded px-2.5 py-1 text-xs font-medium transition-colors',
-              active ? 'bg-primary text-white' : 'text-muted hover:text-text'
+              active ? 'bg-primary text-white' : 'text-secondary hover:text-text'
             )}
           >
             {opt.label}

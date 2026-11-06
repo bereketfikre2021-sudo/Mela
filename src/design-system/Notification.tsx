@@ -90,7 +90,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
                 <Icon className={cn('mt-0.5 h-5 w-5 shrink-0', accent)} aria-hidden="true" />
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium text-text">{t.title}</p>
-                  {t.description && <p className="mt-0.5 text-sm text-muted">{t.description}</p>}
+                  {t.description && <p className="mt-0.5 text-sm text-secondary">{t.description}</p>}
                 </div>
                 <button
                   type="button"

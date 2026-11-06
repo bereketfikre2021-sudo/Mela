@@ -60,7 +60,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
           {error}
         </p>
       ) : helperText ? (
-        <p id={helperId} className="mt-1.5 text-xs text-muted">
+        <p id={helperId} className="mt-1.5 text-xs text-secondary">
           {helperText}
         </p>
       ) : null}

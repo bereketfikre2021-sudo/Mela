@@ -1,19 +1,16 @@
-import { ArrowRight, Boxes, LineChart, ShoppingBag } from 'lucide-react'
+import { Boxes, LineChart, ShoppingBag, Wallet } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import { Button } from '../design-system/Button'
 
-export interface WelcomePageProps {
-  onExplore: () => void
-}
-
-/** On-brand welcome screen demonstrating the design tokens and typography. */
-export function WelcomePage({ onExplore }: WelcomePageProps) {
+/** On-brand MELA welcome screen introducing the product. */
+export function WelcomePage() {
   const { t } = useTranslation()
 
   const features = [
     { icon: ShoppingBag, title: t('welcome.features.sales.title'), desc: t('welcome.features.sales.desc') },
     { icon: Boxes, title: t('welcome.features.inventory.title'), desc: t('welcome.features.inventory.desc') },
+    { icon: Wallet, title: t('welcome.features.expenses.title'), desc: t('welcome.features.expenses.desc') },
     { icon: LineChart, title: t('welcome.features.insights.title'), desc: t('welcome.features.insights.desc') }
   ]
 
@@ -21,18 +18,17 @@ export function WelcomePage({ onExplore }: WelcomePageProps) {
     <div className="py-6 md:py-10">
       <p className="text-sm font-medium uppercase tracking-wider text-primary">{t('welcome.eyebrow')}</p>
       <h1 className="heading mt-3 max-w-2xl text-3xl md:text-4xl">{t('welcome.title')}</h1>
-      <p className="mt-4 max-w-xl text-base text-muted">{t('welcome.subtitle')}</p>
+      <p className="mt-4 max-w-xl text-base text-secondary">{t('welcome.subheading')}</p>
+      <p className="mt-3 max-w-xl text-sm text-secondary">{t('welcome.description')}</p>
 
-      <div className="mt-7 flex flex-wrap gap-3">
-        <Button size="lg" onClick={onExplore} trailingIcon={<ArrowRight className="h-4 w-4" aria-hidden="true" />}>
+      {/* Disabled until onboarding is available (Phase 1). */}
+      <div className="mt-7">
+        <Button size="lg" disabled>
           {t('welcome.cta')}
-        </Button>
-        <Button variant="secondary" size="lg" onClick={onExplore}>
-          {t('welcome.secondary')}
         </Button>
       </div>
 
-      <div className="mt-12 grid gap-px overflow-hidden rounded-lg border border-border bg-border sm:grid-cols-3">
+      <div className="mt-12 grid gap-px overflow-hidden rounded-lg border border-border bg-border sm:grid-cols-2 lg:grid-cols-4">
         {features.map((f) => {
           const Icon = f.icon
           return (
@@ -44,7 +40,7 @@ export function WelcomePage({ onExplore }: WelcomePageProps) {
                 <Icon className="h-5 w-5" />
               </span>
               <h2 className="mt-3 text-sm font-semibold text-text">{f.title}</h2>
-              <p className="mt-1 text-sm text-muted">{f.desc}</p>
+              <p className="mt-1 text-sm text-secondary">{f.desc}</p>
             </div>
           )
         })}

@@ -31,7 +31,7 @@ export function TableRow({ className, ...props }: HTMLAttributes<HTMLTableRowEle
 export function TableHead({ className, ...props }: ThHTMLAttributes<HTMLTableCellElement>) {
   return (
     <th
-      className={cn('px-3 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted', className)}
+      className={cn('px-3 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-secondary', className)}
       {...props}
     />
   )
