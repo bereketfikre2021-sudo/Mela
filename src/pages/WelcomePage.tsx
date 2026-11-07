@@ -214,16 +214,16 @@ export function WelcomePage() {
       {/* ── FOOTER ────────────────────────────────────────────────────────── */}
       <footer className="border-t border-border bg-surface">
         <div className="mx-auto max-w-6xl px-6 py-10 lg:px-8">
-          <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
+
+          {/* Desktop: 4-column grid */}
+          <div className="hidden gap-8 md:grid md:grid-cols-4">
             {/* Brand */}
-            <div className="col-span-2 md:col-span-1">
+            <div>
               <div className="flex items-center gap-2">
                 <img src="/Logo.svg" alt="MELA" className="h-8 w-8" />
                 <span className="text-base font-semibold tracking-tight text-text">MELA</span>
               </div>
-              <p className="mt-3 text-sm leading-relaxed text-secondary">
-                {t('footer.tagline')}
-              </p>
+              <p className="mt-3 text-sm leading-relaxed text-secondary">{t('footer.tagline')}</p>
             </div>
             {/* Product */}
             <div>
@@ -246,14 +246,33 @@ export function WelcomePage() {
             <div>
               <p className="mb-3 text-xs font-bold uppercase tracking-widest text-secondary">{t('footer.support')}</p>
               <ul className="space-y-2 text-sm text-secondary">
-                <li><a href="/contact"                    className="hover:text-primary">{t('footer.helpSupport')}</a></li>
+                <li>
+                  <a href="https://t.me/Believeandforward" target="_blank" rel="noopener noreferrer" className="hover:text-primary">
+                    @Believeandforward
+                  </a>
+                </li>
                 <li><a href="mailto:support@mela.pro.et" className="hover:text-primary">support@mela.pro.et</a></li>
               </ul>
             </div>
           </div>
-          <div className="mt-10 flex flex-col items-center justify-between gap-3 border-t border-border pt-6 text-xs text-muted md:flex-row">
+
+          {/* Mobile: logo + legal links only */}
+          <div className="flex flex-col items-center gap-4 md:hidden">
+            <div className="flex items-center gap-2">
+              <img src="/Logo.svg" alt="MELA" className="h-7 w-7" />
+              <span className="text-sm font-semibold text-text">MELA</span>
+            </div>
+            <div className="flex flex-wrap justify-center gap-x-5 gap-y-2 text-sm text-secondary">
+              <a href="/privacy" className="hover:text-primary">{t('footer.privacy')}</a>
+              <a href="/terms"   className="hover:text-primary">{t('footer.terms')}</a>
+              <a href="/contact" className="hover:text-primary">{t('footer.contact')}</a>
+            </div>
+          </div>
+
+          {/* Copyright row */}
+          <div className="mt-8 border-t border-border pt-6 text-center text-xs text-muted md:flex md:items-center md:justify-between md:text-left">
             <p>{t('footer.copyright', { year: new Date().getFullYear() })}</p>
-            <div className="flex gap-4">
+            <div className="mt-3 hidden gap-4 md:flex">
               <a href="/privacy" className="hover:text-secondary">{t('footer.privacy')}</a>
               <a href="/terms"   className="hover:text-secondary">{t('footer.terms')}</a>
               <a href="/contact" className="hover:text-secondary">{t('footer.contact')}</a>
