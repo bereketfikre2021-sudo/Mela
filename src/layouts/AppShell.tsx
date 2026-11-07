@@ -11,6 +11,8 @@ export interface AppShellProps {
   navItems?: NavItem[]
   activeId?: string
   onNavigate?: (id: string) => void
+  /** Extra content placed in the top-bar trailing slot alongside the language switcher. */
+  trailingExtra?: ReactNode
   children: ReactNode
 }
 
@@ -19,7 +21,7 @@ export interface AppShellProps {
  * language switcher) and a centered content region. A bottom nav renders on
  * mobile only when navigation items are provided.
  */
-export function AppShell({ brand, navItems = [], activeId, onNavigate, children }: AppShellProps) {
+export function AppShell({ brand, navItems = [], activeId, onNavigate, trailingExtra, children }: AppShellProps) {
   const hasNav = navItems.length > 0
 
   const desktopNav = hasNav ? (
@@ -49,7 +51,12 @@ export function AppShell({ brand, navItems = [], activeId, onNavigate, children 
 
   return (
     <div className="min-h-dvh bg-background text-text">
-      <TopBar brand={brand} nav={desktopNav} trailing={<LanguageSwitcher />} />
+      <TopBar brand={brand} nav={desktopNav} trailing={
+        <div className="flex items-center gap-2">
+          <LanguageSwitcher />
+          {trailingExtra}
+        </div>
+      } />
       <main className="mx-auto w-full max-w-5xl px-4 pb-12 pt-6 md:pt-10">{children}</main>
       {hasNav && (
         <BottomNav items={navItems} activeId={activeId ?? ''} onSelect={onNavigate ?? (() => {})} className="md:hidden" />
