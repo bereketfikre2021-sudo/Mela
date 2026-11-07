@@ -1,19 +1,49 @@
 /*
  * MELA design tokens.
  *
- * Colors are stored as space-separated RGB channels so Tailwind v3 opacity
- * modifiers (e.g. bg-primary/50) work via the <alpha-value> placeholder used in
- * tailwind.config.ts. Typography roles are exposed as small helper classes
- * (heading, text-figures) so weights and tabular numerals stay consistent.
+ * @import rules must appear first (PostCSS requirement).
+ * Outfit is loaded from /public/fonts/ via @font-face below.
+ * Noto Sans Ethiopic comes from @fontsource for Amharic glyph coverage.
+ * Both fonts are preloaded or self-hosted so the PWA works offline with no FOUT.
  */
-@import '@fontsource/inter/400.css';
-@import '@fontsource/inter/600.css';
+
+/* ── Noto Sans Ethiopic (must be first — @import before @font-face) ── */
 @import '@fontsource/noto-sans-ethiopic/400.css';
 @import '@fontsource/noto-sans-ethiopic/600.css';
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ── Outfit — brand font for Latin / English ── */
+@font-face {
+  font-family: 'Outfit';
+  src: url('/fonts/Outfit/Outfit-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Outfit';
+  src: url('/fonts/Outfit/Outfit-Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Outfit';
+  src: url('/fonts/Outfit/Outfit-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Outfit';
+  src: url('/fonts/Outfit/Outfit-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
 
 @layer base {
   :root {
@@ -27,14 +57,10 @@
     --color-surface: 255 255 255;
     --color-border: 231 229 220;
     --color-text: 37 42 39;
-    /* Secondary copy (body-sized). Darker than muted so it clears WCAG AA
-       (4.5:1) on the background and on white surfaces; #87968D (muted) is
-       reserved for non-text and larger decorative uses. */
     --color-text-secondary: 88 104 95;
     --color-muted: 135 150 141;
 
-    /* Semantic — restrained, derived to stay on-brand; text hues meet WCAG AA
-       (4.5:1) on their soft fills at the badge text size. */
+    /* Semantic */
     --color-success: 28 107 83;
     --color-success-soft: 217 240 228;
     --color-warning: 142 90 22;
@@ -44,10 +70,10 @@
     --color-info: 83 99 95;
     --color-info-soft: 226 231 229;
 
-    /* Type — Inter handles Latin/numerals; Noto Sans Ethiopic supplies Amharic
-       glyphs via per-glyph fallback within this stack. Both fonts are
-       self-hosted so the PWA works offline. */
-    --font-sans: 'Inter', 'Noto Sans Ethiopic', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    /*
+     * Font stack: Outfit (brand) → Noto Sans Ethiopic (Amharic) → system.
+     */
+    --font-sans: 'Outfit', 'Noto Sans Ethiopic', system-ui, -apple-system, 'Segoe UI', sans-serif;
   }
 
   html {
@@ -59,17 +85,13 @@
     margin: 0;
   }
 
-  /* A single, consistent focus indicator across the app. */
   :focus-visible {
     outline: 2px solid rgb(var(--color-primary-interactive));
     outline-offset: 2px;
   }
 
-  /* Respect users who prefer reduced motion. */
   @media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
+    *, *::before, *::after {
       animation-duration: 0.01ms !important;
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
@@ -78,12 +100,10 @@
 }
 
 @layer components {
-  /* Heading role: weight 600, tight tracking. */
   .heading {
     @apply font-semibold tracking-tight text-text;
   }
 
-  /* Financial figures: weight 600 with tabular numerals for alignment. */
   .text-figures {
     font-variant-numeric: tabular-nums;
     @apply font-semibold;
