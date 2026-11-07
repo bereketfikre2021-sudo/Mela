@@ -50,6 +50,7 @@ export interface SaleItem {
   product_id: string | null
   product_name: string
   unit_price: number
+  unit_cost: number | null   // NULL for sales before migration 0006 or when cost was unknown
   quantity: number
   line_total: number
   created_at: string

@@ -8,12 +8,12 @@ import type { NavItem } from './design-system/BottomNav'
 import { AppShell } from './layouts/AppShell'
 import { AuthProvider } from './modules/auth/AuthContext'
 import { PublicOnly, RequireBusiness, RequireProfile } from './modules/auth/RouteGuards'
-import { AppPlaceholder } from './pages/AppPlaceholder'
 import { AuthCallbackPage } from './pages/AuthCallbackPage'
 import { EditBusinessProfilePage } from './pages/EditBusinessProfilePage'
+import { ExpensesPage } from './pages/ExpensesPage'
 import { LoginPage } from './pages/LoginPage'
 import { OnboardingPage } from './pages/OnboardingPage'
-import { ExpensesPage } from './pages/ExpensesPage'
+import { OverviewPage } from './pages/OverviewPage'
 import { PosPage } from './pages/PosPage'
 import { ProductsPage } from './pages/ProductsPage'
 import { RegisterPage } from './pages/RegisterPage'
@@ -69,15 +69,15 @@ function AppRoutes() {
   return (
     <Routes>
       {/* Public */}
-      <Route path="/"               element={publicShell(<WelcomePage />)} />
-      <Route path="/auth/callback"  element={publicShell(<AuthCallbackPage />)} />
-      <Route path="/login"          element={publicShell(<PublicOnly><LoginPage /></PublicOnly>)} />
-      <Route path="/register"       element={publicShell(<PublicOnly><RegisterPage /></PublicOnly>)} />
-      <Route path="/onboarding"     element={publicShell(<RequireProfile><OnboardingPage /></RequireProfile>)} />
+      <Route path="/"              element={publicShell(<WelcomePage />)} />
+      <Route path="/auth/callback" element={publicShell(<AuthCallbackPage />)} />
+      <Route path="/login"         element={publicShell(<PublicOnly><LoginPage /></PublicOnly>)} />
+      <Route path="/register"      element={publicShell(<PublicOnly><RegisterPage /></PublicOnly>)} />
+      <Route path="/onboarding"    element={publicShell(<RequireProfile><OnboardingPage /></RequireProfile>)} />
 
       {/* Authenticated */}
       <Route path="/app"
-        element={appShell(<RequireBusiness><AppPlaceholder /></RequireBusiness>, '/app')}
+        element={appShell(<RequireBusiness><OverviewPage /></RequireBusiness>, '/app')}
       />
       <Route path="/app/pos"
         element={appShell(<RequireBusiness><PosPage /></RequireBusiness>, '/app/pos')}
