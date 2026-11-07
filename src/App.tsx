@@ -11,6 +11,7 @@ import { useAuth } from './modules/auth/AuthContext'
 import { PublicOnly, RequireBusiness, RequireProfile } from './modules/auth/RouteGuards'
 import { ProfileMenu } from './components/ProfileMenu'
 import { AuthCallbackPage } from './pages/AuthCallbackPage'
+import { ContactPage } from './pages/ContactPage'
 import { EditBusinessProfilePage } from './pages/EditBusinessProfilePage'
 import { ExpensesPage } from './pages/ExpensesPage'
 import { LoginPage } from './pages/LoginPage'
@@ -18,9 +19,11 @@ import { OnboardingPage } from './pages/OnboardingPage'
 import { OverviewPage } from './pages/OverviewPage'
 import { PosPage } from './pages/PosPage'
 import { ProductsPage } from './pages/ProductsPage'
+import { PrivacyPage } from './pages/PrivacyPage'
 import { RegisterPage } from './pages/RegisterPage'
 import { ReportsPage } from './pages/ReportsPage'
 import { SalesPage } from './pages/SalesPage'
+import { TermsPage } from './pages/TermsPage'
 import { WelcomePage } from './pages/WelcomePage'
 
 const brand = (
@@ -83,6 +86,9 @@ function AppRoutes() {
     <Routes>
       {/* Public */}
       <Route path="/"              element={publicShell(<WelcomePage />)} />
+      <Route path="/privacy"       element={publicShell(<PrivacyPage />)} />
+      <Route path="/terms"         element={publicShell(<TermsPage />)} />
+      <Route path="/contact"       element={publicShell(<ContactPage />)} />
       <Route path="/auth/callback" element={publicShell(<AuthCallbackPage />)} />
       <Route path="/login"         element={publicShell(<PublicOnly><LoginPage /></PublicOnly>)} />
       <Route path="/register"      element={publicShell(<PublicOnly><RegisterPage /></PublicOnly>)} />

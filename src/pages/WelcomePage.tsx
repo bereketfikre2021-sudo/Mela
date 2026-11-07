@@ -50,23 +50,15 @@ export function WelcomePage() {
     <div className="overflow-x-hidden">
 
       {/* ── HERO ─────────────────────────────────────────────────────────────── */}
-      <section className="relative">
+      {/*
+        -mt-6 md:-mt-10 bleeds the section up into the AppShell's pt-6/pt-10
+        padding so the dark background covers the full viewport from the top bar
+        down, eliminating the white gap.
+      */}
+      <section className="relative -mx-4 -mt-6 md:-mt-10 px-4 pt-6 md:pt-10">
 
-        {/* Large decorative background block — gives depth and focal weight */}
-        <div
-          className="pointer-events-none absolute inset-0 -z-10"
-          aria-hidden="true"
-        >
-          {/* Dark green panel fills the top ~65% of the hero on large screens */}
-          <div className="absolute inset-x-0 top-0 h-[62%] bg-primary md:h-[70%]" />
-          {/* Subtle grain texture overlay */}
-          <div className="absolute inset-x-0 top-0 h-[62%] opacity-[0.03] md:h-[70%]"
-            style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
-              backgroundSize: '200px',
-            }}
-          />
-        </div>
+        {/* Full dark green background flush with top */}
+        <div className="pointer-events-none absolute inset-x-0 top-0 bottom-[35%] bg-primary md:bottom-[30%]" aria-hidden="true" />
 
         <div className="mx-auto max-w-5xl px-4 pb-0 pt-12 md:pt-16">
           <div className="grid grid-cols-1 gap-8 md:grid-cols-2 md:items-end">
@@ -74,22 +66,22 @@ export function WelcomePage() {
             {/* ── Left — copy ────────────────────────────────────────────── */}
             <div className="pb-8 md:pb-16">
               {/* Eyebrow */}
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-primary-soft/30 bg-primary-soft/10 px-3 py-1 text-xs font-medium tracking-widest text-primary-soft uppercase">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium tracking-widest text-white/80 uppercase">
                 {t('welcome.eyebrow')}
               </span>
 
-              {/* Headline — very large, tight, Outfit weight 700 */}
+              {/* Headline */}
               <h1 className="mt-5 text-4xl font-bold leading-[1.08] tracking-tight text-white md:text-5xl lg:text-6xl">
                 {t('welcome.title')}
               </h1>
 
-              {/* Subheading */}
-              <p className="mt-5 text-lg font-medium leading-relaxed text-primary-soft/80">
+              {/* Subheading — solid white, clearly readable */}
+              <p className="mt-5 text-lg font-medium leading-relaxed text-white/90">
                 {t('welcome.subheading')}
               </p>
 
-              {/* Body description */}
-              <p className="mt-3 text-sm leading-relaxed text-primary-soft/60">
+              {/* Body description — slightly muted but still readable */}
+              <p className="mt-3 text-sm leading-relaxed text-white/70">
                 {t('welcome.description')}
               </p>
 
@@ -108,8 +100,8 @@ export function WelcomePage() {
               {/* Trust checks */}
               <ul className="mt-8 space-y-2">
                 {checks.map(c => (
-                  <li key={c} className="flex items-center gap-2 text-sm text-primary-soft/70">
-                    <CheckCircle2 className="h-4 w-4 shrink-0 text-primary-soft/50" aria-hidden="true" />
+                  <li key={c} className="flex items-center gap-2 text-sm text-white/75">
+                    <CheckCircle2 className="h-4 w-4 shrink-0 text-white/50" aria-hidden="true" />
                     {c}
                   </li>
                 ))}
@@ -277,6 +269,65 @@ export function WelcomePage() {
           </Button>
         </div>
       </section>
+
+      {/* ── FOOTER ───────────────────────────────────────────────────────────── */}
+      <footer className="border-t border-border bg-surface">
+        <div className="mx-auto max-w-5xl px-4 py-10">
+
+          {/* Top row: brand + nav columns */}
+          <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
+
+            {/* Brand */}
+            <div className="col-span-2 md:col-span-1">
+              <div className="flex items-center gap-2">
+                <img src="/Logo.svg" alt="MELA" className="h-8 w-8" />
+                <span className="text-base font-semibold tracking-tight text-text">MELA</span>
+              </div>
+              <p className="mt-3 text-sm leading-relaxed text-secondary">
+                Ethiopian-first small business management. Sales, inventory and insights in one place.
+              </p>
+            </div>
+
+            {/* Product */}
+            <div>
+              <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-secondary">Product</p>
+              <ul className="space-y-2 text-sm text-secondary">
+                <li><a href="/login" className="hover:text-primary">Get started</a></li>
+                <li><a href="/login" className="hover:text-primary">Sign in</a></li>
+              </ul>
+            </div>
+
+            {/* Legal — required for Google OAuth app review */}
+            <div>
+              <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-secondary">Legal</p>
+              <ul className="space-y-2 text-sm text-secondary">
+                <li><a href="/privacy" className="hover:text-primary">Privacy Policy</a></li>
+                <li><a href="/terms" className="hover:text-primary">Terms of Service</a></li>
+                <li><a href="/contact" className="hover:text-primary">Contact</a></li>
+              </ul>
+            </div>
+
+            {/* Support */}
+            <div>
+              <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-secondary">Support</p>
+              <ul className="space-y-2 text-sm text-secondary">
+                <li><a href="/contact" className="hover:text-primary">Help & Support</a></li>
+                <li><a href="mailto:support@mela.pro.et" className="hover:text-primary">support@mela.pro.et</a></li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Bottom row: copyright */}
+          <div className="mt-10 flex flex-col items-center justify-between gap-3 border-t border-border pt-6 text-xs text-muted md:flex-row">
+            <p>© {new Date().getFullYear()} MELA. All rights reserved.</p>
+            <div className="flex gap-4">
+              <a href="/privacy" className="hover:text-secondary">Privacy</a>
+              <a href="/terms" className="hover:text-secondary">Terms</a>
+              <a href="/contact" className="hover:text-secondary">Contact</a>
+            </div>
+          </div>
+        </div>
+      </footer>
 
     </div>
   )
