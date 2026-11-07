@@ -30,7 +30,7 @@ function fmtDate(yyyyMMDD: string) {
     .toLocaleDateString('en-ET', { month: 'short', day: 'numeric' })
 }
 
-// ── Proportion bar (pure CSS, no library) ─────────────────────────────────────
+// ── Proportion bar ────────────────────────────────────────────────────────────
 
 function ProportionBar({ value, max, label }: { value: number; max: number; label: string }) {
   const pct = max > 0 ? Math.round((value / max) * 100) : 0
@@ -47,32 +47,39 @@ function ProportionBar({ value, max, label }: { value: number; max: number; labe
           aria-valuemax={100}
         />
       </div>
-      <span className="w-10 text-right text-xs text-secondary">{pct}%</span>
+      <span className="w-10 shrink-0 text-right text-xs text-secondary">{pct}%</span>
     </div>
   )
 }
 
 // ── Section wrapper ───────────────────────────────────────────────────────────
+// Consistent card-style section: labelled heading + white card body.
+// No border-t divider — spacing between sections is handled by the parent gap.
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="border-t border-border pt-6">
-      <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-secondary">{title}</h2>
+    <section>
+      <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-secondary">
+        {title}
+      </h2>
       {children}
     </section>
   )
 }
 
-// ── Summary row ───────────────────────────────────────────────────────────────
+// ── Summary row (inside a card) ───────────────────────────────────────────────
 
 function SummaryRow({ label, value, muted, danger, sub }: {
   label: string; value: string; muted?: boolean; danger?: boolean; sub?: string
 }) {
   return (
-    <div className="flex items-baseline justify-between gap-4 py-2.5 border-b border-border last:border-0">
+    <div className="flex items-baseline justify-between gap-4 px-4 py-3">
       <span className="text-sm text-text">{label}</span>
-      <div className="text-right">
-        <span className={`text-sm text-figures font-semibold ${danger ? 'text-danger' : muted ? 'text-muted' : ''}`}>
+      <div className="text-right shrink-0">
+        <span className={[
+          'text-sm text-figures font-semibold',
+          danger ? 'text-danger' : muted ? 'text-muted' : 'text-text',
+        ].join(' ')}>
           {value}
         </span>
         {sub && <p className="mt-0.5 text-xs text-secondary">{sub}</p>}
@@ -81,13 +88,50 @@ function SummaryRow({ label, value, muted, danger, sub }: {
   )
 }
 
-// ── Main page ─────────────────────────────────────────────────────────────────
+// ── Shared table wrapper ──────────────────────────────────────────────────────
+
+function ReportTable({ head, children }: { head: React.ReactNode; children: React.ReactNode }) {
+  return (
+    <div className="overflow-x-auto rounded-xl border border-border bg-surface">
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="border-b border-border bg-background">
+            {head}
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-border">
+          {children}
+        </tbody>
+      </table>
+    </div>
+  )
+}
+
+function Th({ children, right }: { children: React.ReactNode; right?: boolean }) {
+  return (
+    <th className={`px-4 py-3 text-xs font-medium uppercase tracking-wide text-secondary ${right ? 'text-right' : 'text-left'}`}>
+      {children}
+    </th>
+  )
+}
+
+function Td({ children, right, figures }: { children: React.ReactNode; right?: boolean; figures?: boolean }) {
+  return (
+    <td className={`px-4 py-3 ${right ? 'text-right' : ''} ${figures ? 'text-figures' : ''}`}>
+      {children}
+    </td>
+  )
+}
+
+// ── Period selector ───────────────────────────────────────────────────────────
 
 const PRESET_PERIODS: { id: Exclude<Period, 'custom'>; labelKey: string }[] = [
   { id: 'today', labelKey: 'overview.period.today' },
   { id: 'week',  labelKey: 'overview.period.week'  },
   { id: 'month', labelKey: 'overview.period.month' },
 ]
+
+// ── Main page ─────────────────────────────────────────────────────────────────
 
 export function ReportsPage() {
   const { t } = useTranslation()
@@ -120,8 +164,12 @@ export function ReportsPage() {
     return (
       <div className="py-6 md:py-10 space-y-6">
         <Skeleton className="h-8 w-40" />
-        <div className="flex gap-2"><Skeleton className="h-8 w-20 rounded-md" /><Skeleton className="h-8 w-24 rounded-md" /><Skeleton className="h-8 w-28 rounded-md" /></div>
-        {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-36 w-full rounded-lg" />)}
+        <div className="flex gap-2">
+          <Skeleton className="h-9 w-20 rounded-md" />
+          <Skeleton className="h-9 w-24 rounded-md" />
+          <Skeleton className="h-9 w-28 rounded-md" />
+        </div>
+        {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-40 w-full rounded-xl" />)}
       </div>
     )
   }
@@ -152,33 +200,56 @@ export function ReportsPage() {
         <p className="mt-1 text-sm text-secondary">{t('reports.subtitle')}</p>
       </div>
 
-      {/* ── Period controls ──────────────────────────────────────────────────── */}
+      {/* ── Period selector ──────────────────────────────────────────────────── */}
       <div className="space-y-3">
         <div className="flex flex-wrap gap-1 rounded-lg border border-border bg-background p-1 w-fit">
           {PRESET_PERIODS.map(({ id, labelKey }) => (
-            <button key={id} type="button" onClick={() => setPeriod(id)} aria-pressed={period === id}
+            <button
+              key={id}
+              type="button"
+              onClick={() => setPeriod(id)}
+              aria-pressed={period === id}
               className={[
                 'rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
-                period === id ? 'bg-surface text-text border border-border' : 'text-secondary hover:text-text',
-              ].join(' ')}>
+                period === id
+                  ? 'bg-surface text-text border border-border'
+                  : 'text-secondary hover:text-text',
+              ].join(' ')}
+            >
               {t(labelKey)}
             </button>
           ))}
-          <button type="button" onClick={() => setPeriod('custom')} aria-pressed={period === 'custom'}
+          <button
+            type="button"
+            onClick={() => setPeriod('custom')}
+            aria-pressed={period === 'custom'}
             className={[
               'rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
-              period === 'custom' ? 'bg-surface text-text border border-border' : 'text-secondary hover:text-text',
-            ].join(' ')}>
+              period === 'custom'
+                ? 'bg-surface text-text border border-border'
+                : 'text-secondary hover:text-text',
+            ].join(' ')}
+          >
             {t('reports.period.custom')}
           </button>
         </div>
 
         {period === 'custom' && (
           <div className="flex flex-wrap items-end gap-2">
-            <Input type="date" value={customFrom} onChange={e => setCustomFrom(e.target.value)}
-              aria-label={t('expenses.filter.from')} className="w-44" />
-            <Input type="date" value={customTo} onChange={e => setCustomTo(e.target.value)}
-              aria-label={t('expenses.filter.to')} className="w-44" />
+            <Input
+              type="date"
+              value={customFrom}
+              onChange={e => setCustomFrom(e.target.value)}
+              aria-label={t('expenses.filter.from')}
+              className="w-44"
+            />
+            <Input
+              type="date"
+              value={customTo}
+              onChange={e => setCustomTo(e.target.value)}
+              aria-label={t('expenses.filter.to')}
+              className="w-44"
+            />
             <Button size="sm" onClick={applyCustom} disabled={!customFrom || !customTo}>
               {t('reports.apply')}
             </Button>
@@ -188,7 +259,7 @@ export function ReportsPage() {
 
       {/* ── Incomplete cost notice ─────────────────────────────────────────── */}
       {r.cogsIncomplete && (
-        <div className="flex items-start gap-2 rounded-lg border border-warning-soft bg-warning-soft px-4 py-3 text-sm text-warning">
+        <div className="flex items-start gap-2 rounded-xl border border-warning-soft bg-warning-soft px-4 py-3 text-sm text-warning">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
           <span>{t('overview.cogsIncompleteNote')}</span>
         </div>
@@ -196,145 +267,134 @@ export function ReportsPage() {
 
       {/* ── Profit summary ──────────────────────────────────────────────────── */}
       <Section title={t('reports.section.profitSummary')}>
-        <div className="rounded-lg border border-border bg-surface divide-y divide-border">
+        <div className="divide-y divide-border rounded-xl border border-border bg-surface">
           <SummaryRow label={t('overview.metric.revenue')} value={fmtETB(r.paidRevenue)} />
           {r.pendingRevenue > 0 && (
-            <SummaryRow label={t('overview.metric.pending')} value={fmtETB(r.pendingRevenue)}
-              muted sub={t('overview.metric.pendingSub')} />
+            <SummaryRow
+              label={t('overview.metric.pending')}
+              value={fmtETB(r.pendingRevenue)}
+              muted
+              sub={t('overview.metric.pendingSub')}
+            />
           )}
-          <SummaryRow label={t('overview.metric.cogs')}
+          <SummaryRow
+            label={t('overview.metric.cogs')}
             value={r.cogs !== null ? fmtETB(r.cogs) : t('overview.metric.unknown')}
             muted={r.cogs === null}
-            sub={r.cogsIncomplete ? t('overview.metric.partial') : undefined} />
-          <SummaryRow label={t('overview.metric.grossProfit')}
+            sub={r.cogsIncomplete ? t('overview.metric.partial') : undefined}
+          />
+          <SummaryRow
+            label={t('overview.metric.grossProfit')}
             value={r.grossProfit !== null ? fmtETB(r.grossProfit) : t('overview.metric.unknown')}
             danger={r.grossProfit !== null && r.grossProfit < 0}
             muted={r.grossProfit === null}
-            sub={r.cogsIncomplete ? t('overview.metric.partial') : undefined} />
+            sub={r.cogsIncomplete ? t('overview.metric.partial') : undefined}
+          />
           <SummaryRow label={t('overview.metric.expenses')} value={fmtETB(r.totalExpenses)} />
-          <SummaryRow label={t('overview.metric.netProfit')}
+          <SummaryRow
+            label={t('overview.metric.netProfit')}
             value={r.netProfit !== null ? fmtETB(r.netProfit) : t('overview.metric.unknown')}
             danger={r.netProfit !== null && r.netProfit < 0}
             muted={r.netProfit === null}
-            sub={r.cogsIncomplete ? t('overview.metric.partial') : undefined} />
+            sub={r.cogsIncomplete ? t('overview.metric.partial') : undefined}
+          />
         </div>
       </Section>
 
       {/* ── Sales summary ────────────────────────────────────────────────────── */}
       <Section title={t('reports.section.salesSummary')}>
-        <div className="rounded-lg border border-border bg-surface divide-y divide-border">
-          <SummaryRow label={t('reports.sales.paidTransactions')}
-            value={String(r.totalSaleTransactions)} />
-          {r.pendingTransactions > 0 && (
-            <SummaryRow label={t('reports.sales.pendingTransactions')}
-              value={String(r.pendingTransactions)} muted />
+        <div className="space-y-3">
+          <div className="divide-y divide-border rounded-xl border border-border bg-surface">
+            <SummaryRow
+              label={t('reports.sales.paidTransactions')}
+              value={String(r.totalSaleTransactions)}
+            />
+            {r.pendingTransactions > 0 && (
+              <SummaryRow
+                label={t('reports.sales.pendingTransactions')}
+                value={String(r.pendingTransactions)}
+                muted
+              />
+            )}
+          </div>
+
+          {r.salesByPaymentMethod.length > 0 && (
+            <ReportTable
+              head={
+                <>
+                  <Th>{t('reports.sales.paymentMethod')}</Th>
+                  <Th right>{t('reports.sales.transactions')}</Th>
+                  <Th right>{t('reports.sales.revenue')}</Th>
+                </>
+              }
+            >
+              {r.salesByPaymentMethod.map(pm => (
+                <tr key={pm.method}>
+                  <Td>{t(`sales.payment.${pm.method}`)}</Td>
+                  <Td right figures>{pm.transactionCount}</Td>
+                  <Td right figures>{fmtETB(pm.revenue)}</Td>
+                </tr>
+              ))}
+            </ReportTable>
           )}
         </div>
-
-        {/* Sales by payment method */}
-        {r.salesByPaymentMethod.length > 0 && (
-          <div className="mt-4 overflow-x-auto rounded-lg border border-border">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border bg-background">
-                  <th className="px-3 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-secondary">
-                    {t('reports.sales.paymentMethod')}
-                  </th>
-                  <th className="px-3 py-2.5 text-right text-xs font-medium uppercase tracking-wide text-secondary">
-                    {t('reports.sales.transactions')}
-                  </th>
-                  <th className="px-3 py-2.5 text-right text-xs font-medium uppercase tracking-wide text-secondary">
-                    {t('reports.sales.revenue')}
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {r.salesByPaymentMethod.map(pm => (
-                  <tr key={pm.method}>
-                    <td className="px-3 py-2.5">{t(`sales.payment.${pm.method}`)}</td>
-                    <td className="px-3 py-2.5 text-right text-figures">{pm.transactionCount}</td>
-                    <td className="px-3 py-2.5 text-right text-figures">{fmtETB(pm.revenue)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
       </Section>
 
       {/* ── Daily sales ──────────────────────────────────────────────────────── */}
       {r.dailySales.length > 0 && (
         <Section title={t('reports.section.dailySales')}>
-          <div className="overflow-x-auto rounded-lg border border-border">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border bg-background">
-                  <th className="px-3 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-secondary">
-                    {t('reports.col.date')}
-                  </th>
-                  <th className="px-3 py-2.5 text-right text-xs font-medium uppercase tracking-wide text-secondary">
-                    {t('reports.col.transactions')}
-                  </th>
-                  <th className="px-3 py-2.5 text-right text-xs font-medium uppercase tracking-wide text-secondary">
-                    {t('reports.col.revenue')}
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {r.dailySales.map(day => (
-                  <tr key={day.date}>
-                    <td className="px-3 py-2.5">{fmtDate(day.date)}</td>
-                    <td className="px-3 py-2.5 text-right text-figures">{day.transactionCount}</td>
-                    <td className="px-3 py-2.5 text-right text-figures">{fmtETB(day.revenue)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <ReportTable
+            head={
+              <>
+                <Th>{t('reports.col.date')}</Th>
+                <Th right>{t('reports.col.transactions')}</Th>
+                <Th right>{t('reports.col.revenue')}</Th>
+              </>
+            }
+          >
+            {r.dailySales.map(day => (
+              <tr key={day.date}>
+                <Td>{fmtDate(day.date)}</Td>
+                <Td right figures>{day.transactionCount}</Td>
+                <Td right figures>{fmtETB(day.revenue)}</Td>
+              </tr>
+            ))}
+          </ReportTable>
         </Section>
       )}
 
       {/* ── Monthly sales ─────────────────────────────────────────────────────── */}
       {r.monthlySales.length > 0 && (
         <Section title={t('reports.section.monthlySales')}>
-          <div className="overflow-x-auto rounded-lg border border-border">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border bg-background">
-                  <th className="px-3 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-secondary">
-                    {t('reports.col.month')}
-                  </th>
-                  <th className="px-3 py-2.5 text-right text-xs font-medium uppercase tracking-wide text-secondary">
-                    {t('reports.col.transactions')}
-                  </th>
-                  <th className="px-3 py-2.5 text-right text-xs font-medium uppercase tracking-wide text-secondary">
-                    {t('reports.col.revenue')}
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {r.monthlySales.map(mo => (
-                  <tr key={mo.month}>
-                    <td className="px-3 py-2.5">{fmtMonth(mo.month)}</td>
-                    <td className="px-3 py-2.5 text-right text-figures">{mo.transactionCount}</td>
-                    <td className="px-3 py-2.5 text-right text-figures">{fmtETB(mo.revenue)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <ReportTable
+            head={
+              <>
+                <Th>{t('reports.col.month')}</Th>
+                <Th right>{t('reports.col.transactions')}</Th>
+                <Th right>{t('reports.col.revenue')}</Th>
+              </>
+            }
+          >
+            {r.monthlySales.map(mo => (
+              <tr key={mo.month}>
+                <Td>{fmtMonth(mo.month)}</Td>
+                <Td right figures>{mo.transactionCount}</Td>
+                <Td right figures>{fmtETB(mo.revenue)}</Td>
+              </tr>
+            ))}
+          </ReportTable>
         </Section>
       )}
 
-      {/* ── Best-selling products ──────────────────────────────────────────────── */}
+      {/* ── Best-selling products by quantity ─────────────────────────────────── */}
       {r.topProductsByQuantity.length > 0 && (
         <Section title={t('reports.section.topProductsByQty')}>
-          <div className="space-y-3">
+          <div className="rounded-xl border border-border bg-surface divide-y divide-border">
             {r.topProductsByQuantity.map(p => (
-              <div key={p.productName}>
-                <div className="mb-1 flex items-baseline justify-between gap-2">
+              <div key={p.productName} className="px-4 py-3">
+                <div className="mb-2 flex items-baseline justify-between gap-3">
                   <span className="truncate text-sm font-medium text-text">{p.productName}</span>
-                  <span className="shrink-0 text-sm text-figures">
+                  <span className="shrink-0 text-xs text-figures text-secondary">
                     {fmtQty(p.totalQuantity)} {t('reports.products.units')}
                     {' · '}{fmtETB(p.totalRevenue)}
                   </span>
@@ -346,14 +406,17 @@ export function ReportsPage() {
         </Section>
       )}
 
+      {/* ── Best-selling products by revenue ──────────────────────────────────── */}
       {r.topProductsByRevenue.length > 0 && (
         <Section title={t('reports.section.topProductsByRevenue')}>
-          <div className="space-y-3">
+          <div className="rounded-xl border border-border bg-surface divide-y divide-border">
             {r.topProductsByRevenue.map(p => (
-              <div key={p.productName}>
-                <div className="mb-1 flex items-baseline justify-between gap-2">
+              <div key={p.productName} className="px-4 py-3">
+                <div className="mb-2 flex items-baseline justify-between gap-3">
                   <span className="truncate text-sm font-medium text-text">{p.productName}</span>
-                  <span className="shrink-0 text-sm text-figures">{fmtETB(p.totalRevenue)}</span>
+                  <span className="shrink-0 text-xs text-figures text-secondary">
+                    {fmtETB(p.totalRevenue)}
+                  </span>
                 </div>
                 <ProportionBar value={p.totalRevenue} max={maxProductRev} label={p.productName} />
               </div>
@@ -362,23 +425,26 @@ export function ReportsPage() {
         </Section>
       )}
 
-      {/* ── Expense breakdown ─────────────────────────────────────────────────── */}
+      {/* ── Expense breakdown by category ─────────────────────────────────────── */}
       {r.expensesByCategory.length > 0 && (
         <Section title={t('reports.section.expensesByCategory')}>
-          <div className="space-y-3">
+          <div className="rounded-xl border border-border bg-surface divide-y divide-border">
             {r.expensesByCategory.map(cat => (
-              <div key={cat.category}>
-                <div className="mb-1 flex items-baseline justify-between gap-2">
+              <div key={cat.category} className="px-4 py-3">
+                <div className="mb-2 flex items-baseline justify-between gap-3">
                   <span className="text-sm font-medium text-text">
                     {t(`expenses.categories.${cat.category}`)}
                   </span>
-                  <span className="shrink-0 text-sm text-figures">
+                  <span className="shrink-0 text-xs text-figures text-secondary">
                     {fmtETB(cat.totalAmount)}
                     {' · '}{cat.transactionCount} {t('reports.expenses.entries')}
                   </span>
                 </div>
-                <ProportionBar value={cat.totalAmount} max={maxExpenseCat}
-                  label={t(`expenses.categories.${cat.category}`)} />
+                <ProportionBar
+                  value={cat.totalAmount}
+                  max={maxExpenseCat}
+                  label={t(`expenses.categories.${cat.category}`)}
+                />
               </div>
             ))}
           </div>
@@ -388,35 +454,28 @@ export function ReportsPage() {
       {/* ── Monthly expenses ──────────────────────────────────────────────────── */}
       {r.monthlyExpenses.length > 0 && (
         <Section title={t('reports.section.monthlyExpenses')}>
-          <div className="overflow-x-auto rounded-lg border border-border">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border bg-background">
-                  <th className="px-3 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-secondary">
-                    {t('reports.col.month')}
-                  </th>
-                  <th className="px-3 py-2.5 text-right text-xs font-medium uppercase tracking-wide text-secondary">
-                    {t('reports.col.amount')}
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {r.monthlyExpenses.map(mo => (
-                  <tr key={mo.month}>
-                    <td className="px-3 py-2.5">{fmtMonth(mo.month)}</td>
-                    <td className="px-3 py-2.5 text-right text-figures">{fmtETB(mo.totalAmount)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <ReportTable
+            head={
+              <>
+                <Th>{t('reports.col.month')}</Th>
+                <Th right>{t('reports.col.amount')}</Th>
+              </>
+            }
+          >
+            {r.monthlyExpenses.map(mo => (
+              <tr key={mo.month}>
+                <Td>{fmtMonth(mo.month)}</Td>
+                <Td right figures>{fmtETB(mo.totalAmount)}</Td>
+              </tr>
+            ))}
+          </ReportTable>
         </Section>
       )}
 
-      {/* ── Empty state when no data at all ───────────────────────────────────── */}
+      {/* ── Empty state ───────────────────────────────────────────────────────── */}
       {r.totalSaleTransactions === 0 && r.totalExpenses === 0 && (
-        <div className="rounded-lg border border-border px-6 py-12 text-center">
-          <p className="text-sm font-medium text-text">{t('reports.empty.title')}</p>
+        <div className="rounded-xl border border-border px-6 py-12 text-center">
+          <p className="text-sm font-semibold text-text">{t('reports.empty.title')}</p>
           <p className="mt-1 text-sm text-secondary">{t('reports.empty.desc')}</p>
         </div>
       )}
