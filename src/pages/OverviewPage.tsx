@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { AlertTriangle } from 'lucide-react'
+import { AlertTriangle, ArrowRight } from 'lucide-react'
 
 import { Button } from '../design-system/Button'
 import { Skeleton } from '../design-system/LoadingState'
@@ -8,24 +9,57 @@ import { StatusBadge } from '../design-system/StatusBadge'
 import { useAuth } from '../modules/auth/AuthContext'
 import { type DateRange, type FinancialSummary, getFinancialSummary } from '../modules/overview/financials'
 
-// ── Date helpers ──────────────────────────────────────────────────────────────
+// ── Timezone-aware date helpers ───────────────────────────────────────────────
+// All boundaries use the device's local UTC offset so "today" means the
+// user's calendar day, not UTC midnight.
 
-function toISO(d: Date): string {
-  return d.toISOString().slice(0, 10)
+function localISODate(d: Date): string {
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
+}
+
+function utcOffsetString(d: Date): string {
+  const off = -d.getTimezoneOffset() // minutes
+  const sign = off >= 0 ? '+' : '-'
+  const h = String(Math.floor(Math.abs(off) / 60)).padStart(2, '0')
+  const min = String(Math.abs(off) % 60).padStart(2, '0')
+  return `${sign}${h}:${min}`
+}
+
+/** Start-of-local-day timestamp with explicit UTC offset. */
+function startOfDay(d: Date): string {
+  return `${localISODate(d)}T00:00:00${utcOffsetString(d)}`
+}
+
+/** End-of-local-day timestamp with explicit UTC offset. */
+function endOfDay(d: Date): string {
+  return `${localISODate(d)}T23:59:59${utcOffsetString(d)}`
 }
 
 type Period = 'today' | 'week' | 'month'
 
 function periodRange(p: Period): DateRange {
   const today = new Date()
-  if (p === 'today') return { from: toISO(today), to: toISO(today) }
-  if (p === 'week') {
-    const from = new Date(today); from.setDate(today.getDate() - 6)
-    return { from: toISO(from), to: toISO(today) }
+  if (p === 'today') {
+    const iso = localISODate(today)
+    return { fromTs: startOfDay(today), toTs: endOfDay(today), fromDate: iso, toDate: iso }
   }
-  // month
+  if (p === 'week') {
+    const from = new Date(today)
+    from.setDate(today.getDate() - 6)
+    return {
+      fromTs: startOfDay(from), toTs: endOfDay(today),
+      fromDate: localISODate(from), toDate: localISODate(today),
+    }
+  }
+  // month — first day of current local month
   const from = new Date(today.getFullYear(), today.getMonth(), 1)
-  return { from: toISO(from), to: toISO(today) }
+  return {
+    fromTs: startOfDay(from), toTs: endOfDay(today),
+    fromDate: localISODate(from), toDate: localISODate(today),
+  }
 }
 
 // ── Formatting ────────────────────────────────────────────────────────────────
@@ -34,13 +68,17 @@ function fmtETB(n: number) {
   return `ETB ${n.toLocaleString('en-ET', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
 }
 
-function fmtDate(iso: string) {
+function fmtSaleDate(iso: string) {
+  return new Date(iso).toLocaleDateString('en-ET', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+}
+
+function fmtExpenseDate(iso: string) {
   const [y, m, d] = iso.slice(0, 10).split('-')
   return new Date(Number(y), Number(m) - 1, Number(d))
     .toLocaleDateString('en-ET', { month: 'short', day: 'numeric' })
 }
 
-// ── Metric card ───────────────────────────────────────────────────────────────
+// ── Metric tile ───────────────────────────────────────────────────────────────
 
 interface MetricProps {
   label: string
@@ -48,19 +86,42 @@ interface MetricProps {
   sub?: string
   muted?: boolean
   warn?: boolean
+  danger?: boolean
 }
 
-function Metric({ label, value, sub, muted, warn }: MetricProps) {
+function Metric({ label, value, sub, muted, warn, danger }: MetricProps) {
+  const valueClass = danger
+    ? 'text-danger'
+    : warn
+    ? 'text-warning'
+    : muted
+    ? 'text-muted'
+    : 'text-text'
+
   return (
-    <div className="border-b border-border py-4 last:border-b-0 md:border-b-0 md:border-r md:py-0 md:pr-6 md:last:border-r-0">
+    <div className="py-4 border-b border-border last:border-b-0">
       <p className="text-xs font-medium uppercase tracking-wide text-secondary">{label}</p>
-      <p className={[
-        'mt-1 text-2xl text-figures font-semibold',
-        muted ? 'text-muted' : warn ? 'text-warning' : 'text-text',
-      ].join(' ')}>
-        {value}
-      </p>
+      <p className={`mt-1 text-xl text-figures font-semibold ${valueClass}`}>{value}</p>
       {sub && <p className="mt-0.5 text-xs text-secondary">{sub}</p>}
+    </div>
+  )
+}
+
+// ── Section header with optional "View all" link ──────────────────────────────
+
+function SectionHeader({ title, onViewAll }: { title: string; onViewAll: () => void }) {
+  const { t } = useTranslation()
+  return (
+    <div className="mb-3 flex items-center justify-between">
+      <h2 className="text-sm font-semibold uppercase tracking-wide text-secondary">{title}</h2>
+      <button
+        type="button"
+        onClick={onViewAll}
+        className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+      >
+        {t('overview.viewAll')}
+        <ArrowRight className="h-3 w-3" aria-hidden="true" />
+      </button>
     </div>
   )
 }
@@ -69,6 +130,7 @@ function Metric({ label, value, sub, muted, warn }: MetricProps) {
 
 export function OverviewPage() {
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const { profile, signOut } = useAuth()
 
   const [period, setPeriod] = useState<Period>('today')
@@ -76,17 +138,18 @@ export function OverviewPage() {
   const [loadStatus, setLoadStatus] = useState<'loading' | 'loaded' | 'error'>('loading')
   const [errorMsg, setErrorMsg] = useState('')
 
-  const load = useCallback(async (p: Period) => {
+  // Single source of loading — driven only by `period` change.
+  useEffect(() => {
+    let cancelled = false
     setLoadStatus('loading')
-    const { data, error } = await getFinancialSummary(periodRange(p))
-    if (error) { setErrorMsg(error.message); setLoadStatus('error'); return }
-    setSummary(data)
-    setLoadStatus('loaded')
-  }, [])
-
-  useEffect(() => { void load(period) }, [load, period])
-
-  function changePeriod(p: Period) { setPeriod(p); void load(p) }
+    getFinancialSummary(periodRange(period)).then(({ data, error }) => {
+      if (cancelled) return
+      if (error) { setErrorMsg(error.message); setLoadStatus('error'); return }
+      setSummary(data)
+      setLoadStatus('loaded')
+    })
+    return () => { cancelled = true }
+  }, [period])
 
   const periodLabels: { id: Period; label: string }[] = [
     { id: 'today', label: t('overview.period.today') },
@@ -94,7 +157,7 @@ export function OverviewPage() {
     { id: 'month', label: t('overview.period.month') },
   ]
 
-  // ── Loading ────────────────────────────────────────────────────────────────
+  // ── Loading skeleton ───────────────────────────────────────────────────────
   if (loadStatus === 'loading') {
     return (
       <div className="py-6 md:py-10">
@@ -102,18 +165,21 @@ export function OverviewPage() {
         <div className="mb-6 flex gap-2">
           {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-8 w-24 rounded-md" />)}
         </div>
-        <Skeleton className="mb-6 h-24 w-full rounded-lg" />
-        <Skeleton className="h-48 w-full rounded-lg" />
+        <Skeleton className="mb-6 h-[280px] w-full rounded-lg" />
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          <Skeleton className="h-48 w-full rounded-lg" />
+          <Skeleton className="h-48 w-full rounded-lg" />
+        </div>
       </div>
     )
   }
 
-  // ── Error ──────────────────────────────────────────────────────────────────
+  // ── Error state ────────────────────────────────────────────────────────────
   if (loadStatus === 'error') {
     return (
       <div className="py-6 md:py-10 text-center">
         <p className="text-sm text-danger">{errorMsg || t('notification.error.desc')}</p>
-        <Button variant="secondary" className="mt-4" onClick={() => void load(period)}>
+        <Button variant="secondary" className="mt-4" onClick={() => setPeriod(p => p)}>
           {t('products.retry')}
         </Button>
       </div>
@@ -124,7 +190,8 @@ export function OverviewPage() {
 
   return (
     <div className="py-6 md:py-10">
-      {/* Header */}
+
+      {/* ── Header ─────────────────────────────────────────────────────────── */}
       <div className="mb-6 flex items-start justify-between gap-4">
         <div>
           <h1 className="heading text-2xl md:text-3xl">
@@ -134,24 +201,23 @@ export function OverviewPage() {
             <p className="mt-1 text-sm text-secondary">{profile.name}</p>
           )}
         </div>
-        <div className="flex shrink-0 items-center gap-2">
-          <Button size="sm" variant="ghost" onClick={() => void signOut()}>
-            {t('app.home.logout')}
-          </Button>
-        </div>
+        <Button size="sm" variant="ghost" onClick={() => void signOut()}>
+          {t('app.home.logout')}
+        </Button>
       </div>
 
-      {/* Period selector */}
+      {/* ── Period selector ─────────────────────────────────────────────────── */}
       <div className="mb-6 flex gap-1 rounded-lg border border-border bg-background p-1 w-fit">
         {periodLabels.map(({ id, label }) => (
           <button
             key={id}
             type="button"
-            onClick={() => changePeriod(id)}
+            onClick={() => setPeriod(id)}
+            aria-pressed={period === id}
             className={[
               'rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
               period === id
-                ? 'bg-surface text-text shadow-sm border border-border'
+                ? 'bg-surface text-text border border-border'
                 : 'text-secondary hover:text-text',
             ].join(' ')}
           >
@@ -160,7 +226,7 @@ export function OverviewPage() {
         ))}
       </div>
 
-      {/* Incomplete cost data notice */}
+      {/* ── Incomplete cost notice ───────────────────────────────────────────── */}
       {s.cogsIncomplete && (
         <div className="mb-4 flex items-start gap-2 rounded-lg border border-warning-soft bg-warning-soft px-4 py-3 text-sm text-warning">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
@@ -168,67 +234,85 @@ export function OverviewPage() {
         </div>
       )}
 
-      {/* Metrics row */}
-      <div className="mb-6 rounded-lg border border-border bg-surface px-6 py-5">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-5 md:gap-0">
-          <Metric
-            label={t('overview.metric.revenue')}
-            value={fmtETB(s.paidRevenue)}
-          />
-          <Metric
-            label={t('overview.metric.expenses')}
-            value={fmtETB(s.totalExpenses)}
-          />
-          <Metric
-            label={t('overview.metric.grossProfit')}
-            value={s.grossProfit !== null ? fmtETB(s.grossProfit) : t('overview.metric.unknown')}
-            sub={s.cogsIncomplete ? t('overview.metric.partial') : undefined}
-            muted={s.grossProfit === null}
-          />
-          <Metric
-            label={t('overview.metric.netProfit')}
-            value={s.netProfit !== null ? fmtETB(s.netProfit) : t('overview.metric.unknown')}
-            sub={s.cogsIncomplete ? t('overview.metric.partial') : undefined}
-            muted={s.netProfit === null}
-            warn={s.netProfit !== null && s.netProfit < 0}
-          />
-          <Metric
-            label={t('overview.metric.pending')}
-            value={s.pendingRevenue > 0 ? fmtETB(s.pendingRevenue) : '—'}
-            muted={s.pendingRevenue === 0}
-          />
+      {/* ── Metrics panel ───────────────────────────────────────────────────── */}
+      <div className="mb-6 rounded-lg border border-border bg-surface px-5 md:px-6">
+        {/* 3 + 3 layout: revenue/pending/expenses | cogs/grossProfit/netProfit */}
+        <div className="grid grid-cols-1 md:grid-cols-2 md:divide-x md:divide-border">
+
+          {/* Left group */}
+          <div className="md:pr-6">
+            <Metric
+              label={t('overview.metric.revenue')}
+              value={fmtETB(s.paidRevenue)}
+            />
+            <Metric
+              label={t('overview.metric.pending')}
+              value={s.pendingRevenue > 0 ? fmtETB(s.pendingRevenue) : '—'}
+              muted={s.pendingRevenue === 0}
+              sub={s.pendingRevenue > 0 ? t('overview.metric.pendingSub') : undefined}
+            />
+            <Metric
+              label={t('overview.metric.expenses')}
+              value={fmtETB(s.totalExpenses)}
+            />
+          </div>
+
+          {/* Right group */}
+          <div className="md:pl-6">
+            <Metric
+              label={t('overview.metric.cogs')}
+              value={s.cogs !== null ? fmtETB(s.cogs) : t('overview.metric.unknown')}
+              sub={s.cogsIncomplete ? t('overview.metric.partial') : undefined}
+              muted={s.cogs === null}
+            />
+            <Metric
+              label={t('overview.metric.grossProfit')}
+              value={s.grossProfit !== null ? fmtETB(s.grossProfit) : t('overview.metric.unknown')}
+              sub={s.cogsIncomplete ? t('overview.metric.partial') : undefined}
+              muted={s.grossProfit === null}
+              danger={s.grossProfit !== null && s.grossProfit < 0}
+            />
+            <Metric
+              label={t('overview.metric.netProfit')}
+              value={s.netProfit !== null ? fmtETB(s.netProfit) : t('overview.metric.unknown')}
+              sub={s.cogsIncomplete ? t('overview.metric.partial') : undefined}
+              muted={s.netProfit === null}
+              danger={s.netProfit !== null && s.netProfit < 0}
+            />
+          </div>
         </div>
       </div>
 
-      {/* Recent data — two columns on desktop */}
+      {/* ── Recent activity ──────────────────────────────────────────────────── */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
 
         {/* Recent sales */}
         <section>
-          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-secondary">
-            {t('overview.recentSales')}
-          </h2>
+          <SectionHeader
+            title={t('overview.recentSales')}
+            onViewAll={() => navigate('/app/sales')}
+          />
           {s.sales.length === 0 ? (
-            <p className="rounded-lg border border-border px-4 py-6 text-center text-sm text-secondary">
-              {t('sales.empty.title')}
-            </p>
+            <div className="rounded-lg border border-border px-4 py-6 text-center">
+              <p className="text-sm text-secondary">{t('overview.noSales')}</p>
+            </div>
           ) : (
             <div className="divide-y divide-border rounded-lg border border-border overflow-hidden">
               {s.sales.slice(0, 5).map(sale => (
-                <div key={sale.id} className="flex items-center justify-between px-4 py-3">
-                  <div className="min-w-0">
+                <div key={sale.id} className="flex items-center gap-3 px-4 py-3">
+                  <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-medium text-text">{sale.sale_number}</p>
-                    <p className="text-xs text-secondary">{fmtDate(sale.sold_at)}</p>
+                    <p className="text-xs text-secondary">{fmtSaleDate(sale.sold_at)}</p>
                   </div>
-                  <div className="ml-4 flex shrink-0 items-center gap-3">
-                    <StatusBadge
-                      tone={sale.payment_status === 'paid' ? 'success' : 'warning'}
-                      dot
-                    >
-                      {t(`sales.status.${sale.payment_status}`)}
-                    </StatusBadge>
-                    <span className="text-sm text-figures font-medium">{fmtETB(sale.total)}</span>
-                  </div>
+                  <StatusBadge
+                    tone={sale.payment_status === 'paid' ? 'success' : 'warning'}
+                    dot
+                  >
+                    {t(`sales.status.${sale.payment_status}`)}
+                  </StatusBadge>
+                  <span className="shrink-0 text-sm text-figures font-medium">
+                    {fmtETB(sale.total)}
+                  </span>
                 </div>
               ))}
             </div>
@@ -237,24 +321,25 @@ export function OverviewPage() {
 
         {/* Recent expenses */}
         <section>
-          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-secondary">
-            {t('overview.recentExpenses')}
-          </h2>
+          <SectionHeader
+            title={t('overview.recentExpenses')}
+            onViewAll={() => navigate('/app/expenses')}
+          />
           {s.expenses.length === 0 ? (
-            <p className="rounded-lg border border-border px-4 py-6 text-center text-sm text-secondary">
-              {t('expenses.empty.title')}
-            </p>
+            <div className="rounded-lg border border-border px-4 py-6 text-center">
+              <p className="text-sm text-secondary">{t('overview.noExpenses')}</p>
+            </div>
           ) : (
             <div className="divide-y divide-border rounded-lg border border-border overflow-hidden">
               {s.expenses.slice(0, 5).map(exp => (
-                <div key={exp.id} className="flex items-center justify-between px-4 py-3">
-                  <div className="min-w-0">
+                <div key={exp.id} className="flex items-center gap-3 px-4 py-3">
+                  <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-medium text-text">{exp.title}</p>
                     <p className="text-xs text-secondary">
-                      {t(`expenses.categories.${exp.category}`)} · {fmtDate(exp.expense_date)}
+                      {t(`expenses.categories.${exp.category}`)} · {fmtExpenseDate(exp.expense_date)}
                     </p>
                   </div>
-                  <span className="ml-4 shrink-0 text-sm text-figures font-medium">
+                  <span className="shrink-0 text-sm text-figures font-medium">
                     {fmtETB(exp.amount)}
                   </span>
                 </div>
@@ -264,13 +349,13 @@ export function OverviewPage() {
         </section>
       </div>
 
-      {/* Profile / settings links */}
+      {/* ── Footer actions ───────────────────────────────────────────────────── */}
       <div className="mt-8 flex flex-wrap gap-3 border-t border-border pt-6">
-        <Button variant="secondary" size="sm"
-          onClick={() => window.location.assign('/app/profile')}>
+        <Button variant="secondary" size="sm" onClick={() => navigate('/app/profile')}>
           {t('app.home.editProfile')}
         </Button>
       </div>
+
     </div>
   )
 }

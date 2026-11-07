@@ -1,54 +1,58 @@
 /**
- * Financial calculation service — Phase 3.2.
+ * Financial calculation service — Phase 3.2 / 3.3.
  *
- * All data comes from the owner's own Supabase tables (sales, sale_items,
- * expenses) filtered by a date range. RLS ensures cross-owner isolation.
- *
- * Key honesty rules:
+ * Honesty rules (enforced here, not just in the UI):
  *  - Only PAID sales count as revenue.
- *  - PENDING sales are tracked separately (not added to revenue).
- *  - CANCELLED sales are excluded entirely.
- *  - COGS is only calculable for items with a non-NULL unit_cost snapshot.
- *  - Gross profit is only shown when at least one sale item has a known cost.
- *  - When some items lack cost data the result is flagged as incomplete so
- *    the UI can warn the user rather than presenting a misleading figure.
+ *  - PENDING sales are tracked separately and never added to revenue.
+ *  - CANCELLED sales are excluded entirely from every calculation.
+ *  - COGS uses only sale_items where unit_cost IS NOT NULL (pre-0006 rows are NULL).
+ *  - Gross / net profit are NULL when no cost data exists; partial when some items
+ *    lack cost data. cogsIncomplete distinguishes the two cases.
+ *  - No percentages, trends or comparisons are derived here — incomplete history
+ *    makes such figures misleading.
+ *
+ * Timezone:
+ *  Date boundaries are expressed with the caller's UTC offset so "today" refers
+ *  to the device's local calendar day, not UTC. The caller supplies ISO timestamps
+ *  with an explicit offset (e.g. "2024-01-15T00:00:00+03:00").
  */
 import { supabase } from '../../lib/supabase'
 import type { Expense } from '../expenses/types'
 import type { SaleWithItems } from '../retail/types'
 
 export interface DateRange {
-  from: string   // ISO date YYYY-MM-DD (inclusive)
-  to: string     // ISO date YYYY-MM-DD (inclusive)
+  /** ISO timestamp with UTC offset, start of local day (inclusive). */
+  fromTs: string
+  /** ISO timestamp with UTC offset, end of local day (inclusive). */
+  toTs: string
+  /** YYYY-MM-DD of the start date in local time (for expense_date filter). */
+  fromDate: string
+  /** YYYY-MM-DD of the end date in local time (for expense_date filter). */
+  toDate: string
 }
 
 export interface FinancialSummary {
-  /** Revenue from paid sales only. */
   paidRevenue: number
-  /** Total of sales with payment_status = 'pending'. */
   pendingRevenue: number
   /**
-   * Cost of goods sold — only from sale_items where unit_cost IS NOT NULL.
-   * NULL means no sales with known costs exist in this period.
+   * COGS from paid sales where unit_cost is known.
+   * null  = no paid sales had any cost data in this period.
+   * 0     = products were sold but all had cost_price = 0.
    */
   cogs: number | null
   /**
-   * paidRevenue - cogs. NULL when cogs is NULL.
-   * `cogsIncomplete` being true means some items lacked cost data.
+   * paidRevenue − cogs. null when cogs is null.
+   * May be partial when cogsIncomplete is true.
    */
   grossProfit: number | null
-  /** True when at least one sale_item in paid sales has NULL unit_cost. */
+  /** true when at least one paid-sale item has unit_cost = NULL. */
   cogsIncomplete: boolean
-  /** Sum of all expenses in the date range. */
   totalExpenses: number
-  /**
-   * grossProfit - totalExpenses. NULL when grossProfit is NULL.
-   * `cogsIncomplete` remains true in that case.
-   */
+  /** grossProfit − totalExpenses. null when grossProfit is null. */
   netProfit: number | null
-  /** Raw paid sales for the period. */
+  /** Paid sales only (for recent-activity display). */
   sales: SaleWithItems[]
-  /** Raw expenses for the period. */
+  /** All expenses in the period (for recent-activity display). */
   expenses: Expense[]
 }
 
@@ -61,24 +65,19 @@ function noClient(): { data: null; error: { message: string } } {
 export async function getFinancialSummary(range: DateRange): Result<FinancialSummary> {
   if (!supabase) return noClient()
 
-  // Supabase date columns: sold_at is timestamptz, expense_date is date.
-  // We compare sold_at against the start-of-day and end-of-day of the range.
-  const fromTs = `${range.from}T00:00:00`
-  const toTs   = `${range.to}T23:59:59`
-
   const [salesRes, expensesRes] = await Promise.all([
     supabase
       .from('sales')
       .select('*, sale_items(*)')
-      .gte('sold_at', fromTs)
-      .lte('sold_at', toTs)
+      .gte('sold_at', range.fromTs)
+      .lte('sold_at', range.toTs)
       .neq('payment_status', 'cancelled')
       .order('sold_at', { ascending: false }),
     supabase
       .from('expenses')
       .select('*')
-      .gte('expense_date', range.from)
-      .lte('expense_date', range.to)
+      .gte('expense_date', range.fromDate)
+      .lte('expense_date', range.toDate)
       .order('expense_date', { ascending: false }),
   ])
 
@@ -91,18 +90,17 @@ export async function getFinancialSummary(range: DateRange): Result<FinancialSum
   const paidSales    = allSales.filter(s => s.payment_status === 'paid')
   const pendingSales = allSales.filter(s => s.payment_status === 'pending')
 
-  const paidRevenue   = paidSales.reduce((s, sale) => s + sale.total, 0)
-  const pendingRevenue = pendingSales.reduce((s, sale) => s + sale.total, 0)
-  const totalExpenses  = allExpenses.reduce((s, e) => s + e.amount, 0)
+  const paidRevenue    = paidSales.reduce((acc, s) => acc + s.total, 0)
+  const pendingRevenue = pendingSales.reduce((acc, s) => acc + s.total, 0)
+  const totalExpenses  = allExpenses.reduce((acc, e) => acc + e.amount, 0)
 
-  // COGS from paid sales — only items with known unit_cost.
-  let cogsKnown    = 0
-  let hasAnyCost   = false
-  let missingCost  = false
+  let cogsKnown   = 0
+  let hasAnyCost  = false
+  let missingCost = false
 
   for (const sale of paidSales) {
     for (const item of sale.sale_items) {
-      if (item.unit_cost !== null) {
+      if (item.unit_cost !== null && item.unit_cost !== undefined) {
         cogsKnown += item.unit_cost * item.quantity
         hasAnyCost = true
       } else {
@@ -111,8 +109,6 @@ export async function getFinancialSummary(range: DateRange): Result<FinancialSum
     }
   }
 
-  // Gross and net profit are calculable only when at least one item has cost data.
-  // We still compute partial figures but flag them as incomplete.
   const cogs        = hasAnyCost ? cogsKnown : null
   const grossProfit = cogs !== null ? paidRevenue - cogs : null
   const netProfit   = grossProfit !== null ? grossProfit - totalExpenses : null
@@ -123,9 +119,9 @@ export async function getFinancialSummary(range: DateRange): Result<FinancialSum
       pendingRevenue,
       cogs,
       grossProfit,
-      netProfit,
       cogsIncomplete: missingCost,
       totalExpenses,
+      netProfit,
       sales:    paidSales,
       expenses: allExpenses,
     },
