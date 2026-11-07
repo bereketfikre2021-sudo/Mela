@@ -12,7 +12,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Building2, ChevronDown, LogIn, LogOut, Settings, User } from 'lucide-react'
+import { ChevronDown, LogIn, LogOut, Settings } from 'lucide-react'
 
 import { useAuth } from '../modules/auth/AuthContext'
 
@@ -104,10 +104,6 @@ export function ProfileMenu() {
 
           {/* Actions */}
           <div className="py-1">
-            <MenuItem icon={<User className="h-4 w-4" />} label={t('profileMenu.editProfile')}
-              onClick={() => go('/app/profile')} />
-            <MenuItem icon={<Building2 className="h-4 w-4" />} label={t('profileMenu.editBusiness')}
-              onClick={() => go('/app/profile')} />
             <MenuItem icon={<Settings className="h-4 w-4" />} label={t('profileMenu.settings')}
               onClick={() => go('/app/profile')} />
           </div>
