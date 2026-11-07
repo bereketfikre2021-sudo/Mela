@@ -7,12 +7,12 @@ import { TopBar } from '../design-system/TopBar'
 
 export interface AppShellProps {
   brand: ReactNode
-  /** Primary navigation items; omitted while the app has a single view. */
   navItems?: NavItem[]
   activeId?: string
   onNavigate?: (id: string) => void
-  /** Extra content placed in the top-bar trailing slot alongside the language switcher. */
   trailingExtra?: ReactNode
+  /** When true the main content area has no max-width or horizontal padding. */
+  fullWidth?: boolean
   children: ReactNode
 }
 
@@ -21,7 +21,7 @@ export interface AppShellProps {
  * language switcher) and a centered content region. A bottom nav renders on
  * mobile only when navigation items are provided.
  */
-export function AppShell({ brand, navItems = [], activeId, onNavigate, trailingExtra, children }: AppShellProps) {
+export function AppShell({ brand, navItems = [], activeId, onNavigate, trailingExtra, fullWidth = false, children }: AppShellProps) {
   const hasNav = navItems.length > 0
 
   const desktopNav = hasNav ? (
@@ -57,7 +57,7 @@ export function AppShell({ brand, navItems = [], activeId, onNavigate, trailingE
           {trailingExtra}
         </div>
       } />
-      <main className="mx-auto w-full max-w-5xl px-4 pb-12 pt-6 md:pt-10">{children}</main>
+      <main className={fullWidth ? 'w-full' : 'mx-auto w-full max-w-5xl px-4 pb-12 pt-6 md:pt-10'}>{children}</main>
       {hasNav && (
         <BottomNav items={navItems} activeId={activeId ?? ''} onSelect={onNavigate ?? (() => {})} className="md:hidden" />
       )}

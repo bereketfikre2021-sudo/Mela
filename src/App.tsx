@@ -65,7 +65,7 @@ function AppRoutes() {
   ]
 
   const publicShell = (children: React.ReactNode) => (
-    <AppShell brand={brand}>{children}</AppShell>
+    <AppShell brand={brand} fullWidth>{children}</AppShell>
   )
 
   const profileMenu = status === 'authenticated' ? <ProfileMenu /> : null

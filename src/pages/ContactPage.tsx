@@ -1,32 +1,26 @@
-/** Contact page — required for Google OAuth app review. */
+import { useTranslation } from 'react-i18next'
+
 export function ContactPage() {
+  const { t } = useTranslation()
   return (
-    <div className="mx-auto max-w-2xl px-4 py-12 md:py-16">
-      <h1 className="heading text-3xl">Contact Us</h1>
-      <p className="mt-2 text-sm text-secondary">
-        We're here to help. Reach out with questions, feedback, or support requests.
-      </p>
-
-      <div className="mt-8 space-y-4 text-sm text-secondary">
-        <div className="rounded-xl border border-border bg-surface p-5">
-          <p className="font-semibold text-text">Email</p>
-          <a href="mailto:support@mela.pro.et" className="mt-1 block text-primary hover:underline">
-            support@mela.pro.et
-          </a>
-        </div>
-
-        <div className="rounded-xl border border-border bg-surface p-5">
-          <p className="font-semibold text-text">Business hours</p>
-          <p className="mt-1">Monday – Friday, 9:00 AM – 6:00 PM EAT (UTC+3)</p>
-        </div>
-
-        <div className="rounded-xl border border-border bg-surface p-5">
-          <p className="font-semibold text-text">Mailing address</p>
-          <p className="mt-1 leading-relaxed">
-            MELA Business Software<br />
-            Addis Ababa, Ethiopia
-          </p>
-        </div>
+    <div className="mx-auto max-w-2xl px-6 py-12 md:py-16">
+      <h1 className="heading text-3xl">{t('legal.contact.title')}</h1>
+      <p className="mt-2 text-sm text-secondary">{t('legal.contact.subtitle')}</p>
+      <div className="mt-8 space-y-4">
+        {[
+          { label: t('legal.contact.email'),   value: 'support@mela.pro.et', href: 'mailto:support@mela.pro.et' },
+          { label: t('legal.contact.hours'),   value: t('legal.contact.hoursValue'),   href: null },
+          { label: t('legal.contact.address'), value: t('legal.contact.addressValue'), href: null },
+        ].map(item => (
+          <div key={item.label} className="rounded-xl border border-border bg-surface p-5">
+            <p className="text-xs font-semibold uppercase tracking-wide text-secondary">{item.label}</p>
+            {item.href ? (
+              <a href={item.href} className="mt-1 block text-sm text-primary hover:underline">{item.value}</a>
+            ) : (
+              <p className="mt-1 text-sm leading-relaxed text-text">{item.value}</p>
+            )}
+          </div>
+        ))}
       </div>
     </div>
   )
