@@ -12,7 +12,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { ChevronDown, LogIn, LogOut, Settings } from 'lucide-react'
+import { ChevronDown, LogOut, Settings } from 'lucide-react'
 
 import { useAuth } from '../modules/auth/AuthContext'
 
@@ -55,12 +55,6 @@ export function ProfileMenu() {
   async function handleSignOut() {
     setOpen(false)
     await signOut()
-  }
-
-  async function handleSwitchAccount() {
-    setOpen(false)
-    await signOut()
-    navigate('/login')
   }
 
   function go(path: string) {
@@ -111,8 +105,6 @@ export function ProfileMenu() {
           <div className="border-t border-border py-1">
             <MenuItem icon={<LogOut className="h-4 w-4" />} label={t('profileMenu.signOut')}
               onClick={() => void handleSignOut()} danger />
-            <MenuItem icon={<LogIn className="h-4 w-4" />} label={t('profileMenu.switchAccount')}
-              onClick={() => void handleSwitchAccount()} />
           </div>
         </div>
       )}
