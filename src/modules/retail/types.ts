@@ -70,5 +70,8 @@ export interface CheckoutPayload {
   owner_id: string
   sale_number: string
   payment_method: PaymentMethod
+  /** UUID generated once per checkout attempt. Re-sending the same key is safe
+   *  — the RPC returns the original result instead of creating a duplicate. */
+  idempotency_key: string
   items: { product_id: string; quantity: number }[]
 }

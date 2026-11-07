@@ -20,16 +20,17 @@ function noClient(): { data: null; error: { message: string } } {
  */
 export async function completeSale(
   payload: CheckoutPayload
-): Result<{ sale_id: string; total: number }> {
+): Result<{ sale_id: string; total: number; payment_status: string; already_exists: boolean }> {
   if (!supabase) return noClient()
   const { data, error } = await supabase.rpc('complete_sale', {
-    p_owner_id:       payload.owner_id,
-    p_sale_number:    payload.sale_number,
-    p_payment_method: payload.payment_method,
-    p_items:          payload.items,
+    p_owner_id:        payload.owner_id,
+    p_sale_number:     payload.sale_number,
+    p_payment_method:  payload.payment_method,
+    p_idempotency_key: payload.idempotency_key,
+    p_items:           payload.items,
   })
   if (error) return { data: null, error: { message: error.message } }
-  return { data: data as { sale_id: string; total: number }, error: null }
+  return { data: data as { sale_id: string; total: number; payment_status: string; already_exists: boolean }, error: null }
 }
 
 /**

@@ -38,6 +38,14 @@ export function PosPage() {
   const [checkoutOpen, setCheckoutOpen] = useState(false)
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cash')
   const [submitting, setSubmitting] = useState(false)
+  // One UUID per checkout attempt. Regenerated after each successful sale or
+  // when the dialog is opened, so retries on the same open dialog are safe.
+  const [idempotencyKey, setIdempotencyKey] = useState(() => crypto.randomUUID())
+
+  function openCheckout() {
+    setIdempotencyKey(crypto.randomUUID()) // fresh key for this attempt
+    setCheckoutOpen(true)
+  }
 
   // ── Filtered product list ──────────────────────────────────────────────────
   const filtered = useMemo(() => {
@@ -93,21 +101,27 @@ export function PosPage() {
   async function handleCheckout() {
     if (!user || cart.length === 0) return
     setSubmitting(true)
-    const { error } = await completeSale({
-      owner_id:       user.id,
-      sale_number:    genSaleNumber(),
-      payment_method: paymentMethod,
-      items:          cart.map(c => ({ product_id: c.product.id, quantity: c.quantity })),
+    const { data, error } = await completeSale({
+      owner_id:        user.id,
+      sale_number:     genSaleNumber(),
+      payment_method:  paymentMethod,
+      idempotency_key: idempotencyKey,
+      items:           cart.map(c => ({ product_id: c.product.id, quantity: c.quantity })),
     })
     setSubmitting(false)
     if (error) {
       notify({ tone: 'danger', title: t('pos.checkoutResult.error'), description: error.message })
       return
     }
-    notify({ tone: 'success', title: t('pos.checkoutResult.success') })
+    // Cash → paid; Telebirr/bank → pending
+    const isPending = data?.payment_status === 'pending'
+    notify({
+      tone: isPending ? 'warning' : 'success',
+      title: isPending ? t('pos.checkoutResult.successPending') : t('pos.checkoutResult.success'),
+    })
     clearCart()
     setCheckoutOpen(false)
-    await reloadProducts() // refresh stock
+    await reloadProducts()
   }
 
   const paymentOptions = [
@@ -286,7 +300,7 @@ export function PosPage() {
                   size="lg"
                   className="mt-3"
                   disabled={cart.length === 0}
-                  onClick={() => setCheckoutOpen(true)}
+                  onClick={openCheckout}
                 >
                   {t('pos.checkout')}
                 </Button>
