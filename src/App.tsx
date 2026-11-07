@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { BrowserRouter, Navigate, Route, Routes, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Home, Package, Receipt, ShoppingCart, Wallet, BarChart2, LogOut } from 'lucide-react'
+import { Home, Package, Receipt, ShoppingCart, Wallet, BarChart2 } from 'lucide-react'
 
 import { NotificationProvider } from './design-system/Notification'
 import type { NavItem } from './design-system/BottomNav'
@@ -9,6 +9,7 @@ import { AppShell } from './layouts/AppShell'
 import { AuthProvider } from './modules/auth/AuthContext'
 import { useAuth } from './modules/auth/AuthContext'
 import { PublicOnly, RequireBusiness, RequireProfile } from './modules/auth/RouteGuards'
+import { ProfileMenu } from './components/ProfileMenu'
 import { AuthCallbackPage } from './pages/AuthCallbackPage'
 import { EditBusinessProfilePage } from './pages/EditBusinessProfilePage'
 import { ExpensesPage } from './pages/ExpensesPage'
@@ -49,7 +50,7 @@ export function App() {
 function AppRoutes() {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const { status, signOut } = useAuth()
+  const { status } = useAuth()
 
   const appNav: NavItem[] = [
     { id: '/app',          label: t('nav.home'),     icon: Home         },
@@ -64,18 +65,7 @@ function AppRoutes() {
     <AppShell brand={brand}>{children}</AppShell>
   )
 
-  /** Sign-out button shown in the top-bar of every authenticated page. */
-  const signOutButton = status === 'authenticated' ? (
-    <button
-      type="button"
-      onClick={() => void signOut()}
-      aria-label={t('app.home.logout')}
-      title={t('app.home.logout')}
-      className="flex items-center justify-center rounded-md p-1.5 text-secondary hover:bg-background hover:text-text transition-colors"
-    >
-      <LogOut className="h-4 w-4" aria-hidden="true" />
-    </button>
-  ) : null
+  const profileMenu = status === 'authenticated' ? <ProfileMenu /> : null
 
   const appShell = (children: React.ReactNode, activeId: string) => (
     <AppShell
@@ -83,7 +73,7 @@ function AppRoutes() {
       navItems={appNav}
       activeId={activeId}
       onNavigate={navigate}
-      trailingExtra={signOutButton}
+      trailingExtra={profileMenu}
     >
       {children}
     </AppShell>
