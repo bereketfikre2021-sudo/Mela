@@ -34,10 +34,12 @@ export async function completeSale(
 }
 
 /**
- * Fetch paginated sales for the owner, newest first.
+ * Fetch sales history for the owner, newest first.
+ * Defaults to 500 rows (the sales history page). Use higher limits for
+ * analytical queries — see getFinancialSummary and getReportData.
  */
 export async function getSales(
-  limit = 50,
+  limit = 500,
   offset = 0
 ): Result<SaleWithItems[]> {
   if (!supabase) return noClient()

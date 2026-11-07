@@ -118,13 +118,15 @@ export async function getReportData(range: DateRange): Result<ReportData> {
       .gte('sold_at', range.fromTs)
       .lte('sold_at', range.toTs)
       .neq('payment_status', 'cancelled')
-      .order('sold_at', { ascending: false }),
+      .order('sold_at', { ascending: false })
+      .limit(10000), // guard against PostgREST 1000-row default
     supabase
       .from('expenses')
       .select('*')
       .gte('expense_date', range.fromDate)
       .lte('expense_date', range.toDate)
-      .order('expense_date', { ascending: false }),
+      .order('expense_date', { ascending: false })
+      .limit(10000),
   ])
 
   if (salesRes.error)    return { data: null, error: { message: salesRes.error.message } }
@@ -187,6 +189,9 @@ export async function getReportData(range: DateRange): Result<ReportData> {
   const salesByPaymentMethod = [...pmMap.values()].sort((a, b) => b.revenue - a.revenue)
 
   // ── Product aggregations — historical snapshots only ──────────────────────
+  // Track per-product cost coverage separately from the global flag.
+  const productCostKnown = new Map<string, boolean>() // productName → hasAnyCost
+
   const productMap = new Map<string, ProductSummary>()
   for (const sale of paidSales) {
     for (const item of sale.sale_items) {
@@ -199,17 +204,17 @@ export async function getReportData(range: DateRange): Result<ReportData> {
       row.totalRevenue  += item.line_total
       if (item.unit_cost !== null && item.unit_cost !== undefined) {
         row.totalCogs = (row.totalCogs ?? 0) + item.unit_cost * item.quantity
+        productCostKnown.set(key, true)
       } else {
         row.cogsIncomplete = true
-        if (row.totalCogs === 0 && !row.cogsIncomplete) row.totalCogs = null
       }
       productMap.set(key, row)
     }
   }
-  // Normalise: if cogsIncomplete and totalCogs is still 0 with no known costs, set null
-  for (const [, row] of productMap) {
-    if (row.cogsIncomplete && row.totalCogs === 0) {
-      // check if any known cost was added
+  // If no cost was ever known for this product, set totalCogs to null rather
+  // than 0 — zero cost is a valid real value so the two must be distinguishable.
+  for (const [key, row] of productMap) {
+    if (row.cogsIncomplete && !productCostKnown.get(key)) {
       row.totalCogs = null
     }
   }

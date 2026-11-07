@@ -72,13 +72,15 @@ export async function getFinancialSummary(range: DateRange): Result<FinancialSum
       .gte('sold_at', range.fromTs)
       .lte('sold_at', range.toTs)
       .neq('payment_status', 'cancelled')
-      .order('sold_at', { ascending: false }),
+      .order('sold_at', { ascending: false })
+      .limit(10000), // guard against PostgREST 1000-row default; small businesses won't hit 10k/period
     supabase
       .from('expenses')
       .select('*')
       .gte('expense_date', range.fromDate)
       .lte('expense_date', range.toDate)
-      .order('expense_date', { ascending: false }),
+      .order('expense_date', { ascending: false })
+      .limit(10000),
   ])
 
   if (salesRes.error)    return { data: null, error: { message: salesRes.error.message } }

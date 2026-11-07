@@ -21,6 +21,7 @@ export async function getExpenses(): Result<Expense[]> {
     .select('*')
     .order('expense_date', { ascending: false })
     .order('created_at', { ascending: false })
+    .limit(10000)  // guard against PostgREST default 1000-row cap
   if (error) return { data: null, error: { message: error.message } }
   return { data: (data as Expense[]) ?? [], error: null }
 }
