@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { BrowserRouter, Navigate, Route, Routes, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Home, Package } from 'lucide-react'
+import { Home, Package, Receipt, ShoppingCart } from 'lucide-react'
 
 import { NotificationProvider } from './design-system/Notification'
 import type { NavItem } from './design-system/BottomNav'
@@ -13,8 +13,10 @@ import { AuthCallbackPage } from './pages/AuthCallbackPage'
 import { EditBusinessProfilePage } from './pages/EditBusinessProfilePage'
 import { LoginPage } from './pages/LoginPage'
 import { OnboardingPage } from './pages/OnboardingPage'
+import { PosPage } from './pages/PosPage'
 import { ProductsPage } from './pages/ProductsPage'
 import { RegisterPage } from './pages/RegisterPage'
+import { SalesPage } from './pages/SalesPage'
 import { WelcomePage } from './pages/WelcomePage'
 
 const brand = (
@@ -26,7 +28,6 @@ const brand = (
 export function App() {
   const { i18n } = useTranslation()
 
-  // Keep <html lang> in sync with the active language (helps fonts + AT).
   useEffect(() => {
     document.documentElement.lang = i18n.resolvedLanguage ?? i18n.language ?? 'en'
   }, [i18n.resolvedLanguage, i18n.language])
@@ -42,25 +43,21 @@ export function App() {
   )
 }
 
-/**
- * Inner route tree — rendered inside BrowserRouter so hooks like
- * useNavigate and useTranslation are available.
- */
 function AppRoutes() {
   const { t } = useTranslation()
   const navigate = useNavigate()
 
   const appNav: NavItem[] = [
-    { id: '/app',          label: t('nav.home'),     icon: Home    },
-    { id: '/app/products', label: t('nav.products'), icon: Package },
+    { id: '/app',          label: t('nav.home'),     icon: Home         },
+    { id: '/app/pos',      label: t('nav.pos'),      icon: ShoppingCart },
+    { id: '/app/sales',    label: t('nav.sales'),    icon: Receipt      },
+    { id: '/app/products', label: t('nav.products'), icon: Package      },
   ]
 
-  /** Bare public shell (no nav). */
   const publicShell = (children: React.ReactNode) => (
     <AppShell brand={brand}>{children}</AppShell>
   )
 
-  /** Authenticated shell with nav. */
   const appShell = (children: React.ReactNode, activeId: string) => (
     <AppShell brand={brand} navItems={appNav} activeId={activeId} onNavigate={navigate}>
       {children}
@@ -76,9 +73,15 @@ function AppRoutes() {
       <Route path="/register"       element={publicShell(<PublicOnly><RegisterPage /></PublicOnly>)} />
       <Route path="/onboarding"     element={publicShell(<RequireProfile><OnboardingPage /></RequireProfile>)} />
 
-      {/* Authenticated — shared nav shell */}
+      {/* Authenticated */}
       <Route path="/app"
         element={appShell(<RequireBusiness><AppPlaceholder /></RequireBusiness>, '/app')}
+      />
+      <Route path="/app/pos"
+        element={appShell(<RequireBusiness><PosPage /></RequireBusiness>, '/app/pos')}
+      />
+      <Route path="/app/sales"
+        element={appShell(<RequireBusiness><SalesPage /></RequireBusiness>, '/app/sales')}
       />
       <Route path="/app/products"
         element={appShell(<RequireBusiness><ProductsPage /></RequireBusiness>, '/app/products')}

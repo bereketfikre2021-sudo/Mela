@@ -1,5 +1,5 @@
 /**
- * Retail module domain types — Phase 2.1 (product catalogue).
+ * Retail module domain types — Phase 2.1–2.3 (products + sales).
  */
 
 /** A persisted product row from public.products. */
@@ -24,4 +24,51 @@ export interface ProductInput {
   cost_price: number | null
   stock_quantity: number
   unit: string
+}
+
+// ── Sales ─────────────────────────────────────────────────────────────────────
+
+export type PaymentMethod = 'cash' | 'telebirr' | 'bank_transfer'
+export type PaymentStatus = 'paid' | 'pending' | 'cancelled'
+
+export interface Sale {
+  id: string
+  owner_id: string
+  sale_number: string
+  subtotal: number
+  total: number
+  payment_method: PaymentMethod
+  payment_status: PaymentStatus
+  sold_at: string
+  created_at: string
+  updated_at: string
+}
+
+export interface SaleItem {
+  id: string
+  sale_id: string
+  product_id: string | null
+  product_name: string
+  unit_price: number
+  quantity: number
+  line_total: number
+  created_at: string
+}
+
+export interface SaleWithItems extends Sale {
+  sale_items: SaleItem[]
+}
+
+/** One line in the POS cart. */
+export interface CartItem {
+  product: Product
+  quantity: number
+}
+
+/** Payload sent to the complete_sale() RPC. */
+export interface CheckoutPayload {
+  owner_id: string
+  sale_number: string
+  payment_method: PaymentMethod
+  items: { product_id: string; quantity: number }[]
 }
