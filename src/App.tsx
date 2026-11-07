@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { BrowserRouter, Navigate, Route, Routes, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Home, Package, Receipt, ShoppingCart, Wallet } from 'lucide-react'
+import { Home, Package, Receipt, ShoppingCart, Wallet, BarChart2 } from 'lucide-react'
 
 import { NotificationProvider } from './design-system/Notification'
 import type { NavItem } from './design-system/BottomNav'
@@ -17,6 +17,7 @@ import { OverviewPage } from './pages/OverviewPage'
 import { PosPage } from './pages/PosPage'
 import { ProductsPage } from './pages/ProductsPage'
 import { RegisterPage } from './pages/RegisterPage'
+import { ReportsPage } from './pages/ReportsPage'
 import { SalesPage } from './pages/SalesPage'
 import { WelcomePage } from './pages/WelcomePage'
 
@@ -53,6 +54,7 @@ function AppRoutes() {
     { id: '/app/pos',      label: t('nav.pos'),      icon: ShoppingCart },
     { id: '/app/sales',    label: t('nav.sales'),    icon: Receipt      },
     { id: '/app/expenses', label: t('nav.expenses'), icon: Wallet       },
+    { id: '/app/reports',  label: t('nav.reports'),  icon: BarChart2    },
     { id: '/app/products', label: t('nav.products'), icon: Package      },
   ]
 
@@ -87,6 +89,9 @@ function AppRoutes() {
       />
       <Route path="/app/expenses"
         element={appShell(<RequireBusiness><ExpensesPage /></RequireBusiness>, '/app/expenses')}
+      />
+      <Route path="/app/reports"
+        element={appShell(<RequireBusiness><ReportsPage /></RequireBusiness>, '/app/reports')}
       />
       <Route path="/app/products"
         element={appShell(<RequireBusiness><ProductsPage /></RequireBusiness>, '/app/products')}

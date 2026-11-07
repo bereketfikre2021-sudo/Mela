@@ -7,60 +7,8 @@ import { Button } from '../design-system/Button'
 import { Skeleton } from '../design-system/LoadingState'
 import { StatusBadge } from '../design-system/StatusBadge'
 import { useAuth } from '../modules/auth/AuthContext'
-import { type DateRange, type FinancialSummary, getFinancialSummary } from '../modules/overview/financials'
-
-// ── Timezone-aware date helpers ───────────────────────────────────────────────
-// All boundaries use the device's local UTC offset so "today" means the
-// user's calendar day, not UTC midnight.
-
-function localISODate(d: Date): string {
-  const y = d.getFullYear()
-  const m = String(d.getMonth() + 1).padStart(2, '0')
-  const day = String(d.getDate()).padStart(2, '0')
-  return `${y}-${m}-${day}`
-}
-
-function utcOffsetString(d: Date): string {
-  const off = -d.getTimezoneOffset() // minutes
-  const sign = off >= 0 ? '+' : '-'
-  const h = String(Math.floor(Math.abs(off) / 60)).padStart(2, '0')
-  const min = String(Math.abs(off) % 60).padStart(2, '0')
-  return `${sign}${h}:${min}`
-}
-
-/** Start-of-local-day timestamp with explicit UTC offset. */
-function startOfDay(d: Date): string {
-  return `${localISODate(d)}T00:00:00${utcOffsetString(d)}`
-}
-
-/** End-of-local-day timestamp with explicit UTC offset. */
-function endOfDay(d: Date): string {
-  return `${localISODate(d)}T23:59:59${utcOffsetString(d)}`
-}
-
-type Period = 'today' | 'week' | 'month'
-
-function periodRange(p: Period): DateRange {
-  const today = new Date()
-  if (p === 'today') {
-    const iso = localISODate(today)
-    return { fromTs: startOfDay(today), toTs: endOfDay(today), fromDate: iso, toDate: iso }
-  }
-  if (p === 'week') {
-    const from = new Date(today)
-    from.setDate(today.getDate() - 6)
-    return {
-      fromTs: startOfDay(from), toTs: endOfDay(today),
-      fromDate: localISODate(from), toDate: localISODate(today),
-    }
-  }
-  // month — first day of current local month
-  const from = new Date(today.getFullYear(), today.getMonth(), 1)
-  return {
-    fromTs: startOfDay(from), toTs: endOfDay(today),
-    fromDate: localISODate(from), toDate: localISODate(today),
-  }
-}
+import { type FinancialSummary, getFinancialSummary } from '../modules/overview/financials'
+import { type Period, periodRange } from '../modules/overview/dateRange'
 
 // ── Formatting ────────────────────────────────────────────────────────────────
 
