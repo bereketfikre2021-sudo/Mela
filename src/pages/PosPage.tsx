@@ -101,10 +101,10 @@ export function PosPage() {
     })
     setSubmitting(false)
     if (error) {
-      notify({ tone: 'danger', title: t('pos.checkout.error'), description: error.message })
+      notify({ tone: 'danger', title: t('pos.checkoutResult.error'), description: error.message })
       return
     }
-    notify({ tone: 'success', title: t('pos.checkout.success') })
+    notify({ tone: 'success', title: t('pos.checkoutResult.success') })
     clearCart()
     setCheckoutOpen(false)
     await reloadProducts() // refresh stock
