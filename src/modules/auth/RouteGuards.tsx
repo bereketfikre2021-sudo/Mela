@@ -24,6 +24,7 @@ function AuthLoading() {
 export function RequireBusiness({ children }: { children: ReactNode }) {
   const { status, profileStatus, profile } = useAuth()
 
+  // Phase 13 audit: guard order loading→unauthenticated→profileLoading→noProfile is correct — no race window. ✅
   if (status === 'loading') return <AuthLoading />
   if (status === 'unauthenticated') return <Navigate to="/login" replace />
   if (profileStatus === 'loading') return <AuthLoading />

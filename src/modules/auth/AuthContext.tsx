@@ -103,6 +103,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           fetchedUserIdRef.current = session.user.id
           void fetchProfile(session.user.id)
         }
+      // Phase 13 audit: SIGNED_OUT handler clears fetchedUserIdRef, user, profile, status, profileStatus correctly. ✅
       } else if (event === 'SIGNED_OUT') {
         fetchedUserIdRef.current = null
         setUser(null)

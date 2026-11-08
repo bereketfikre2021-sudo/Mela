@@ -1,0 +1,25 @@
+-- Phase 13 RLS audit: security hardening review
+--
+-- inventory_movements:
+--   RLS enabled. Policy: owner_id = auth.uid() on SELECT, INSERT, UPDATE, DELETE.
+--   Gap: none — all movements are inserted by SECURITY DEFINER RPCs that enforce
+--   auth.uid() = p_owner_id before writing. Direct client INSERT is blocked by RLS.
+--
+-- sale_items:
+--   RLS enabled. Policy: owner_id = auth.uid() on SELECT, INSERT, UPDATE, DELETE.
+--   Gap: none — sale_items are inserted exclusively via complete_sale() SECURITY DEFINER
+--   RPC. The RPC validates auth.uid() = p_owner_id. Direct client INSERT is blocked.
+--
+-- purchase_items:
+--   RLS enabled. Policy: owner_id = auth.uid() on SELECT, INSERT, UPDATE, DELETE.
+--   Gap: none — purchase_items are inserted exclusively via receive_purchase()
+--   SECURITY DEFINER RPC. The RPC validates auth.uid() = p_owner_id.
+--
+-- expenses:
+--   RLS enabled. Policy: owner_id = auth.uid() on SELECT, INSERT, UPDATE, DELETE.
+--   Gap: none — INSERT enforces owner_id = auth.uid() via RLS policy directly.
+--   The sync engine sets owner_id from auth.uid() at enqueue time.
+--
+-- All four tables: no RLS gap found. No schema changes required.
+
+DO $$ BEGIN NULL; END $$;

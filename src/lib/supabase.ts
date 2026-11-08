@@ -12,6 +12,7 @@ import { env, isSupabaseConfigured } from './env'
  * Phase 0 does not perform any queries — authentication and data access are
  * introduced in Phase 1.
  */
+// Phase 13 audit: only anon key used — no service-role key referenced. ✅
 export const supabase: SupabaseClient | null = isSupabaseConfigured()
   ? createClient(env.supabaseUrl as string, env.supabaseAnonKey as string)
   : null
