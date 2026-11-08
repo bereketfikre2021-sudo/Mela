@@ -21,7 +21,7 @@ import type { PlanLimits, SubscriptionPlan, SubscriptionStatus } from './types'
 
 // ── Usage counts ──────────────────────────────────────────────────────────────
 
-interface UsageCounts {
+export interface UsageCounts {
   products: number
   customers: number
   suppliers: number
@@ -39,7 +39,7 @@ const DEFAULT_USAGE: UsageCounts = {
 
 // ── Context value ─────────────────────────────────────────────────────────────
 
-interface SubscriptionContextValue {
+export interface SubscriptionContextValue {
   plan: SubscriptionPlan
   status: SubscriptionStatus | null
   isActive: boolean
@@ -52,6 +52,8 @@ interface SubscriptionContextValue {
   canAddSaleThisMonth: () => boolean
   canAddPurchaseThisMonth: () => boolean
   hasAdvancedReports: boolean
+  /** Raw usage counts for display purposes (e.g. progress bars). */
+  usageCounts: UsageCounts
 }
 
 const SAFE_DEFAULTS: SubscriptionContextValue = {
@@ -67,6 +69,7 @@ const SAFE_DEFAULTS: SubscriptionContextValue = {
   canAddSaleThisMonth: () => true,
   canAddPurchaseThisMonth: () => true,
   hasAdvancedReports: false,
+  usageCounts: DEFAULT_USAGE,
 }
 
 const SubscriptionContext = createContext<SubscriptionContextValue>(SAFE_DEFAULTS)
@@ -242,6 +245,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
       canAddSaleThisMonth,
       canAddPurchaseThisMonth,
       hasAdvancedReports,
+      usageCounts: usage,
     }),
     [
       plan,
@@ -256,6 +260,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
       canAddSaleThisMonth,
       canAddPurchaseThisMonth,
       hasAdvancedReports,
+      usage,
     ]
   )
 

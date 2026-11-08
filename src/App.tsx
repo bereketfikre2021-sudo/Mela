@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { BrowserRouter, Navigate, Route, Routes, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Home, PackageSearch, Receipt, Users, Wallet } from 'lucide-react'
+import { CreditCard, Home, PackageSearch, Receipt, Users, Wallet } from 'lucide-react'
 
 import { NotificationProvider } from './design-system/Notification'
 import type { NavItem } from './design-system/BottomNav'
@@ -35,6 +35,7 @@ import { StockPage } from './pages/StockPage'
 import { SuppliersPage } from './pages/SuppliersPage'
 import { TermsPage } from './pages/TermsPage'
 import { WelcomePage } from './pages/WelcomePage'
+import { SubscriptionPage } from './pages/SubscriptionPage'
 
 const brand = (
   <div className="flex items-center">
@@ -103,6 +104,11 @@ function AppRoutes() {
       id:    '/app/customers',
       label: t('nav.customers'),
       icon:  Users,
+    },
+    {
+      id:    '/app/subscription',
+      label: t('nav.subscription'),
+      icon:  CreditCard,
     },
   ]
 
@@ -174,6 +180,9 @@ function AppRoutes() {
         element={appShell(<RequireBusiness><SuppliersPage /></RequireBusiness>, '/app/customers')} />
       <Route path="/app/profile"
         element={appShell(<RequireBusiness><EditBusinessProfilePage /></RequireBusiness>, '/app')} />
+
+      <Route path="/app/subscription"
+        element={appShell(<RequireBusiness><SubscriptionPage /></RequireBusiness>, '/app/subscription')} />
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
