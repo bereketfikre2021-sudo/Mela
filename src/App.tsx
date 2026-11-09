@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { BrowserRouter, Navigate, Route, Routes, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { BarChart2, Briefcase, Home, Receipt, UserCog, Wallet } from 'lucide-react'
+import { BarChart2, Briefcase, Home, PackageSearch, Receipt, Users, Wallet } from 'lucide-react'
 
 import { NotificationProvider } from './design-system/Notification'
 import type { NavItem } from './design-system/BottomNav'
@@ -13,7 +13,6 @@ import { ProfileMenu } from './components/ProfileMenu'
 import { SyncBadge } from './components/SyncBadge'
 import { SyncProvider } from './context/SyncContext'
 import { SubscriptionProvider } from './modules/subscriptions/SubscriptionContext'
-import { useSubscription } from './modules/subscriptions/SubscriptionContext'
 import { StaffProvider } from './modules/staff/StaffContext'
 import { getBusinessConfig } from './modules/auth/businessConfig'
 
@@ -76,8 +75,6 @@ function AppRoutes() {
   const { t }           = useTranslation()
   const navigate        = useNavigate()
   const { status, profile } = useAuth()
-  const { isActive }    = useSubscription()
-
   const bizConfig = getBusinessConfig(profile?.type ?? 'retail')
   const isService = bizConfig.isServiceBased
 
@@ -89,6 +86,14 @@ function AppRoutes() {
    *
    * Everything else (Customers, Products, Stock, Suppliers, Purchases,
    * Inventory, More) lives in the "Advanced" section of the account menu.
+   */
+  /**
+   * Primary nav — 6 items max.
+   *
+   * Product businesses:  Home | Sales | Expenses | Products | Customers | Reports
+   * Service businesses:  Home | Services | Expenses | Clients | Reports
+   *
+   * Staff lives in Advanced (account menu), not in nav.
    */
   const appNav: NavItem[] = [
     {
@@ -106,17 +111,22 @@ function AppRoutes() {
       label: t('nav.expenses'),
       icon:  Wallet,
     },
+    // Products — product businesses only
+    ...(!isService ? [{
+      id:    '/app/products',
+      label: t('nav.products'),
+      icon:  PackageSearch,
+    }] : []),
+    {
+      id:    '/app/customers',
+      label: isService ? t('nav.clients') : t('nav.customers'),
+      icon:  Users,
+    },
     {
       id:    '/app/reports',
       label: t('nav.reports'),
       icon:  BarChart2,
     },
-    // Staff nav item — 5th slot, Premium only
-    ...(isActive ? [{
-      id:    '/app/staff',
-      label: t('nav.staff'),
-      icon:  UserCog,
-    }] : []),
   ]
 
   const publicShell = (children: React.ReactNode) => (
@@ -171,7 +181,7 @@ function AppRoutes() {
       <Route path="/app/more"
         element={appShell(<RequireBusiness><MorePage /></RequireBusiness>, '/app')} />
       <Route path="/app/products"
-        element={appShell(<RequireBusiness><ProductsPage /></RequireBusiness>, '/app')} />
+        element={appShell(<RequireBusiness><ProductsPage /></RequireBusiness>, '/app/products')} />
       <Route path="/app/stock"
         element={appShell(<RequireBusiness><StockPage /></RequireBusiness>, '/app')} />
       <Route path="/app/inventory"
@@ -179,15 +189,15 @@ function AppRoutes() {
       <Route path="/app/purchases"
         element={appShell(<RequireBusiness><PurchasesPage /></RequireBusiness>, '/app')} />
       <Route path="/app/customers"
-        element={appShell(<RequireBusiness><CustomersPage /></RequireBusiness>, '/app')} />
+        element={appShell(<RequireBusiness><CustomersPage /></RequireBusiness>, '/app/customers')} />
       <Route path="/app/suppliers"
         element={appShell(<RequireBusiness><SuppliersPage /></RequireBusiness>, '/app')} />
+      <Route path="/app/staff"
+        element={appShell(<RequireBusiness><StaffPage /></RequireBusiness>, '/app')} />
       <Route path="/app/profile"
         element={appShell(<RequireBusiness><EditBusinessProfilePage /></RequireBusiness>, '/app')} />
       <Route path="/app/subscription"
         element={appShell(<RequireBusiness><SubscriptionPage /></RequireBusiness>, '/app')} />
-      <Route path="/app/staff"
-        element={appShell(<RequireBusiness><StaffPage /></RequireBusiness>, '/app/staff')} />
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

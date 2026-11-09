@@ -714,7 +714,8 @@
       "products": "Edit products and prices",
       "settings": "Profile and business settings",
       "clients": "Manage your client contacts",
-      "stock": "View stock levels and adjust quantities"
+      "stock": "View stock levels and adjust quantities",
+      "staff": "Manage staff members and permissions"
     }
   },
   "sync": {
