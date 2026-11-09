@@ -103,7 +103,7 @@ function AppRoutes() {
     },
     {
       id:    '/app/sales',
-      label: isService ? t('nav.jobs') : t('nav.sales'),
+      label: isService ? t('nav.services') : t('nav.sales'),
       icon:  isService ? Briefcase : Receipt,
     },
     {
@@ -111,10 +111,10 @@ function AppRoutes() {
       label: t('nav.expenses'),
       icon:  Wallet,
     },
-    // Products — product businesses; Services catalogue — service businesses
+    // Products — product businesses; Catalogue — service businesses
     {
       id:    '/app/products',
-      label: isService ? t('nav.services') : t('nav.products'),
+      label: isService ? t('nav.catalogue') : t('nav.products'),
       icon:  PackageSearch,
     },
     {

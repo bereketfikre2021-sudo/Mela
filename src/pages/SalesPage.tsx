@@ -74,8 +74,8 @@ export function SalesPage() {
     { key: 'all',   label: t('sales.filter.all')   },
   ]
 
-  const pageTitle = isService ? t('nav.jobs')   : t('sales.title')
-  const newLabel  = isService ? t('nav.newJob') : t('nav.newSale')
+  const pageTitle = isService ? t('nav.services') : t('sales.title')
+  const newLabel  = isService ? t('nav.newService') : t('nav.newSale')
 
   if (status === 'loading') {
     return (
