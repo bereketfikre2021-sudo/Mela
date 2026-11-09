@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { BrowserRouter, Navigate, Route, Routes, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { BarChart2, Briefcase, Home, MoreHorizontal, PackageSearch, Receipt, UserCog, Users, Wallet } from 'lucide-react'
+import { BarChart2, Briefcase, Home, Receipt, UserCog, Wallet } from 'lucide-react'
 
 import { NotificationProvider } from './design-system/Notification'
 import type { NavItem } from './design-system/BottomNav'
@@ -82,14 +82,13 @@ function AppRoutes() {
   const isService = bizConfig.isServiceBased
 
   /**
-   * Business-type-aware primary nav.
+   * Primary nav — max 5 items always.
    *
-   * Product businesses (retail, fnb, bakery, cosmetics):
-   *   Home | Sales | Expenses | Stock | Customers | More
+   * Product businesses:  Home | Sales | Expenses | Reports | [Staff]
+   * Service businesses:  Home | Services | Expenses | Reports | [Staff]
    *
-   * Service businesses (service, salon):
-   *   Home | Services | Expenses | Clients | More
-   *   (no Stock, no Purchases, no Suppliers — not relevant)
+   * Everything else (Customers, Products, Stock, Suppliers, Purchases,
+   * Inventory, More) lives in the "Advanced" section of the account menu.
    */
   const appNav: NavItem[] = [
     {
@@ -98,48 +97,21 @@ function AppRoutes() {
       icon:  Home,
     },
     {
-      id:    '/app/pos',
+      id:    '/app/sales',
       label: isService ? t('nav.services') : t('nav.sales'),
       icon:  isService ? Briefcase : Receipt,
-      children: isService
-        ? [
-            { id: '/app/pos',   label: t('nav.newService') },
-            { id: '/app/sales', label: t('nav.serviceHistory') },
-          ]
-        : [
-            { id: '/app/pos',   label: t('nav.newSale') },
-            { id: '/app/sales', label: t('nav.salesHistory') },
-          ],
     },
     {
       id:    '/app/expenses',
       label: t('nav.expenses'),
       icon:  Wallet,
     },
-    // Product businesses only: Products in nav instead of Stock
-    ...(!isService ? [{
-      id:    '/app/products',
-      label: t('nav.products'),
-      icon:  PackageSearch,
-    }] : []),
-    {
-      id:    '/app/customers',
-      label: isService ? t('nav.clients') : t('nav.customers'),
-      icon:  Users,
-    },
-    // Both business types get Reports in the primary nav
     {
       id:    '/app/reports',
       label: t('nav.reports'),
       icon:  BarChart2,
     },
-    // Product businesses only: More hub (purchases, suppliers, inventory, products, customers)
-    ...(!isService ? [{
-      id:    '/app/more',
-      label: t('nav.more'),
-      icon:  MoreHorizontal,
-    }] : []),
-    // Staff nav item only shown on Premium
+    // Staff nav item — 5th slot, Premium only
     ...(isActive ? [{
       id:    '/app/staff',
       label: t('nav.staff'),
@@ -184,36 +156,32 @@ function AppRoutes() {
         element={appShell(<RequireBusiness><OverviewPage /></RequireBusiness>, '/app')} />
 
       <Route path="/app/pos"
-        element={appShell(<RequireBusiness><PosPage /></RequireBusiness>, '/app/pos')} />
+        element={appShell(<RequireBusiness><PosPage /></RequireBusiness>, '/app/sales')} />
 
       <Route path="/app/sales"
-        element={appShell(<RequireBusiness><SalesPage /></RequireBusiness>, '/app/pos')} />
+        element={appShell(<RequireBusiness><SalesPage /></RequireBusiness>, '/app/sales')} />
 
       <Route path="/app/expenses"
         element={appShell(<RequireBusiness><ExpensesPage /></RequireBusiness>, '/app/expenses')} />
 
-      <Route path="/app/stock"
-        element={appShell(<RequireBusiness><StockPage /></RequireBusiness>, '/app/stock')} />
-
-      <Route path="/app/customers"
-        element={appShell(<RequireBusiness><CustomersPage /></RequireBusiness>, isService ? '/app/customers' : '/app/more')} />
-
-      <Route path="/app/more"
-        element={appShell(<RequireBusiness><MorePage /></RequireBusiness>, '/app/more')} />
-
-      {/* ── Secondary routes ──────────────────────────────────────────────── */}
-      <Route path="/app/products"
-        element={appShell(<RequireBusiness><ProductsPage /></RequireBusiness>, '/app/products')} />
-      <Route path="/app/stock"
-        element={appShell(<RequireBusiness><StockPage /></RequireBusiness>, '/app/more')} />
-      <Route path="/app/inventory"
-        element={appShell(<RequireBusiness><InventoryPage /></RequireBusiness>, '/app/more')} />
-      <Route path="/app/purchases"
-        element={appShell(<RequireBusiness><PurchasesPage /></RequireBusiness>, '/app/more')} />
       <Route path="/app/reports"
         element={appShell(<RequireBusiness><ReportsPage /></RequireBusiness>, '/app/reports')} />
+
+      {/* ── Secondary routes (via account Advanced menu) ──────────────────── */}
+      <Route path="/app/more"
+        element={appShell(<RequireBusiness><MorePage /></RequireBusiness>, '/app')} />
+      <Route path="/app/products"
+        element={appShell(<RequireBusiness><ProductsPage /></RequireBusiness>, '/app')} />
+      <Route path="/app/stock"
+        element={appShell(<RequireBusiness><StockPage /></RequireBusiness>, '/app')} />
+      <Route path="/app/inventory"
+        element={appShell(<RequireBusiness><InventoryPage /></RequireBusiness>, '/app')} />
+      <Route path="/app/purchases"
+        element={appShell(<RequireBusiness><PurchasesPage /></RequireBusiness>, '/app')} />
+      <Route path="/app/customers"
+        element={appShell(<RequireBusiness><CustomersPage /></RequireBusiness>, '/app')} />
       <Route path="/app/suppliers"
-        element={appShell(<RequireBusiness><SuppliersPage /></RequireBusiness>, '/app/more')} />
+        element={appShell(<RequireBusiness><SuppliersPage /></RequireBusiness>, '/app')} />
       <Route path="/app/profile"
         element={appShell(<RequireBusiness><EditBusinessProfilePage /></RequireBusiness>, '/app')} />
       <Route path="/app/subscription"

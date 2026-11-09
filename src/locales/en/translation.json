@@ -236,7 +236,8 @@
     "count_other": "{{count}} sales",
     "empty": {
       "title": "No sales yet",
-      "desc": "Completed sales will appear here after your first checkout."
+      "desc": "Completed sales will appear here after your first checkout.",
+      "todayDesc": "No sales recorded today. Tap New sale to get started."
     },
     "col": {
       "ref": "Reference",
@@ -262,6 +263,12 @@
       "unitPrice": "Unit price",
       "lineTotal": "Total",
       "total": "Total"
+    },
+    "filter": {
+      "today": "Today",
+      "week": "This week",
+      "month": "This month",
+      "all": "All time"
     }
   },
   "validation": {
@@ -316,7 +323,8 @@
     "switchAccount": "Log in to another account",
     "switchStaff": "Switch staff",
     "staffActive": "Active: {{name}}",
-    "subscription": "Subscription & billing"
+    "subscription": "Subscription & billing",
+    "advanced": "Advanced"
   },
   "overview": {
     "period": {

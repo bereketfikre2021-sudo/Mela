@@ -236,7 +236,8 @@
     "count_other": "{{count}} ሽያጮች",
     "empty": {
       "title": "ሽያጭ የለም",
-      "desc": "ሽያጮች ሲጠናቀቁ እዚህ ይታያሉ።"
+      "desc": "ሽያጮች ሲጠናቀቁ እዚህ ይታያሉ።",
+      "todayDesc": "ዛሬ ምንም ሽያጭ አልተመዘገበም። አዲስ ሽያጭ ለመጀመር ጠቅ ያድርጉ።"
     },
     "col": {
       "ref": "ማጣቀሻ",
@@ -262,6 +263,12 @@
       "unitPrice": "ዋጋ",
       "lineTotal": "ድምር",
       "total": "ጠቅላላ ድምር"
+    },
+    "filter": {
+      "today": "ዛሬ",
+      "week": "ይህ ሳምንት",
+      "month": "ይህ ወር",
+      "all": "ሁሉ"
     }
   },
   "validation": {
@@ -451,7 +458,8 @@
     "switchAccount": "ወደ ሌላ መለያ ቀይር",
     "switchStaff": "ሰራተኛ ቀይር",
     "staffActive": "ንቁ: {{name}}",
-    "subscription": "ደንበኝነት እና ክፍያ"
+    "subscription": "ደንበኝነት እና ክፍያ",
+    "advanced": "የላቀ"
   },
   "footer": {
     "tagline": "ለኢትዮጵያ ንግዶች የተሰራ ቀላል የቢዝነስ አስተዳደር ስርዓት።",

@@ -1,20 +1,10 @@
 /**
- * More page — secondary navigation hub.
- *
- * Shows only sections relevant to the business type:
- * - Service businesses (service, salon): hide stock, purchases, suppliers, inventory
- * - Product businesses: show everything
+ * MorePage — "Advanced" section accessible from the account menu.
+ * Contains everything not in the 5-item primary nav.
  */
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import {
-  ClipboardList,
-  History,
-  Package,
-  Settings,
-  Truck,
-  Users,
-} from 'lucide-react'
+import { ClipboardList, History, Package, PackageSearch, Truck, Users } from 'lucide-react'
 
 import { useAuth } from '../modules/auth/AuthContext'
 import { getBusinessConfig } from '../modules/auth/businessConfig'
@@ -52,20 +42,27 @@ export function MorePage() {
   const isService   = bizConfig.isServiceBased
 
   const tiles = [
-    // Settings — always visible (Reports is in the primary nav)
+    // Both business types
     {
-      icon:  <Settings className="h-5 w-5" aria-hidden="true" />,
-      label: t('more.settings'),
-      desc:  t('more.desc.settings'),
-      route: '/app/profile',
+      icon:  <Users className="h-5 w-5" aria-hidden="true" />,
+      label: isService ? t('nav.clients') : t('nav.customers'),
+      desc:  isService ? t('more.desc.clients') : t('more.desc.customers'),
+      route: '/app/customers',
       show:  true,
     },
     // Product businesses only
     {
-      icon:  <Users className="h-5 w-5" aria-hidden="true" />,
-      label: t('nav.customers'),
-      desc:  t('more.desc.customers'),
-      route: '/app/customers',
+      icon:  <PackageSearch className="h-5 w-5" aria-hidden="true" />,
+      label: t('nav.products'),
+      desc:  t('more.desc.products'),
+      route: '/app/products',
+      show:  !isService,
+    },
+    {
+      icon:  <Package className="h-5 w-5" aria-hidden="true" />,
+      label: t('nav.stock'),
+      desc:  t('more.desc.stock'),
+      route: '/app/stock',
       show:  !isService,
     },
     {
@@ -80,13 +77,6 @@ export function MorePage() {
       label: t('nav.suppliers'),
       desc:  t('more.desc.suppliers'),
       route: '/app/suppliers',
-      show:  !isService,
-    },
-    {
-      icon:  <Package className="h-5 w-5" aria-hidden="true" />,
-      label: t('nav.stock'),
-      desc:  t('more.desc.stock'),
-      route: '/app/stock',
       show:  !isService,
     },
     {
