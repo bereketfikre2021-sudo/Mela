@@ -25,7 +25,8 @@
     "more": "ተጨማሪ",
     "newSale": "አዲስ ሽያጭ",
     "salesHistory": "የሽያጭ ታሪክ",
-    "subscription": "ደንበኝነት"
+    "subscription": "ደንበኝነት",
+    "staff": "ሰራተኞች"
   },
   "welcome": {
     "eyebrow": "ለኢትዮጵያ ንግዶች",
@@ -432,7 +433,9 @@
     "editBusiness": "የንግድ መረጃ አርትዕ",
     "settings": "ቅንጅቶች",
     "signOut": "ውጣ",
-    "switchAccount": "ወደ ሌላ መለያ ቀይር"
+    "switchAccount": "ወደ ሌላ መለያ ቀይር",
+    "switchStaff": "ሰራተኛ ቀይር",
+    "staffActive": "ንቁ: {{name}}"
   },
   "footer": {
     "tagline": "ለኢትዮጵያ ንግዶች የተሰራ ቀላል የቢዝነስ አስተዳደር ስርዓት።",
@@ -824,5 +827,95 @@
     "supplierLimitReached": "የአቅራቢ ገደቡ ደርሷል። ተጨማሪ አቅራቢዎች ለማከል ያሻሽሉ።",
     "purchaseLimitReached": "የወርሃዊ ግዢ ገደቡ ደርሷል። ያልተወሰኑ ግዢዎች ለማድረግ ያሻሽሉ።",
     "salesLimitWarning": "በዚህ ወር {{used}} ከ{{max}} ሽያጮችን ተጠቅመዋል። ያልተወሰኑ ሽያጮች ለፕሪሚየም ያሻሽሉ።"
+  },
+  "staff": {
+    "title": "ሰራተኞች",
+    "subtitle": "{{count}} ንቁ ሰራተኛ",
+    "subtitle_other": "{{count}} ንቁ ሰራተኞች",
+    "addStaff": "ሰራተኛ ጨምር",
+    "premiumRequired": "ፕሪሚየም ያስፈልጋል",
+    "premiumRequiredDesc": "የሰራተኛ አስተዳደር በፕሪሚየም እቅድ ላይ ይገኛል። ሰራተኞችን ለማከል አዘምን።",
+    "accessRestricted": "መዳረሻ ተገድቧል",
+    "accessRestrictedDesc": "ሰራተኞችን ለማስተዳደር ፈቃድ የለዎትም።",
+    "deactivate": "አቦ",
+    "reactivate": "ንቁ አድርግ",
+    "remove": "አስወግድ",
+    "editPermissions": "ፈቃዶችን አርትዕ",
+    "role": {
+      "manager": "ስራ አስኪያጅ",
+      "cashier": "ካሽ",
+      "inventory": "የዕቃ ሰራተኛ",
+      "accountant": "አካውንታንት"
+    },
+    "status": {
+      "active": "ንቁ",
+      "deactivated": "ተሰናክሏል"
+    },
+    "permission": {
+      "pos": "የሽያጭ ነጥብ",
+      "cancel_sale": "ሽያጭ ሰርዝ / መልስ ስጥ",
+      "manage_products": "ምርቶችን አስተዳድር",
+      "stock_adjustments": "የዕቃ ክምችት ማስተካከያ",
+      "receive_purchases": "ግዢዎችን ተቀበል",
+      "manage_customers": "ደንበኞችን አስተዳድር",
+      "manage_suppliers": "አቅራቢዎችን አስተዳድር",
+      "manage_expenses": "ወጪዎችን አስተዳድር",
+      "view_reports": "ሪፖርቶችን ይመልከቱ",
+      "manage_staff": "ሰራተኞችን አስተዳድር",
+      "manage_subscription": "ደንበኝነት እና ክፍያ",
+      "manage_business_settings": "የንግድ ቅንብሮች"
+    },
+    "form": {
+      "titleAdd": "ሰራተኛ ጨምር",
+      "titleEditPerms": "ለ {{name}} ፈቃዶችን አርትዕ",
+      "name": "ሙሉ ስም",
+      "role": "ሚና",
+      "permissions": "ፈቃዶች",
+      "pin": "4-አሃዝ ፒን",
+      "pinHelper": "ሰራተኛው ወደ ሂሳቡ ለመቀየር ይህን ፒን ይጠቀማል።",
+      "pinError": "ፒን ትክክለኛ 4 አሃዞች መሆን አለበት።",
+      "showPin": "ፒን አሳይ",
+      "hidePin": "ፒን ደብቅ",
+      "submit": "ሰራተኛ ጨምር"
+    },
+    "delete": {
+      "title": "ሰራተኛ አስወግድ",
+      "desc": "\"{{name}}\" ያስወግዱ? ሂሳባቸው ቋሚ ይሰረዛል።"
+    },
+    "empty": {
+      "title": "እስካሁን ሰራተኞች የሉም",
+      "desc": "ሌሎች የንግድዎን ጉዳዮች እንዲያስተዳድሩ ሰራተኞችን ያክሉ።"
+    },
+    "notifications": {
+      "added": "ሰራተኛ ታክሏል",
+      "updated": "ፈቃዶች ተዘምነዋል",
+      "deleted": "ሰራተኛ ተወግዷል",
+      "deactivated": "ሰራተኛ ተሰናክሏል",
+      "reactivated": "ሰራተኛ ንቁ ሆኗል"
+    },
+    "switcher": {
+      "title": "መለያ ቀይር",
+      "ownerRole": "ባለቤት (ሙሉ መዳረሻ)",
+      "enterPin": "ለ {{name}} ፒን ያስገቡ",
+      "wrongPin": "ፒን ትክክል አይደለም። እንደገና ይሞክሩ።",
+      "deleteDigit": "አሃዝ ሰርዝ",
+      "noStaff": "ምንም ንቁ ሰራተኞች የሉም።"
+    },
+    "activityLog": {
+      "title": "የቅርብ ጊዜ እንቅስቃሴ",
+      "empty": "እስካሁን ምንም እንቅስቃሴ አልተመዘገበም።",
+      "owner": "ባለቤት",
+      "unknownStaff": "ያልታወቀ ሰራተኛ",
+      "action": {
+        "sale": "ሽያጭ ተመዝግቧል",
+        "expense": "ወጪ ታክሏል",
+        "stock_adjustment": "ዕቃ ተስተካክሏል",
+        "purchase": "ግዢ ተቀብሏል",
+        "sale_cancellation": "ሽያጭ ተሰርዟል",
+        "staff_created": "ሰራተኛ ታክሏል",
+        "staff_deactivated": "ሰራተኛ ተሰናክሏል",
+        "staff_deleted": "ሰራተኛ ተወግዷል"
+      }
+    }
   }
 }

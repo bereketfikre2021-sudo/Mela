@@ -4,17 +4,21 @@
  * Shows owner initials as an avatar. On click opens a dropdown with:
  *  - Owner name + business name (read-only header)
  *  - Edit profile (→ /app/profile)
- *  - Edit business details (→ /app/profile, same page handles both)
+ *  - Switch staff (→ StaffSwitcher sheet, only when Premium + staff exist)
  *  - Divider
  *  - Sign out / log out
- *  - "Log in to another account" (sign out first, then /login)
  */
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { ChevronDown, LogOut, Settings } from 'lucide-react'
+import { ChevronDown, LogOut, Settings, UserCog } from 'lucide-react'
 
 import { useAuth } from '../modules/auth/AuthContext'
+import { useSubscription } from '../modules/subscriptions/SubscriptionContext'
+import { useStaff } from '../modules/staff/StaffContext'
+import { listStaff } from '../modules/staff/api'
+import { StaffSwitcher } from './StaffSwitcher'
+import type { StaffMember } from '../modules/staff/types'
 
 function initials(name: string): string {
   return name
@@ -29,9 +33,22 @@ export function ProfileMenu() {
   const { t }    = useTranslation()
   const navigate = useNavigate()
   const { profile, user, signOut } = useAuth()
+  const { isActive } = useSubscription()
+  const { currentStaffMember } = useStaff()
 
-  const [open, setOpen] = useState(false)
+  const [open,          setOpen]          = useState(false)
+  const [switcherOpen,  setSwitcherOpen]  = useState(false)
+  const [staffList,     setStaffList]     = useState<StaffMember[]>([])
   const rootRef = useRef<HTMLDivElement>(null)
+
+  // Load staff list when Premium is active (for the switcher)
+  useEffect(() => {
+    if (isActive && user) {
+      void listStaff(user.id).then(({ data }) => {
+        if (data) setStaffList(data.filter(s => s.status === 'active'))
+      })
+    }
+  }, [isActive, user])
 
   // Close on outside click or Escape
   useEffect(() => {
@@ -50,7 +67,9 @@ export function ProfileMenu() {
 
   const ownerName    = profile?.owner_name ?? user?.email ?? ''
   const businessName = profile?.name ?? ''
-  const avatarText   = initials(ownerName) || '?'
+  // Show the active staff member name in the avatar if staff is active
+  const displayName  = currentStaffMember ? currentStaffMember.name : ownerName
+  const avatarText   = initials(displayName) || '?'
 
   async function handleSignOut() {
     setOpen(false)
@@ -62,53 +81,77 @@ export function ProfileMenu() {
     navigate(path)
   }
 
+  function openSwitcher() {
+    setOpen(false)
+    setSwitcherOpen(true)
+  }
+
   return (
-    <div ref={rootRef} className="relative">
-      {/* Avatar button */}
-      <button
-        type="button"
-        onClick={() => setOpen(v => !v)}
-        aria-haspopup="true"
-        aria-expanded={open}
-        aria-label={t('profileMenu.openMenu')}
-        className="flex items-center gap-1.5 rounded-lg border border-border bg-surface px-2 py-1.5 text-sm font-medium text-text transition-colors hover:bg-background"
-      >
-        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-xs font-semibold text-white select-none">
-          {avatarText}
-        </span>
-        <ChevronDown className={`h-3.5 w-3.5 text-secondary transition-transform ${open ? 'rotate-180' : ''}`} aria-hidden="true" />
-      </button>
-
-      {/* Dropdown */}
-      {open && (
-        <div
-          role="menu"
-          className="absolute right-0 top-full z-50 mt-1.5 w-64 overflow-hidden rounded-xl border border-border bg-surface shadow-layer"
+    <>
+      <div ref={rootRef} className="relative">
+        {/* Avatar button */}
+        <button
+          type="button"
+          onClick={() => setOpen(v => !v)}
+          aria-haspopup="true"
+          aria-expanded={open}
+          aria-label={t('profileMenu.openMenu')}
+          className="flex items-center gap-1.5 rounded-lg border border-border bg-surface px-2 py-1.5 text-sm font-medium text-text transition-colors hover:bg-background"
         >
-          {/* Header — owner + business info */}
-          <div className="border-b border-border px-4 py-3">
-            <p className="truncate text-sm font-semibold text-text">{ownerName}</p>
-            {businessName && (
-              <p className="mt-0.5 truncate text-xs text-secondary">{businessName}</p>
-            )}
-            {user?.email && (
-              <p className="mt-0.5 truncate text-xs text-muted">{user.email}</p>
-            )}
-          </div>
+          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-xs font-semibold text-white select-none">
+            {avatarText}
+          </span>
+          <ChevronDown className={`h-3.5 w-3.5 text-secondary transition-transform ${open ? 'rotate-180' : ''}`} aria-hidden="true" />
+        </button>
 
-          {/* Actions */}
-          <div className="py-1">
-            <MenuItem icon={<Settings className="h-4 w-4" />} label={t('profileMenu.settings')}
-              onClick={() => go('/app/profile')} />
-          </div>
+        {/* Dropdown */}
+        {open && (
+          <div
+            role="menu"
+            className="absolute right-0 top-full z-50 mt-1.5 w-64 overflow-hidden rounded-xl border border-border bg-surface shadow-layer"
+          >
+            {/* Header — owner + business info */}
+            <div className="border-b border-border px-4 py-3">
+              <p className="truncate text-sm font-semibold text-text">{ownerName}</p>
+              {businessName && (
+                <p className="mt-0.5 truncate text-xs text-secondary">{businessName}</p>
+              )}
+              {user?.email && (
+                <p className="mt-0.5 truncate text-xs text-muted">{user.email}</p>
+              )}
+              {currentStaffMember && (
+                <p className="mt-1 truncate text-xs font-medium text-primary">
+                  {t('profileMenu.staffActive', { name: currentStaffMember.name })}
+                </p>
+              )}
+            </div>
 
-          <div className="border-t border-border py-1">
-            <MenuItem icon={<LogOut className="h-4 w-4" />} label={t('profileMenu.signOut')}
-              onClick={() => void handleSignOut()} danger />
+            {/* Actions */}
+            <div className="py-1">
+              <MenuItem icon={<Settings className="h-4 w-4" />} label={t('profileMenu.settings')}
+                onClick={() => go('/app/profile')} />
+              {isActive && staffList.length > 0 && (
+                <MenuItem icon={<UserCog className="h-4 w-4" />} label={t('profileMenu.switchStaff')}
+                  onClick={openSwitcher} />
+              )}
+            </div>
+
+            <div className="border-t border-border py-1">
+              <MenuItem icon={<LogOut className="h-4 w-4" />} label={t('profileMenu.signOut')}
+                onClick={() => void handleSignOut()} danger />
+            </div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+
+      {/* Staff Switcher Sheet */}
+      <StaffSwitcher
+        open={switcherOpen}
+        onClose={() => setSwitcherOpen(false)}
+        staffList={staffList}
+        ownerName={ownerName}
+      />
+    </>
   )
 }
 

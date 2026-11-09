@@ -25,7 +25,8 @@
     "more": "More",
     "newSale": "New sale",
     "salesHistory": "Sales history",
-    "subscription": "Subscription"
+    "subscription": "Subscription",
+    "staff": "Staff"
   },
   "welcome": {
     "eyebrow": "MADE FOR ETHIOPIAN BUSINESSES",
@@ -297,7 +298,9 @@
     "editBusiness": "Edit business details",
     "settings": "Account settings",
     "signOut": "Sign out",
-    "switchAccount": "Log in to another account"
+    "switchAccount": "Log in to another account",
+    "switchStaff": "Switch staff",
+    "staffActive": "Active: {{name}}"
   },
   "overview": {
     "period": {
@@ -824,5 +827,95 @@
     "supplierLimitReached": "Supplier limit reached. Upgrade to add more suppliers.",
     "purchaseLimitReached": "Monthly purchase limit reached. Upgrade for unlimited purchases.",
     "salesLimitWarning": "You have used {{used}} of {{max}} sales this month. Upgrade to Premium for unlimited sales."
+  },
+  "staff": {
+    "title": "Staff",
+    "subtitle": "{{count}} active staff member",
+    "subtitle_other": "{{count}} active staff members",
+    "addStaff": "Add staff",
+    "premiumRequired": "Premium required",
+    "premiumRequiredDesc": "Staff management is available on the Premium plan. Upgrade to add staff members.",
+    "accessRestricted": "Access restricted",
+    "accessRestrictedDesc": "You do not have permission to manage staff.",
+    "deactivate": "Deactivate",
+    "reactivate": "Reactivate",
+    "remove": "Remove",
+    "editPermissions": "Edit permissions",
+    "role": {
+      "manager": "Manager",
+      "cashier": "Cashier",
+      "inventory": "Inventory Staff",
+      "accountant": "Accountant"
+    },
+    "status": {
+      "active": "Active",
+      "deactivated": "Deactivated"
+    },
+    "permission": {
+      "pos": "Point of Sale",
+      "cancel_sale": "Cancel / refund sales",
+      "manage_products": "Manage products",
+      "stock_adjustments": "Stock adjustments",
+      "receive_purchases": "Receive purchases",
+      "manage_customers": "Manage customers",
+      "manage_suppliers": "Manage suppliers",
+      "manage_expenses": "Manage expenses",
+      "view_reports": "View reports",
+      "manage_staff": "Manage staff",
+      "manage_subscription": "Subscription and billing",
+      "manage_business_settings": "Business settings"
+    },
+    "form": {
+      "titleAdd": "Add staff member",
+      "titleEditPerms": "Edit permissions for {{name}}",
+      "name": "Full name",
+      "role": "Role",
+      "permissions": "Permissions",
+      "pin": "4-digit PIN",
+      "pinHelper": "Staff will use this PIN to switch to their account.",
+      "pinError": "PIN must be exactly 4 digits.",
+      "showPin": "Show PIN",
+      "hidePin": "Hide PIN",
+      "submit": "Add staff member"
+    },
+    "delete": {
+      "title": "Remove staff member",
+      "desc": "Remove \"{{name}}\"? Their account will be permanently deleted."
+    },
+    "empty": {
+      "title": "No staff members yet",
+      "desc": "Add staff members to let others help manage your business."
+    },
+    "notifications": {
+      "added": "Staff member added",
+      "updated": "Permissions updated",
+      "deleted": "Staff member removed",
+      "deactivated": "Staff member deactivated",
+      "reactivated": "Staff member reactivated"
+    },
+    "switcher": {
+      "title": "Switch account",
+      "ownerRole": "Owner (full access)",
+      "enterPin": "Enter PIN for {{name}}",
+      "wrongPin": "Incorrect PIN. Try again.",
+      "deleteDigit": "Delete digit",
+      "noStaff": "No active staff members."
+    },
+    "activityLog": {
+      "title": "Recent activity",
+      "empty": "No activity recorded yet.",
+      "owner": "Owner",
+      "unknownStaff": "Unknown staff",
+      "action": {
+        "sale": "Recorded a sale",
+        "expense": "Added an expense",
+        "stock_adjustment": "Adjusted stock",
+        "purchase": "Received a purchase",
+        "sale_cancellation": "Cancelled a sale",
+        "staff_created": "Added a staff member",
+        "staff_deactivated": "Deactivated a staff member",
+        "staff_deleted": "Removed a staff member"
+      }
+    }
   }
 }

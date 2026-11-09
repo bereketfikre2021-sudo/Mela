@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { BrowserRouter, Navigate, Route, Routes, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { CreditCard, Home, PackageSearch, Receipt, Users, Wallet } from 'lucide-react'
+import { CreditCard, Home, PackageSearch, Receipt, UserCog, Users, Wallet } from 'lucide-react'
 
 import { NotificationProvider } from './design-system/Notification'
 import type { NavItem } from './design-system/BottomNav'
@@ -13,6 +13,8 @@ import { ProfileMenu } from './components/ProfileMenu'
 import { SyncBadge } from './components/SyncBadge'
 import { SyncProvider } from './context/SyncContext'
 import { SubscriptionProvider } from './modules/subscriptions/SubscriptionContext'
+import { useSubscription } from './modules/subscriptions/SubscriptionContext'
+import { StaffProvider } from './modules/staff/StaffContext'
 
 // Pages
 import { AuthCallbackPage } from './pages/AuthCallbackPage'
@@ -36,6 +38,7 @@ import { SuppliersPage } from './pages/SuppliersPage'
 import { TermsPage } from './pages/TermsPage'
 import { WelcomePage } from './pages/WelcomePage'
 import { SubscriptionPage } from './pages/SubscriptionPage'
+import { StaffPage } from './pages/StaffPage'
 
 const brand = (
   <div className="flex items-center">
@@ -56,7 +59,9 @@ export function App() {
         <SyncProvider>
           <BrowserRouter>
             <SubscriptionProvider>
-              <AppRoutes />
+              <StaffProvider>
+                <AppRoutes />
+              </StaffProvider>
             </SubscriptionProvider>
           </BrowserRouter>
         </SyncProvider>
@@ -69,6 +74,7 @@ function AppRoutes() {
   const { t }      = useTranslation()
   const navigate   = useNavigate()
   const { status } = useAuth()
+  const { isActive } = useSubscription()
 
   /**
    * 5-item primary nav.
@@ -110,6 +116,12 @@ function AppRoutes() {
       label: t('nav.subscription'),
       icon:  CreditCard,
     },
+    // Staff nav item only shown on Premium
+    ...(isActive ? [{
+      id:    '/app/staff',
+      label: t('nav.staff'),
+      icon:  UserCog,
+    }] : []),
   ]
 
   const publicShell = (children: React.ReactNode) => (
@@ -183,6 +195,9 @@ function AppRoutes() {
 
       <Route path="/app/subscription"
         element={appShell(<RequireBusiness><SubscriptionPage /></RequireBusiness>, '/app/subscription')} />
+
+      <Route path="/app/staff"
+        element={appShell(<RequireBusiness><StaffPage /></RequireBusiness>, '/app/staff')} />
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
