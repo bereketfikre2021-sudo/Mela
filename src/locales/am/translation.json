@@ -31,7 +31,10 @@
     "newService": "አዲስ አገልግሎት",
     "serviceHistory": "የአገልግሎት ታሪክ",
     "clients": "ደንበኞች",
-    "serviceCatalogue": "አገልግሎቶች"
+    "serviceCatalogue": "አገልግሎቶች",
+    "jobs": "ስራዎች",
+    "newJob": "አዲስ ስራ",
+    "jobHistory": "የስራ ታሪክ"
   },
   "welcome": {
     "eyebrow": "ለኢትዮጵያ ንግዶች",
