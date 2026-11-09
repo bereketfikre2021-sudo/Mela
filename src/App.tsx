@@ -111,10 +111,10 @@ function AppRoutes() {
       label: t('nav.expenses'),
       icon:  Wallet,
     },
-    // Products — product businesses; Catalogue — service businesses
+    // Products — same label for both business types
     {
       id:    '/app/products',
-      label: isService ? t('nav.catalogue') : t('nav.products'),
+      label: t('nav.products'),
       icon:  PackageSearch,
     },
     {
