@@ -82,7 +82,8 @@
       "confirmPassword": "የይለፍ ቃል ያረጋግጡ",
       "submit": "መለያ ፍጠር",
       "submitting": "እየተፈጠረ ነው…",
-      "toLogin": "መለያ አለዎት? ይግቡ"
+      "toLogin": "መለያ አለዎት? ይግቡ",
+      "usePassword": "በኢሜይልና ይለፍ ቃል ተመዝገብ"
     },
     "errors": {
       "invalidCredentials": "ኢሜይሉ ወይም የይለፍ ቃሉ ትክክል አይደለም።",

@@ -82,7 +82,8 @@
       "confirmPassword": "Confirm password",
       "submit": "Create account",
       "submitting": "Creating account…",
-      "toLogin": "Already have an account? Log in"
+      "toLogin": "Already have an account? Log in",
+      "usePassword": "Register with email & password"
     },
     "errors": {
       "invalidCredentials": "Incorrect email or password.",
