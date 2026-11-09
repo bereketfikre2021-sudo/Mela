@@ -96,6 +96,21 @@ export async function updateBusiness(
   return { data: data as Business, error: null }
 }
 
+/**
+ * Send a magic-link (OTP) email so the user can log in without a password.
+ * Supabase sends the link to the given email; clicking it redirects to /auth/callback.
+ */
+export async function sendMagicLink(
+  email: string
+): Promise<{ error: { message: string } | null }> {
+  if (!supabase) return { error: { message: clientUnavailableError().error.message } }
+  const { error } = await supabase.auth.signInWithOtp({
+    email,
+    options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+  })
+  return { error: error ? { message: error.message } : null }
+}
+
 /** Map a raw Supabase auth error message to a localized user-facing string. */
 export function mapAuthError(t: (key: string) => string, message: string): string {
   const msg = message.toLowerCase()

@@ -70,7 +70,10 @@
       "password": "Password",
       "submit": "Log in",
       "submitting": "Logging in…",
-      "toRegister": "Don't have an account? Register"
+      "toRegister": "Don't have an account? Register",
+      "usePassword": "Sign in with password instead",
+      "showPassword": "Show password",
+      "hidePassword": "Hide password"
     },
     "register": {
       "title": "Create your account",
@@ -88,7 +91,20 @@
       "generic": "Something went wrong. Please try again."
     },
     "google": "Continue with Google",
-    "or": "or"
+    "or": "or",
+    "magicLink": {
+      "label": "Sign in with email link",
+      "submit": "Send me a sign-in link",
+      "sending": "Sending…",
+      "sentTitle": "Check your email",
+      "sentDesc": "We sent a sign-in link to {{email}}. Click it to log in — no password needed.",
+      "tryAnother": "Use a different email"
+    },
+    "forgotPassword": {
+      "link": "Forgot password?",
+      "enterEmailFirst": "Enter your email address above first.",
+      "sent": "Sign-in link sent — check your email."
+    }
   },
   "business": {
     "create": {
