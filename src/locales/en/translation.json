@@ -30,7 +30,8 @@
     "services": "Services",
     "newService": "New service",
     "serviceHistory": "Service history",
-    "clients": "Clients"
+    "clients": "Clients",
+    "serviceCatalogue": "Services"
   },
   "welcome": {
     "eyebrow": "MADE FOR ETHIOPIAN BUSINESSES",
