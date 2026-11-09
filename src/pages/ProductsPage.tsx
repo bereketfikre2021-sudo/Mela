@@ -1,20 +1,26 @@
 import { useState } from 'react'
-import { Pencil, Plus, Trash2, Package } from 'lucide-react'
+import { ArrowDownUp, Pencil, Plus, Trash2, Package } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import { Button } from '../design-system/Button'
 import { Dialog } from '../design-system/Dialog'
 import { EmptyState } from '../design-system/EmptyState'
+import { Input } from '../design-system/Input'
 import { Skeleton } from '../design-system/LoadingState'
 import { useNotification } from '../design-system/Notification'
+import { Select } from '../design-system/Select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../design-system/Table'
 import { useAuth } from '../modules/auth/AuthContext'
+import { adjustStock } from '../modules/retail/inventoryApi'
+import { MANUAL_MOVEMENT_TYPES } from '../modules/retail/inventoryTypes'
 import { createProduct, deleteProduct, updateProduct } from '../modules/retail/api'
 import { ProductForm } from '../modules/retail/ProductForm'
 import { useProducts } from '../modules/retail/useProducts'
 import type { Product, ProductInput } from '../modules/retail/types'
+import type { MovementType } from '../modules/retail/inventoryTypes'
+import { useSubscription } from '../modules/subscriptions/SubscriptionContext'
 
-type DialogMode = 'add' | 'edit' | 'delete' | null
+type DialogMode = 'add' | 'edit' | 'delete' | 'adjust' | null
 
 /** Format a numeric price as ETB without a library. */
 function fmtPrice(n: number) {
@@ -31,14 +37,31 @@ export function ProductsPage() {
   const { user } = useAuth()
   const { products, status, errorMessage, reload } = useProducts()
   const { notify } = useNotification()
+  const { canAddProduct } = useSubscription()
 
   const [dialogMode, setDialogMode] = useState<DialogMode>(null)
   const [selected, setSelected] = useState<Product | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
+  // Adjustment state
+  const [adjType,     setAdjType]     = useState<MovementType>('purchase')
+  const [adjQty,      setAdjQty]      = useState('')
+  const [adjReason,   setAdjReason]   = useState('')
+  const [adjError,    setAdjError]    = useState('')
+  const [adjPreview,  setAdjPreview]  = useState<number | null>(null)
+
   function openAdd() { setSelected(null); setDialogMode('add') }
   function openEdit(p: Product) { setSelected(p); setDialogMode('edit') }
   function openDelete(p: Product) { setSelected(p); setDialogMode('delete') }
+  function openAdjust(p: Product) {
+    setSelected(p)
+    setAdjType('purchase')
+    setAdjQty('')
+    setAdjReason('')
+    setAdjError('')
+    setAdjPreview(null)
+    setDialogMode('adjust')
+  }
   function closeDialog() { setDialogMode(null); setSelected(null) }
 
   async function handleAdd(input: ProductInput) {
@@ -79,6 +102,45 @@ export function ProductsPage() {
       return
     }
     notify({ tone: 'success', title: t('products.notifications.deleted') })
+    closeDialog()
+    await reload()
+  }
+
+  function handleAdjQtyChange(val: string) {
+    setAdjQty(val)
+    setAdjError('')
+    if (!selected) return
+    const n = parseFloat(val)
+    if (!isNaN(n) && n !== 0) {
+      const sign = adjType === 'purchase' || adjType === 'return' ? 1 : -1
+      const preview = selected.stock_quantity + sign * Math.abs(n)
+      setAdjPreview(preview)
+    } else {
+      setAdjPreview(null)
+    }
+  }
+
+  async function handleAdjust() {
+    if (!user || !selected) return
+    const n = parseFloat(adjQty)
+    if (isNaN(n) || n <= 0) { setAdjError(t('inventory.adjust.invalidQty')); return }
+    const sign = adjType === 'purchase' || adjType === 'return' ? 1 : -1
+    const change = sign * Math.abs(n)
+    if (selected.stock_quantity + change < 0) {
+      setAdjError(t('inventory.adjust.negativeStock', { available: fmtQty(selected.stock_quantity) }))
+      return
+    }
+    setSubmitting(true)
+    const { error } = await adjustStock({
+      owner_id: user.id,
+      product_id: selected.id,
+      movement_type: adjType,
+      quantity_change: change,
+      reason: adjReason.trim() || null,
+    })
+    setSubmitting(false)
+    if (error) { notify({ tone: 'danger', title: t('notification.error.title'), description: error.message }); return }
+    notify({ tone: 'success', title: t('inventory.adjust.success') })
     closeDialog()
     await reload()
   }
@@ -133,6 +195,8 @@ export function ProductsPage() {
         size="sm"
         leadingIcon={<Plus className="h-4 w-4" aria-hidden="true" />}
         onClick={openAdd}
+        disabled={!canAddProduct()}
+        title={!canAddProduct() ? t('subscription.productLimitReached') : undefined}
       >
         {t('products.addProduct')}
       </Button>
@@ -149,6 +213,8 @@ export function ProductsPage() {
         <Button
           leadingIcon={<Plus className="h-4 w-4" aria-hidden="true" />}
           onClick={openAdd}
+          disabled={!canAddProduct()}
+          title={!canAddProduct() ? t('subscription.productLimitReached') : undefined}
         >
           {t('products.addProduct')}
         </Button>
@@ -180,6 +246,14 @@ export function ProductsPage() {
               <TableCell className="hidden text-secondary md:table-cell">{p.unit}</TableCell>
               <TableCell>
                 <div className="flex items-center justify-end gap-1">
+                  <button
+                    type="button"
+                    onClick={() => openAdjust(p)}
+                    aria-label={t('inventory.adjust.ariaLabel', { name: p.name })}
+                    className="rounded p-1.5 text-secondary hover:bg-primary-soft hover:text-primary"
+                  >
+                    <ArrowDownUp className="h-4 w-4" aria-hidden="true" />
+                  </button>
                   <button
                     type="button"
                     onClick={() => openEdit(p)}
@@ -263,6 +337,78 @@ export function ProductsPage() {
           </>
         }
       />
+
+      {/* ── Stock adjustment dialog ──────────────────────────────────────── */}
+      <Dialog
+        open={dialogMode === 'adjust' && selected !== null}
+        onOpenChange={open => { if (!open) closeDialog() }}
+        title={t('inventory.adjust.title')}
+        closeLabel={t('common.cancel')}
+      >
+        {selected && (
+          <div className="flex flex-col gap-4">
+            {/* Current stock info */}
+            <div className="rounded-lg border border-border bg-background p-3 text-sm">
+              <p className="text-secondary">{t('inventory.adjust.currentStock')}</p>
+              <p className="mt-0.5 text-xl font-semibold text-figures text-text">
+                {fmtQty(selected.stock_quantity)} {selected.unit}
+              </p>
+              <p className="mt-0.5 font-medium text-text">{selected.name}</p>
+            </div>
+
+            {/* Movement type */}
+            <Select
+              label={t('inventory.adjust.type')}
+              options={MANUAL_MOVEMENT_TYPES.map(mt => ({
+                value: mt,
+                label: t(`inventory.movementType.${mt}`),
+              }))}
+              value={adjType}
+              onChange={e => {
+                setAdjType(e.target.value as MovementType)
+                setAdjPreview(null)
+                setAdjError('')
+              }}
+            />
+
+            {/* Quantity */}
+            <Input
+              label={t('inventory.adjust.quantity')}
+              helperText={t('inventory.adjust.quantityHelper')}
+              inputMode="decimal"
+              value={adjQty}
+              onChange={e => handleAdjQtyChange(e.target.value)}
+              error={adjError}
+            />
+
+            {/* Preview */}
+            {adjPreview !== null && (
+              <div className={`rounded-lg border px-3 py-2 text-sm ${adjPreview < 0 ? 'border-danger-soft bg-danger-soft text-danger' : 'border-primary-soft bg-primary-soft text-primary'}`}>
+                {t('inventory.adjust.preview')}{' '}
+                <span className="font-semibold text-figures">{fmtQty(adjPreview)} {selected.unit}</span>
+              </div>
+            )}
+
+            {/* Reason */}
+            <Input
+              label={t('inventory.adjust.reason')}
+              helperText={t('inventory.adjust.reasonHelper')}
+              value={adjReason}
+              onChange={e => setAdjReason(e.target.value)}
+              maxLength={500}
+            />
+
+            <div className="flex justify-end gap-2 pt-1">
+              <Button variant="ghost" onClick={closeDialog} disabled={submitting}>
+                {t('common.cancel')}
+              </Button>
+              <Button loading={submitting} onClick={() => void handleAdjust()}>
+                {t('inventory.adjust.confirm')}
+              </Button>
+            </div>
+          </div>
+        )}
+      </Dialog>
     </>
   )
 }

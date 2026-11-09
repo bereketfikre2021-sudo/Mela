@@ -11,8 +11,12 @@ import { useNotification } from '../design-system/Notification'
 import { Select } from '../design-system/Select'
 import { useAuth } from '../modules/auth/AuthContext'
 import { completeSale } from '../modules/retail/salesApi'
+import { enqueueSale } from '../lib/offlineQueue'
+import { useSyncContext } from '../context/SyncContext'
+import { getBusinessConfig } from '../modules/auth/businessConfig'
 import { useProducts } from '../modules/retail/useProducts'
 import type { CartItem, PaymentMethod } from '../modules/retail/types'
+import { useSubscription } from '../modules/subscriptions/SubscriptionContext'
 
 /** Generate a simple sale reference: S-YYYYMMDD-XXXX */
 function genSaleNumber(): string {
@@ -29,18 +33,30 @@ function fmtPrice(n: number) {
 /** Point-of-sale screen — Phase 2.3. */
 export function PosPage() {
   const { t } = useTranslation()
-  const { user } = useAuth()
+  const { user, profile } = useAuth()
+  const bizConfig = getBusinessConfig(profile?.type ?? 'retail')
   const { products, status, reload: reloadProducts } = useProducts()
   const { notify } = useNotification()
+  const { usageCounts, limits, isActive } = useSubscription()
+
+  const { isOnline, refreshCount } = useSyncContext()
 
   const [search, setSearch] = useState('')
   const [cart, setCart] = useState<CartItem[]>([])
   const [checkoutOpen, setCheckoutOpen] = useState(false)
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cash')
   const [submitting, setSubmitting] = useState(false)
+  const [salesBannerDismissed, setSalesBannerDismissed] = useState(false)
   // One UUID per checkout attempt. Regenerated after each successful sale or
   // when the dialog is opened, so retries on the same open dialog are safe.
   const [idempotencyKey, setIdempotencyKey] = useState(() => crypto.randomUUID())
+
+  const showSalesBanner =
+    !salesBannerDismissed &&
+    !isActive &&
+    limits !== null &&
+    limits.max_sales_per_month > 0 &&
+    usageCounts.salesThisMonth / limits.max_sales_per_month >= 0.8
 
   function openCheckout() {
     setIdempotencyKey(crypto.randomUUID()) // fresh key for this attempt
@@ -68,12 +84,14 @@ export function PosPage() {
     setCart(prev => {
       const existing = prev.find(c => c.product.id === productId)
       if (existing) {
-        if (existing.quantity >= product.stock_quantity) return prev // cap at stock
+        // Service-based: no stock cap — can always add more
+        if (!bizConfig.isServiceBased && existing.quantity >= product.stock_quantity) return prev
         return prev.map(c => c.product.id === productId
           ? { ...c, quantity: c.quantity + 1 }
           : c)
       }
-      if (product.stock_quantity < 1) return prev
+      // Service-based: zero stock_quantity is normal — don't block adding
+      if (!bizConfig.isServiceBased && product.stock_quantity < 1) return prev
       return [...prev, { product, quantity: 1 }]
     })
   }
@@ -101,19 +119,42 @@ export function PosPage() {
   async function handleCheckout() {
     if (!user || cart.length === 0) return
     setSubmitting(true)
-    const { data, error } = await completeSale({
+
+    const payload = {
       owner_id:        user.id,
       sale_number:     genSaleNumber(),
       payment_method:  paymentMethod,
       idempotency_key: idempotencyKey,
       items:           cart.map(c => ({ product_id: c.product.id, quantity: c.quantity })),
-    })
+    }
+
+    // If offline, queue for later sync — stock NOT deducted until synced
+    if (!isOnline) {
+      await enqueueSale(payload)
+      await refreshCount()
+      setSubmitting(false)
+      notify({ tone: 'warning', title: t('sync.savedOffline'), description: t('sync.savedOfflineDesc') })
+      clearCart()
+      setCheckoutOpen(false)
+      return
+    }
+
+    const { data, error } = await completeSale(payload)
     setSubmitting(false)
+
     if (error) {
+      // Network failure while nominally online — queue it
+      if (!navigator.onLine || error.message.toLowerCase().includes('fetch') || error.message.toLowerCase().includes('network')) {
+        await enqueueSale(payload)
+        await refreshCount()
+        notify({ tone: 'warning', title: t('sync.savedOffline'), description: t('sync.savedOfflineDesc') })
+        clearCart()
+        setCheckoutOpen(false)
+        return
+      }
       notify({ tone: 'danger', title: t('pos.checkoutResult.error'), description: error.message })
       return
     }
-    // Cash → paid; Telebirr/bank → pending
     const isPending = data?.payment_status === 'pending'
     notify({
       tone: isPending ? 'warning' : 'success',
@@ -157,6 +198,24 @@ export function PosPage() {
     <>
       {/* ── Two-column layout on md+; single column on mobile ─────────────── */}
       <div className="py-6 md:py-10">
+        {showSalesBanner && (
+          <div className="mb-4 flex items-start justify-between gap-3 rounded-lg border border-warning-soft bg-warning-soft px-4 py-3 text-sm text-warning">
+            <span>
+              {t('subscription.salesLimitWarning', {
+                used: usageCounts.salesThisMonth,
+                max: limits!.max_sales_per_month,
+              })}
+            </span>
+            <button
+              type="button"
+              onClick={() => setSalesBannerDismissed(true)}
+              aria-label={t('common.close')}
+              className="shrink-0 rounded p-0.5 hover:opacity-70"
+            >
+              <X className="h-4 w-4" aria-hidden="true" />
+            </button>
+          </div>
+        )}
         <h1 className="heading mb-4 text-2xl md:text-3xl">{t('pos.title')}</h1>
 
         <div className="flex flex-col gap-6 md:flex-row md:items-start">
@@ -164,10 +223,10 @@ export function PosPage() {
           {/* ── Product search + grid ──────────────────────────────────────── */}
           <div className="flex-1 min-w-0">
             <Input
-              placeholder={t('pos.search')}
+              placeholder={bizConfig.posSearchPlaceholder}
               value={search}
               onChange={e => setSearch(e.target.value)}
-              aria-label={t('pos.search')}
+              aria-label={bizConfig.posSearchPlaceholder}
             />
 
             {filtered.length === 0 ? (
@@ -178,7 +237,8 @@ export function PosPage() {
               <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
                 {filtered.map(p => {
                   const inCart = cartQty(p.id)
-                  const outOfStock = p.stock_quantity === 0
+                  // Service-based: never "out of stock" — stock_quantity is unused
+                  const outOfStock = bizConfig.isServiceBased ? false : p.stock_quantity === 0
                   return (
                     <button
                       key={p.id}
@@ -199,13 +259,21 @@ export function PosPage() {
                       <span className="mt-2 text-sm font-semibold text-figures text-text">
                         {fmtPrice(p.selling_price)}
                       </span>
-                      <span className={[
-                        'mt-0.5 text-xs',
-                        p.stock_quantity <= 3 ? 'text-warning' : 'text-secondary'
-                      ].join(' ')}>
-                        {t('pos.stock', { qty: p.stock_quantity, unit: p.unit })}
-                        {inCart > 0 && ` · ${t('pos.inCart', { qty: inCart })}`}
-                      </span>
+                      {/* Hide stock count for service-based businesses */}
+                      {!bizConfig.isServiceBased && (
+                        <span className={[
+                          'mt-0.5 text-xs',
+                          p.stock_quantity <= 3 ? 'text-warning' : 'text-secondary'
+                        ].join(' ')}>
+                          {t('pos.stock', { qty: p.stock_quantity, unit: p.unit })}
+                          {inCart > 0 && ` · ${t('pos.inCart', { qty: inCart })}`}
+                        </span>
+                      )}
+                      {bizConfig.isServiceBased && inCart > 0 && (
+                        <span className="mt-0.5 text-xs text-secondary">
+                          {t('pos.inCart', { qty: inCart })}
+                        </span>
+                      )}
                     </button>
                   )
                 })}
@@ -219,7 +287,7 @@ export function PosPage() {
               {/* Cart header */}
               <div className="flex items-center justify-between border-b border-border px-4 py-3">
                 <span className="text-sm font-semibold text-text">
-                  {t('pos.cart')}
+                  {bizConfig.posCartLabel}
                   {cart.length > 0 && (
                     <span className="ml-2 rounded-full bg-primary px-2 py-0.5 text-xs font-medium text-white">
                       {cart.length}

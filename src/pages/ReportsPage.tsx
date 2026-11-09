@@ -1,12 +1,15 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useNavigate } from 'react-router-dom'
 import { AlertTriangle } from 'lucide-react'
 
 import { Button } from '../design-system/Button'
+import { EmptyState } from '../design-system/EmptyState'
 import { Input } from '../design-system/Input'
 import { Skeleton } from '../design-system/LoadingState'
 import { type Period, periodRange } from '../modules/overview/dateRange'
 import { type ReportData, getReportData } from '../modules/reports/reportData'
+import { useSubscription } from '../modules/subscriptions/SubscriptionContext'
 
 // ── Formatting ────────────────────────────────────────────────────────────────
 
@@ -135,6 +138,8 @@ const PRESET_PERIODS: { id: Exclude<Period, 'custom'>; labelKey: string }[] = [
 
 export function ReportsPage() {
   const { t } = useTranslation()
+  const { hasAdvancedReports } = useSubscription()
+  const navigate = useNavigate()
 
   const [period,     setPeriod]     = useState<Period>('month')
   const [customFrom, setCustomFrom] = useState('')
@@ -302,6 +307,7 @@ export function ReportsPage() {
       </Section>
 
       {/* ── Sales summary ────────────────────────────────────────────────────── */}
+      {hasAdvancedReports ? (
       <Section title={t('reports.section.salesSummary')}>
         <div className="space-y-3">
           <div className="divide-y divide-border rounded-xl border border-border bg-surface">
@@ -339,9 +345,19 @@ export function ReportsPage() {
           )}
         </div>
       </Section>
+      ) : (
+        <Section title={t('reports.section.salesSummary')}>
+          <EmptyState
+            title={t('subscription.upgradeRequired')}
+            description={t('subscription.reportsUpgradeDesc')}
+            action={<Button size="sm" onClick={() => navigate('/app/subscription')}>{t('subscription.upgradeButton')}</Button>}
+          />
+        </Section>
+      )}
 
       {/* ── Daily sales ──────────────────────────────────────────────────────── */}
       {r.dailySales.length > 0 && (
+        hasAdvancedReports ? (
         <Section title={t('reports.section.dailySales')}>
           <ReportTable
             head={
@@ -361,10 +377,20 @@ export function ReportsPage() {
             ))}
           </ReportTable>
         </Section>
+        ) : (
+          <Section title={t('reports.section.dailySales')}>
+            <EmptyState
+              title={t('subscription.upgradeRequired')}
+              description={t('subscription.reportsUpgradeDesc')}
+              action={<Button size="sm" onClick={() => navigate('/app/subscription')}>{t('subscription.upgradeButton')}</Button>}
+            />
+          </Section>
+        )
       )}
 
       {/* ── Monthly sales ─────────────────────────────────────────────────────── */}
       {r.monthlySales.length > 0 && (
+        hasAdvancedReports ? (
         <Section title={t('reports.section.monthlySales')}>
           <ReportTable
             head={
@@ -384,10 +410,20 @@ export function ReportsPage() {
             ))}
           </ReportTable>
         </Section>
+        ) : (
+          <Section title={t('reports.section.monthlySales')}>
+            <EmptyState
+              title={t('subscription.upgradeRequired')}
+              description={t('subscription.reportsUpgradeDesc')}
+              action={<Button size="sm" onClick={() => navigate('/app/subscription')}>{t('subscription.upgradeButton')}</Button>}
+            />
+          </Section>
+        )
       )}
 
       {/* ── Best-selling products by quantity ─────────────────────────────────── */}
       {r.topProductsByQuantity.length > 0 && (
+        hasAdvancedReports ? (
         <Section title={t('reports.section.topProductsByQty')}>
           <div className="rounded-xl border border-border bg-surface divide-y divide-border">
             {r.topProductsByQuantity.map(p => (
@@ -404,10 +440,20 @@ export function ReportsPage() {
             ))}
           </div>
         </Section>
+        ) : (
+          <Section title={t('reports.section.topProductsByQty')}>
+            <EmptyState
+              title={t('subscription.upgradeRequired')}
+              description={t('subscription.reportsUpgradeDesc')}
+              action={<Button size="sm" onClick={() => navigate('/app/subscription')}>{t('subscription.upgradeButton')}</Button>}
+            />
+          </Section>
+        )
       )}
 
       {/* ── Best-selling products by revenue ──────────────────────────────────── */}
       {r.topProductsByRevenue.length > 0 && (
+        hasAdvancedReports ? (
         <Section title={t('reports.section.topProductsByRevenue')}>
           <div className="rounded-xl border border-border bg-surface divide-y divide-border">
             {r.topProductsByRevenue.map(p => (
@@ -423,10 +469,20 @@ export function ReportsPage() {
             ))}
           </div>
         </Section>
+        ) : (
+          <Section title={t('reports.section.topProductsByRevenue')}>
+            <EmptyState
+              title={t('subscription.upgradeRequired')}
+              description={t('subscription.reportsUpgradeDesc')}
+              action={<Button size="sm" onClick={() => navigate('/app/subscription')}>{t('subscription.upgradeButton')}</Button>}
+            />
+          </Section>
+        )
       )}
 
       {/* ── Expense breakdown by category ─────────────────────────────────────── */}
       {r.expensesByCategory.length > 0 && (
+        hasAdvancedReports ? (
         <Section title={t('reports.section.expensesByCategory')}>
           <div className="rounded-xl border border-border bg-surface divide-y divide-border">
             {r.expensesByCategory.map(cat => (
@@ -449,10 +505,20 @@ export function ReportsPage() {
             ))}
           </div>
         </Section>
+        ) : (
+          <Section title={t('reports.section.expensesByCategory')}>
+            <EmptyState
+              title={t('subscription.upgradeRequired')}
+              description={t('subscription.reportsUpgradeDesc')}
+              action={<Button size="sm" onClick={() => navigate('/app/subscription')}>{t('subscription.upgradeButton')}</Button>}
+            />
+          </Section>
+        )
       )}
 
       {/* ── Monthly expenses ──────────────────────────────────────────────────── */}
       {r.monthlyExpenses.length > 0 && (
+        hasAdvancedReports ? (
         <Section title={t('reports.section.monthlyExpenses')}>
           <ReportTable
             head={
@@ -470,6 +536,15 @@ export function ReportsPage() {
             ))}
           </ReportTable>
         </Section>
+        ) : (
+          <Section title={t('reports.section.monthlyExpenses')}>
+            <EmptyState
+              title={t('subscription.upgradeRequired')}
+              description={t('subscription.reportsUpgradeDesc')}
+              action={<Button size="sm" onClick={() => navigate('/app/subscription')}>{t('subscription.upgradeButton')}</Button>}
+            />
+          </Section>
+        )
       )}
 
       {/* ── Empty state ───────────────────────────────────────────────────────── */}
