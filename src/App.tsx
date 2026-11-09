@@ -127,17 +127,18 @@ function AppRoutes() {
       label: isService ? t('nav.clients') : t('nav.customers'),
       icon:  Users,
     },
-    // Service businesses: Reports replaces More (no stock/purchases to navigate to)
-    // Product businesses: More hub (purchases, suppliers, inventory, products)
-    ...(isService ? [{
+    // Both business types get Reports in the primary nav
+    {
       id:    '/app/reports',
       label: t('nav.reports'),
       icon:  BarChart2,
-    }] : [{
+    },
+    // Product businesses only: More hub (purchases, suppliers, inventory, products, customers)
+    ...(!isService ? [{
       id:    '/app/more',
       label: t('nav.more'),
       icon:  MoreHorizontal,
-    }]),
+    }] : []),
     // Staff nav item only shown on Premium
     ...(isActive ? [{
       id:    '/app/staff',
@@ -195,7 +196,7 @@ function AppRoutes() {
         element={appShell(<RequireBusiness><StockPage /></RequireBusiness>, '/app/stock')} />
 
       <Route path="/app/customers"
-        element={appShell(<RequireBusiness><CustomersPage /></RequireBusiness>, '/app/customers')} />
+        element={appShell(<RequireBusiness><CustomersPage /></RequireBusiness>, isService ? '/app/customers' : '/app/more')} />
 
       <Route path="/app/more"
         element={appShell(<RequireBusiness><MorePage /></RequireBusiness>, '/app/more')} />
@@ -206,11 +207,11 @@ function AppRoutes() {
       <Route path="/app/inventory"
         element={appShell(<RequireBusiness><InventoryPage /></RequireBusiness>, '/app/stock')} />
       <Route path="/app/reports"
-        element={appShell(<RequireBusiness><ReportsPage /></RequireBusiness>, isService ? '/app/reports' : '/app/more')} />
+        element={appShell(<RequireBusiness><ReportsPage /></RequireBusiness>, '/app/reports')} />
       <Route path="/app/purchases"
         element={appShell(<RequireBusiness><PurchasesPage /></RequireBusiness>, '/app/stock')} />
       <Route path="/app/suppliers"
-        element={appShell(<RequireBusiness><SuppliersPage /></RequireBusiness>, '/app/customers')} />
+        element={appShell(<RequireBusiness><SuppliersPage /></RequireBusiness>, '/app/more')} />
       <Route path="/app/profile"
         element={appShell(<RequireBusiness><EditBusinessProfilePage /></RequireBusiness>, '/app')} />
       <Route path="/app/subscription"

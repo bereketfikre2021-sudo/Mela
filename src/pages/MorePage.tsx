@@ -14,6 +14,7 @@ import {
   Package,
   Settings,
   Truck,
+  Users,
 } from 'lucide-react'
 
 import { useAuth } from '../modules/auth/AuthContext'
@@ -69,6 +70,13 @@ export function MorePage() {
       show:  true,
     },
     // Product businesses only below
+    {
+      icon:  <Users className="h-5 w-5" aria-hidden="true" />,
+      label: t('nav.customers'),
+      desc:  t('more.desc.customers'),
+      route: '/app/customers',
+      show:  !isService,
+    },
     {
       icon:  <ClipboardList className="h-5 w-5" aria-hidden="true" />,
       label: t('nav.purchases'),
