@@ -14,7 +14,6 @@ import {
   Package,
   Settings,
   Truck,
-  Users,
 } from 'lucide-react'
 
 import { useAuth } from '../modules/auth/AuthContext'
@@ -53,14 +52,6 @@ export function MorePage() {
   const isService   = bizConfig.isServiceBased
 
   const tiles = [
-    // Customers / Clients — always visible
-    {
-      icon:  <Users className="h-5 w-5" aria-hidden="true" />,
-      label: isService ? t('nav.clients') : t('nav.customers'),
-      desc:  isService ? t('more.desc.clients') : t('more.desc.customers'),
-      route: '/app/customers',
-      show:  true,
-    },
     // Reports — always visible
     {
       icon:  <BarChart2 className="h-5 w-5" aria-hidden="true" />,
