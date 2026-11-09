@@ -1,6 +1,6 @@
 # MELA — Project Context (Handoff Document)
 
-> **Current as of Phase 13** — all changes uncommitted, working on branch `phase-1-onboarding` (HEAD `0a422d5`).
+> **Current as of Phase 11** — Phase 11 (Subscriptions) complete, committed on branch `phase-1-onboarding`.
 > This document supersedes all previous versions. Treat it as the single source of truth.
 
 ---
@@ -171,7 +171,7 @@ vercel.json         SPA rewrite rule
 | Security hardening (Phase 13) | ✅ Complete — RLS audit, anon-key-only, sync owner_id comments |
 | Test runner (Phase 13) | ✅ Complete — vitest@2.1.9 installed, vitest.config.ts created |
 | Production config (Phase 13) | ✅ Complete — sourcemap: false, VITE_APP_URL warning, env.appUrl |
-| Staff/user management | ❌ Not implemented |
+| Subscriptions (Phase 11) | ✅ Complete — Free/Premium plans, entitlement gates, payment flow, migration 0013 |
 | Staff/user management | ❌ Not implemented |
 | F&B, Bakery, Service modules | ❌ Placeholder dirs only |
 
@@ -235,6 +235,12 @@ All Phase 6.x work is **uncommitted** (working tree). The last commit is `0a422d
 
 7. **Bundle size** — JS ≈ 758 kB gzip: 210 kB; Vite warns >500 kB. No code-splitting. Not a blocker.
 
+8. **Migration 0013 (subscriptions) needs to be applied after migration 0012.** Migration 0013 introduces the subscriptions schema, plan limits, and enforcement functions. It depends on all prior migrations being in place.
+
+9. **Subscription limits are enforced at DB level via PostgreSQL functions in migration 0013.** Count-based limits (products, customers, suppliers, monthly sales, monthly purchases) use atomic DB functions and RLS policies — not UI-only checks.
+
+10. **/app/subscription page added; payment verification is a manual admin flow.** Users submit Telebirr/CBE/bank transaction references; an authorized admin verifies and activates the subscription in the `subscription_payments` table.
+
 ---
 
 ## 8. Important Decisions and Constraints
@@ -296,12 +302,12 @@ npm run test:coverage  # vitest run --coverage
 
 1. **Commit all Phase 6.1–6.4 work** (plus vercel.json, README, vite.config, .env.example) with a meaningful commit message
 2. **Apply migrations 0007–0010** in Supabase SQL Editor (in order)
-3. **Configure Google OAuth** (Google Cloud Console + Supabase provider + redirect URLs)
-4. **Disable email confirmation** (Supabase Auth → Providers → Email)
-5. **Live-test Phase 6.1–6.4 flows** — customers, suppliers, inventory, purchases, low-stock alerts
-6. **Deploy to Vercel** once migrations are applied and tested
-7. **(Optional)** Code-split with `React.lazy`/`Suspense` to reduce bundle
-8. ~~Add test runner + behavioral tests~~ ✅ Done (Phase 13 — vitest installed)
+3. **Apply migration 0013 (subscriptions schema)** in Supabase SQL Editor — must run after migrations 0001–0012 are applied
+4. **Configure Google OAuth** (Google Cloud Console + Supabase provider + redirect URLs)
+5. **Disable email confirmation** (Supabase Auth → Providers → Email)
+6. **Live-test Phase 6.1–6.4 flows** — customers, suppliers, inventory, purchases, low-stock alerts
+7. **Deploy to Vercel** once migrations are applied and tested
+8. **(Optional)** Code-split with `React.lazy`/`Suspense` to reduce bundle
 9. **(Optional)** Update/expand F&B, Bakery, or Services modules
 10. **(Optional)** Delete orphaned `AppPlaceholder.tsx`
 
