@@ -26,7 +26,11 @@
     "newSale": "አዲስ ሽያጭ",
     "salesHistory": "የሽያጭ ታሪክ",
     "subscription": "ደንበኝነት",
-    "staff": "ሰራተኞች"
+    "staff": "ሰራተኞች",
+    "services": "አገልግሎቶች",
+    "newService": "አዲስ አገልግሎት",
+    "serviceHistory": "የአገልግሎት ታሪክ",
+    "clients": "ደንበኞች"
   },
   "welcome": {
     "eyebrow": "ለኢትዮጵያ ንግዶች",
@@ -446,7 +450,8 @@
     "signOut": "ውጣ",
     "switchAccount": "ወደ ሌላ መለያ ቀይር",
     "switchStaff": "ሰራተኛ ቀይር",
-    "staffActive": "ንቁ: {{name}}"
+    "staffActive": "ንቁ: {{name}}",
+    "subscription": "ደንበኝነት እና ክፍያ"
   },
   "footer": {
     "tagline": "ለኢትዮጵያ ንግዶች የተሰራ ቀላል የቢዝነስ አስተዳደር ስርዓት።",
@@ -699,7 +704,8 @@
       "inventory": "ሁሉም የክምችት እንቅስቃሴ",
       "reports": "ዝርዝር የፋይናንስ ሪፖርቶች",
       "products": "ምርቶችን እና ዋጋዎችን አርትዕ",
-      "settings": "መለያ እና ንግድ ቅንጅቶች"
+      "settings": "መለያ እና ንግድ ቅንጅቶች",
+      "clients": "የደንበኞችዎን ዝርዝር ያስተዳድሩ"
     }
   },
   "sync": {

@@ -26,7 +26,11 @@
     "newSale": "New sale",
     "salesHistory": "Sales history",
     "subscription": "Subscription",
-    "staff": "Staff"
+    "staff": "Staff",
+    "services": "Services",
+    "newService": "New service",
+    "serviceHistory": "Service history",
+    "clients": "Clients"
   },
   "welcome": {
     "eyebrow": "MADE FOR ETHIOPIAN BUSINESSES",
@@ -311,7 +315,8 @@
     "signOut": "Sign out",
     "switchAccount": "Log in to another account",
     "switchStaff": "Switch staff",
-    "staffActive": "Active: {{name}}"
+    "staffActive": "Active: {{name}}",
+    "subscription": "Subscription & billing"
   },
   "overview": {
     "period": {
@@ -699,7 +704,8 @@
       "inventory": "View all stock movements",
       "reports": "Detailed financial reports",
       "products": "Edit products and prices",
-      "settings": "Profile and business settings"
+      "settings": "Profile and business settings",
+      "clients": "Manage your client contacts"
     }
   },
   "sync": {

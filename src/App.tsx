@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { BrowserRouter, Navigate, Route, Routes, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { CreditCard, Home, PackageSearch, Receipt, UserCog, Users, Wallet } from 'lucide-react'
+import { Briefcase, Home, MoreHorizontal, PackageSearch, Receipt, UserCog, Users, Wallet } from 'lucide-react'
 
 import { NotificationProvider } from './design-system/Notification'
 import type { NavItem } from './design-system/BottomNav'
@@ -15,6 +15,7 @@ import { SyncProvider } from './context/SyncContext'
 import { SubscriptionProvider } from './modules/subscriptions/SubscriptionContext'
 import { useSubscription } from './modules/subscriptions/SubscriptionContext'
 import { StaffProvider } from './modules/staff/StaffContext'
+import { getBusinessConfig } from './modules/auth/businessConfig'
 
 // Pages
 import { AuthCallbackPage } from './pages/AuthCallbackPage'
@@ -38,6 +39,7 @@ import { SuppliersPage } from './pages/SuppliersPage'
 import { TermsPage } from './pages/TermsPage'
 import { WelcomePage } from './pages/WelcomePage'
 import { SubscriptionPage } from './pages/SubscriptionPage'
+import { MorePage } from './pages/MorePage'
 import { StaffPage } from './pages/StaffPage'
 
 const brand = (
@@ -71,15 +73,23 @@ export function App() {
 }
 
 function AppRoutes() {
-  const { t }      = useTranslation()
-  const navigate   = useNavigate()
-  const { status } = useAuth()
-  const { isActive } = useSubscription()
+  const { t }           = useTranslation()
+  const navigate        = useNavigate()
+  const { status, profile } = useAuth()
+  const { isActive }    = useSubscription()
+
+  const bizConfig = getBusinessConfig(profile?.type ?? 'retail')
+  const isService = bizConfig.isServiceBased
 
   /**
-   * 5-item primary nav.
-   * "Sales" has a desktop dropdown (New Sale / History).
-   * Mobile bottom nav taps "Sales" → goes directly to POS.
+   * Business-type-aware primary nav.
+   *
+   * Product businesses (retail, fnb, bakery, cosmetics):
+   *   Home | Sales | Expenses | Stock | Customers | More
+   *
+   * Service businesses (service, salon):
+   *   Home | Services | Expenses | Clients | More
+   *   (no Stock, no Purchases, no Suppliers — not relevant)
    */
   const appNav: NavItem[] = [
     {
@@ -88,33 +98,39 @@ function AppRoutes() {
       icon:  Home,
     },
     {
-      id:    '/app/pos',          // mobile tap destination
-      label: t('nav.sales'),
-      icon:  Receipt,
-      children: [
-        { id: '/app/pos',   label: t('nav.newSale') },
-        { id: '/app/sales', label: t('nav.salesHistory') },
-      ],
+      id:    '/app/pos',
+      label: isService ? t('nav.services') : t('nav.sales'),
+      icon:  isService ? Briefcase : Receipt,
+      children: isService
+        ? [
+            { id: '/app/pos',   label: t('nav.newService') },
+            { id: '/app/sales', label: t('nav.serviceHistory') },
+          ]
+        : [
+            { id: '/app/pos',   label: t('nav.newSale') },
+            { id: '/app/sales', label: t('nav.salesHistory') },
+          ],
     },
     {
       id:    '/app/expenses',
       label: t('nav.expenses'),
       icon:  Wallet,
     },
-    {
+    // Stock — product businesses only
+    ...(!isService ? [{
       id:    '/app/stock',
       label: t('nav.stock'),
       icon:  PackageSearch,
-    },
+    }] : []),
     {
       id:    '/app/customers',
-      label: t('nav.customers'),
+      label: isService ? t('nav.clients') : t('nav.customers'),
       icon:  Users,
     },
     {
-      id:    '/app/subscription',
-      label: t('nav.subscription'),
-      icon:  CreditCard,
+      id:    '/app/more',
+      label: t('nav.more'),
+      icon:  MoreHorizontal,
     },
     // Staff nav item only shown on Premium
     ...(isActive ? [{
@@ -132,10 +148,6 @@ function AppRoutes() {
     ? <div className="flex items-center gap-1"><SyncBadge /><ProfileMenu /></div>
     : null
 
-  /**
-   * activeId determines which nav item is highlighted.
-   * Secondary routes (profile, reports, etc.) highlight the closest primary.
-   */
   const appShell = (children: React.ReactNode, activeId: string) => (
     <AppShell
       brand={brand}
@@ -160,7 +172,7 @@ function AppRoutes() {
       <Route path="/register"      element={publicShell(<PublicOnly><RegisterPage /></PublicOnly>)} />
       <Route path="/onboarding"    element={publicShell(<RequireProfile><OnboardingPage /></RequireProfile>)} />
 
-      {/* ── PRIMARY nav destinations ─────────────────────────────────────── */}
+      {/* ── Primary nav destinations ─────────────────────────────────────── */}
       <Route path="/app"
         element={appShell(<RequireBusiness><OverviewPage /></RequireBusiness>, '/app')} />
 
@@ -179,23 +191,24 @@ function AppRoutes() {
       <Route path="/app/customers"
         element={appShell(<RequireBusiness><CustomersPage /></RequireBusiness>, '/app/customers')} />
 
-      {/* ── Secondary routes (accessible by URL, not in primary nav) ──────── */}
+      <Route path="/app/more"
+        element={appShell(<RequireBusiness><MorePage /></RequireBusiness>, '/app/more')} />
+
+      {/* ── Secondary routes ──────────────────────────────────────────────── */}
       <Route path="/app/products"
         element={appShell(<RequireBusiness><ProductsPage /></RequireBusiness>, '/app/stock')} />
       <Route path="/app/inventory"
         element={appShell(<RequireBusiness><InventoryPage /></RequireBusiness>, '/app/stock')} />
       <Route path="/app/reports"
-        element={appShell(<RequireBusiness><ReportsPage /></RequireBusiness>, '/app')} />
+        element={appShell(<RequireBusiness><ReportsPage /></RequireBusiness>, '/app/more')} />
       <Route path="/app/purchases"
         element={appShell(<RequireBusiness><PurchasesPage /></RequireBusiness>, '/app/stock')} />
       <Route path="/app/suppliers"
         element={appShell(<RequireBusiness><SuppliersPage /></RequireBusiness>, '/app/customers')} />
       <Route path="/app/profile"
         element={appShell(<RequireBusiness><EditBusinessProfilePage /></RequireBusiness>, '/app')} />
-
       <Route path="/app/subscription"
-        element={appShell(<RequireBusiness><SubscriptionPage /></RequireBusiness>, '/app/subscription')} />
-
+        element={appShell(<RequireBusiness><SubscriptionPage /></RequireBusiness>, '/app')} />
       <Route path="/app/staff"
         element={appShell(<RequireBusiness><StaffPage /></RequireBusiness>, '/app/staff')} />
 
