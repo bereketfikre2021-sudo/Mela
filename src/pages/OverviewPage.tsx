@@ -143,7 +143,7 @@ export function OverviewPage() {
           <p className={`mt-0.5 text-lg font-bold text-figures truncate ${isLoss ? 'text-danger' : isProfit ? 'text-text' : 'text-muted'}`}>
             {s.netProfit !== null ? fmtETBCompact(s.netProfit) : '—'}
           </p>
-          {s.cogsIncomplete && (
+          {!bizConfig.isServiceBased && s.cogsIncomplete && (
             <p className="mt-0.5 text-[10px] text-warning">{t('overview.metric.partial')}</p>
           )}
         </div>

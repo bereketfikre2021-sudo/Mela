@@ -10,6 +10,8 @@ import { Skeleton } from '../design-system/LoadingState'
 import { type Period, periodRange } from '../modules/overview/dateRange'
 import { type ReportData, getReportData } from '../modules/reports/reportData'
 import { useSubscription } from '../modules/subscriptions/SubscriptionContext'
+import { useAuth } from '../modules/auth/AuthContext'
+import { getBusinessConfig } from '../modules/auth/businessConfig'
 
 // ── Formatting ────────────────────────────────────────────────────────────────
 
@@ -140,6 +142,8 @@ export function ReportsPage() {
   const { t } = useTranslation()
   const { hasAdvancedReports } = useSubscription()
   const navigate = useNavigate()
+  const { profile } = useAuth()
+  const isService = getBusinessConfig(profile?.type ?? 'retail').isServiceBased
 
   const [period,     setPeriod]     = useState<Period>('month')
   const [customFrom, setCustomFrom] = useState('')
@@ -262,8 +266,8 @@ export function ReportsPage() {
         )}
       </div>
 
-      {/* ── Incomplete cost notice ─────────────────────────────────────────── */}
-      {r.cogsIncomplete && (
+      {/* ── Incomplete cost notice — product businesses only ───────────────── */}
+      {!isService && r.cogsIncomplete && (
         <div className="flex items-start gap-2 rounded-xl border border-warning-soft bg-warning-soft px-4 py-3 text-sm text-warning">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
           <span>{t('overview.cogsIncompleteNote')}</span>
@@ -286,14 +290,14 @@ export function ReportsPage() {
             label={t('overview.metric.cogs')}
             value={r.cogs !== null ? fmtETB(r.cogs) : t('overview.metric.unknown')}
             muted={r.cogs === null}
-            sub={r.cogsIncomplete ? t('overview.metric.partial') : undefined}
+            sub={!isService && r.cogsIncomplete ? t('overview.metric.partial') : undefined}
           />
           <SummaryRow
             label={t('overview.metric.grossProfit')}
             value={r.grossProfit !== null ? fmtETB(r.grossProfit) : t('overview.metric.unknown')}
             danger={r.grossProfit !== null && r.grossProfit < 0}
             muted={r.grossProfit === null}
-            sub={r.cogsIncomplete ? t('overview.metric.partial') : undefined}
+            sub={!isService && r.cogsIncomplete ? t('overview.metric.partial') : undefined}
           />
           <SummaryRow label={t('overview.metric.expenses')} value={fmtETB(r.totalExpenses)} />
           <SummaryRow
@@ -301,7 +305,7 @@ export function ReportsPage() {
             value={r.netProfit !== null ? fmtETB(r.netProfit) : t('overview.metric.unknown')}
             danger={r.netProfit !== null && r.netProfit < 0}
             muted={r.netProfit === null}
-            sub={r.cogsIncomplete ? t('overview.metric.partial') : undefined}
+            sub={!isService && r.cogsIncomplete ? t('overview.metric.partial') : undefined}
           />
         </div>
       </Section>
