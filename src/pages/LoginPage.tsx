@@ -12,28 +12,20 @@ import { mapAuthError, sendMagicLink, signIn, signInWithGoogle } from '../module
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 /**
- * Login page — Phase 1, updated Phase 12.
+ * Login page.
  *
  * Layout:
  *  1. Google OAuth button (primary)
- *  2. Magic-link (email OTP) — enter email, click "Send link"
- *  3. Collapsible "Sign in with password" section (optional)
- *     - Email + password fields
+ *  2. Collapsible "Sign in with email & password" section (optional)
  *     - Show/hide password toggle
- *     - "Forgot password?" → triggers magic-link for that email
+ *     - "Forgot password?" → sends a magic link to their email
  */
 export function LoginPage() {
   const { t }      = useTranslation()
   const navigate   = useNavigate()
   const { notify } = useNotification()
 
-  // ── Magic link state ──────────────────────────────────────────────────────
-  const [magicEmail,    setMagicEmail]    = useState('')
-  const [magicError,    setMagicError]    = useState('')
-  const [magicSending,  setMagicSending]  = useState(false)
-  const [magicSent,     setMagicSent]     = useState(false)
-
-  // ── Password section state ────────────────────────────────────────────────
+  // ── Password section ──────────────────────────────────────────────────────
   const [pwOpen,      setPwOpen]      = useState(false)
   const [email,       setEmail]       = useState('')
   const [password,    setPassword]    = useState('')
@@ -42,53 +34,14 @@ export function LoginPage() {
   const [formError,   setFormError]   = useState('')
   const [submitting,  setSubmitting]  = useState(false)
 
+  // ── Forgot password ───────────────────────────────────────────────────────
+  const [forgotSending, setForgotSending] = useState(false)
+  const [forgotSent,    setForgotSent]    = useState(false)
+
   // ── Google ────────────────────────────────────────────────────────────────
   async function handleGoogle() {
     const { error } = await signInWithGoogle()
-    if (error) {
-      const msg = mapAuthError(t, error.message)
-      notify({ tone: 'danger', title: msg })
-    }
-  }
-
-  // ── Magic link ────────────────────────────────────────────────────────────
-  async function handleMagicLink(e: FormEvent) {
-    e.preventDefault()
-    if (!EMAIL_RE.test(magicEmail.trim())) {
-      setMagicError(t('validation.email'))
-      return
-    }
-    setMagicError('')
-    setMagicSending(true)
-    const { error } = await sendMagicLink(magicEmail.trim())
-    setMagicSending(false)
-    if (error) {
-      setMagicError(mapAuthError(t, error.message))
-      return
-    }
-    setMagicSent(true)
-  }
-
-  // ── Forgot password (re-uses magic link) ─────────────────────────────────
-  async function handleForgotPassword() {
-    const target = email.trim() || magicEmail.trim()
-    if (!EMAIL_RE.test(target)) {
-      setFormError(t('auth.forgotPassword.enterEmailFirst'))
-      return
-    }
-    setFormError('')
-    setMagicSending(true)
-    const { error } = await sendMagicLink(target)
-    setMagicSending(false)
-    if (error) {
-      setFormError(mapAuthError(t, error.message))
-      return
-    }
-    // Switch to magic-link sent state
-    setMagicEmail(target)
-    setMagicSent(true)
-    setPwOpen(false)
-    notify({ tone: 'success', title: t('auth.forgotPassword.sent') })
+    if (error) notify({ tone: 'danger', title: mapAuthError(t, error.message) })
   }
 
   // ── Password sign-in ──────────────────────────────────────────────────────
@@ -125,9 +78,27 @@ export function LoginPage() {
     navigate('/app')
   }
 
+  // ── Forgot password → magic link ──────────────────────────────────────────
+  async function handleForgotPassword() {
+    if (!EMAIL_RE.test(email.trim())) {
+      setFieldErrors(prev => ({ ...prev, email: t('validation.email') }))
+      setFormError(t('auth.forgotPassword.enterEmailFirst'))
+      return
+    }
+    setFormError('')
+    setForgotSending(true)
+    const { error } = await sendMagicLink(email.trim())
+    setForgotSending(false)
+    if (error) {
+      setFormError(mapAuthError(t, error.message))
+      return
+    }
+    setForgotSent(true)
+  }
+
   return (
     <div className="mx-auto max-w-md py-6 md:py-10">
-      <div className="rounded-lg border border-border bg-surface p-6 md:p-8 space-y-6">
+      <div className="rounded-lg border border-border bg-surface p-6 md:p-8 space-y-5">
 
         <h1 className="text-2xl font-bold text-text">{t('auth.login.title')}</h1>
 
@@ -142,44 +113,6 @@ export function LoginPage() {
         >
           {t('auth.google')}
         </Button>
-
-        <div className="flex items-center gap-3 text-xs text-secondary">
-          <span className="h-px flex-1 bg-border" />
-          <span>{t('auth.or')}</span>
-          <span className="h-px flex-1 bg-border" />
-        </div>
-
-        {/* ── Magic link ── */}
-        {magicSent ? (
-          <div className="rounded-lg bg-success-soft px-4 py-3 text-sm text-success">
-            <p className="font-medium">{t('auth.magicLink.sentTitle')}</p>
-            <p className="mt-1 text-xs opacity-80">
-              {t('auth.magicLink.sentDesc', { email: magicEmail })}
-            </p>
-            <button
-              type="button"
-              className="mt-2 text-xs underline underline-offset-2 hover:no-underline"
-              onClick={() => { setMagicSent(false); setMagicEmail('') }}
-            >
-              {t('auth.magicLink.tryAnother')}
-            </button>
-          </div>
-        ) : (
-          <form onSubmit={handleMagicLink} className="space-y-3" noValidate>
-            <Input
-              label={t('auth.magicLink.label')}
-              type="email"
-              value={magicEmail}
-              onChange={e => { setMagicEmail(e.target.value); setMagicError('') }}
-              placeholder={t('auth.login.email')}
-              error={magicError}
-              autoComplete="email"
-            />
-            <Button type="submit" size="lg" fullWidth loading={magicSending}>
-              {magicSending ? t('auth.magicLink.sending') : t('auth.magicLink.submit')}
-            </Button>
-          </form>
-        )}
 
         <div className="flex items-center gap-3 text-xs text-secondary">
           <span className="h-px flex-1 bg-border" />
@@ -203,66 +136,70 @@ export function LoginPage() {
           </button>
 
           {pwOpen && (
-            <form
-              onSubmit={handlePasswordSubmit}
-              className="mt-3 flex flex-col gap-4"
-              noValidate
-            >
+            <div className="mt-3 space-y-4">
               {formError && (
                 <p role="alert" className="rounded-md bg-danger-soft px-3 py-2 text-sm text-danger">
                   {formError}
                 </p>
               )}
 
-              <Input
-                label={t('auth.login.email')}
-                type="email"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                onBlur={e => handleBlur('email', e.target.value)}
-                error={fieldErrors.email}
-                autoComplete="email"
-              />
+              {forgotSent && (
+                <div className="rounded-md bg-success-soft px-3 py-2 text-sm text-success">
+                  <p className="font-medium">{t('auth.forgotPassword.sentTitle')}</p>
+                  <p className="mt-0.5 text-xs opacity-80">
+                    {t('auth.forgotPassword.sentDesc', { email: email.trim() })}
+                  </p>
+                </div>
+              )}
 
-              <Input
-                label={t('auth.login.password')}
-                type={showPw ? 'text' : 'password'}
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                onBlur={e => handleBlur('password', e.target.value)}
-                error={fieldErrors.password}
-                autoComplete="current-password"
-                trailingIcon={
+              <form onSubmit={handlePasswordSubmit} className="space-y-4" noValidate>
+                <Input
+                  label={t('auth.login.email')}
+                  type="email"
+                  value={email}
+                  onChange={e => { setEmail(e.target.value); setForgotSent(false) }}
+                  onBlur={e => handleBlur('email', e.target.value)}
+                  error={fieldErrors.email}
+                  autoComplete="email"
+                />
+
+                <Input
+                  label={t('auth.login.password')}
+                  type={showPw ? 'text' : 'password'}
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  onBlur={e => handleBlur('password', e.target.value)}
+                  error={fieldErrors.password}
+                  autoComplete="current-password"
+                  trailingIcon={
+                    <button
+                      type="button"
+                      onClick={() => setShowPw(v => !v)}
+                      aria-label={showPw ? t('auth.login.hidePassword') : t('auth.login.showPassword')}
+                      className="text-secondary hover:text-text"
+                    >
+                      {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  }
+                />
+
+                {/* Forgot password */}
+                <div className="text-right -mt-2">
                   <button
                     type="button"
-                    onClick={() => setShowPw(v => !v)}
-                    aria-label={showPw ? t('auth.login.hidePassword') : t('auth.login.showPassword')}
-                    className="text-secondary hover:text-text"
+                    onClick={() => void handleForgotPassword()}
+                    disabled={forgotSending}
+                    className="text-xs text-primary hover:underline underline-offset-2 disabled:opacity-50"
                   >
-                    {showPw
-                      ? <EyeOff className="h-4 w-4" />
-                      : <Eye    className="h-4 w-4" />
-                    }
+                    {forgotSending ? t('auth.forgotPassword.sending') : t('auth.forgotPassword.link')}
                   </button>
-                }
-              />
+                </div>
 
-              {/* Forgot password */}
-              <div className="text-right -mt-2">
-                <button
-                  type="button"
-                  onClick={() => void handleForgotPassword()}
-                  disabled={magicSending}
-                  className="text-xs text-primary hover:underline underline-offset-2 disabled:opacity-50"
-                >
-                  {t('auth.forgotPassword.link')}
-                </button>
-              </div>
-
-              <Button type="submit" size="lg" loading={submitting} fullWidth>
-                {submitting ? t('auth.login.submitting') : t('auth.login.submit')}
-              </Button>
-            </form>
+                <Button type="submit" size="lg" loading={submitting} fullWidth>
+                  {submitting ? t('auth.login.submitting') : t('auth.login.submit')}
+                </Button>
+              </form>
+            </div>
           )}
         </div>
 

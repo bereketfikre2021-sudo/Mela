@@ -71,7 +71,7 @@
       "submit": "ግባ",
       "submitting": "እየተገባ ነው…",
       "toRegister": "መለያ የለዎትም? ይመዝገቡ",
-      "usePassword": "ይለፍ ቃል ተጠቀም",
+      "usePassword": "በኢሜይልና ይለፍ ቃል ግባ",
       "showPassword": "ይለፍ ቃልን አሳይ",
       "hidePassword": "ይለፍ ቃልን ደብቅ"
     },
@@ -92,18 +92,12 @@
     },
     "google": "በGoogle ይቀጥሉ",
     "or": "ወይም",
-    "magicLink": {
-      "label": "በኢሜይል ሊንክ ግባ",
-      "submit": "የመግቢያ ሊንክ ላክልኝ",
-      "sending": "እየላከ ነው…",
-      "sentTitle": "ኢሜይልዎን ይፈትሹ",
-      "sentDesc": "ወደ {{email}} የመግቢያ ሊንክ ላክናል። ለመግባት ይጫኑት — ይለፍ ቃል አያስፈልግም።",
-      "tryAnother": "ሌላ ኢሜይል ተጠቀም"
-    },
     "forgotPassword": {
       "link": "የይለፍ ቃል ረሱ?",
+      "sending": "እየላከ ነው…",
       "enterEmailFirst": "አስቀድሞ የኢሜይል አድራሻዎን ያስገቡ።",
-      "sent": "የመግቢያ ሊንክ ተልኳል — ኢሜይልዎን ይፈትሹ።"
+      "sentTitle": "ኢሜይልዎን ይፈትሹ",
+      "sentDesc": "ወደ {{email}} የመግቢያ ሊንክ ላክናል። ለመግባት ይጫኑት — ይለፍ ቃል አያስፈልግም።"
     }
   },
   "business": {
