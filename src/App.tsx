@@ -116,10 +116,10 @@ function AppRoutes() {
       label: t('nav.expenses'),
       icon:  Wallet,
     },
-    // Stock — product businesses only
+    // Product businesses only: Products in nav instead of Stock
     ...(!isService ? [{
-      id:    '/app/stock',
-      label: t('nav.stock'),
+      id:    '/app/products',
+      label: t('nav.products'),
       icon:  PackageSearch,
     }] : []),
     {
@@ -203,13 +203,15 @@ function AppRoutes() {
 
       {/* ── Secondary routes ──────────────────────────────────────────────── */}
       <Route path="/app/products"
-        element={appShell(<RequireBusiness><ProductsPage /></RequireBusiness>, '/app/stock')} />
+        element={appShell(<RequireBusiness><ProductsPage /></RequireBusiness>, '/app/products')} />
+      <Route path="/app/stock"
+        element={appShell(<RequireBusiness><StockPage /></RequireBusiness>, '/app/more')} />
       <Route path="/app/inventory"
-        element={appShell(<RequireBusiness><InventoryPage /></RequireBusiness>, '/app/stock')} />
+        element={appShell(<RequireBusiness><InventoryPage /></RequireBusiness>, '/app/more')} />
+      <Route path="/app/purchases"
+        element={appShell(<RequireBusiness><PurchasesPage /></RequireBusiness>, '/app/more')} />
       <Route path="/app/reports"
         element={appShell(<RequireBusiness><ReportsPage /></RequireBusiness>, '/app/reports')} />
-      <Route path="/app/purchases"
-        element={appShell(<RequireBusiness><PurchasesPage /></RequireBusiness>, '/app/stock')} />
       <Route path="/app/suppliers"
         element={appShell(<RequireBusiness><SuppliersPage /></RequireBusiness>, '/app/more')} />
       <Route path="/app/profile"

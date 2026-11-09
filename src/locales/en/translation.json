@@ -705,7 +705,8 @@
       "reports": "Detailed financial reports",
       "products": "Edit products and prices",
       "settings": "Profile and business settings",
-      "clients": "Manage your client contacts"
+      "clients": "Manage your client contacts",
+      "stock": "View stock levels and adjust quantities"
     }
   },
   "sync": {

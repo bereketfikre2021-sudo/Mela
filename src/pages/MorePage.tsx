@@ -8,7 +8,6 @@
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
-  BarChart2,
   ClipboardList,
   History,
   Package,
@@ -53,15 +52,7 @@ export function MorePage() {
   const isService   = bizConfig.isServiceBased
 
   const tiles = [
-    // Reports — always visible
-    {
-      icon:  <BarChart2 className="h-5 w-5" aria-hidden="true" />,
-      label: t('nav.reports'),
-      desc:  t('more.desc.reports'),
-      route: '/app/reports',
-      show:  true,
-    },
-    // Settings — always visible
+    // Settings — always visible (Reports is in the primary nav)
     {
       icon:  <Settings className="h-5 w-5" aria-hidden="true" />,
       label: t('more.settings'),
@@ -69,7 +60,7 @@ export function MorePage() {
       route: '/app/profile',
       show:  true,
     },
-    // Product businesses only below
+    // Product businesses only
     {
       icon:  <Users className="h-5 w-5" aria-hidden="true" />,
       label: t('nav.customers'),
@@ -92,17 +83,17 @@ export function MorePage() {
       show:  !isService,
     },
     {
+      icon:  <Package className="h-5 w-5" aria-hidden="true" />,
+      label: t('nav.stock'),
+      desc:  t('more.desc.stock'),
+      route: '/app/stock',
+      show:  !isService,
+    },
+    {
       icon:  <History className="h-5 w-5" aria-hidden="true" />,
       label: t('nav.inventory'),
       desc:  t('more.desc.inventory'),
       route: '/app/inventory',
-      show:  !isService,
-    },
-    {
-      icon:  <Package className="h-5 w-5" aria-hidden="true" />,
-      label: t('nav.products'),
-      desc:  t('more.desc.products'),
-      route: '/app/products',
       show:  !isService,
     },
   ].filter(t => t.show)
