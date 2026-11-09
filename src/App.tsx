@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { BrowserRouter, Navigate, Route, Routes, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Briefcase, Home, MoreHorizontal, PackageSearch, Receipt, UserCog, Users, Wallet } from 'lucide-react'
+import { BarChart2, Briefcase, Home, MoreHorizontal, PackageSearch, Receipt, UserCog, Users, Wallet } from 'lucide-react'
 
 import { NotificationProvider } from './design-system/Notification'
 import type { NavItem } from './design-system/BottomNav'
@@ -127,11 +127,17 @@ function AppRoutes() {
       label: isService ? t('nav.clients') : t('nav.customers'),
       icon:  Users,
     },
-    {
+    // Service businesses: Reports replaces More (no stock/purchases to navigate to)
+    // Product businesses: More hub (purchases, suppliers, inventory, products)
+    ...(isService ? [{
+      id:    '/app/reports',
+      label: t('nav.reports'),
+      icon:  BarChart2,
+    }] : [{
       id:    '/app/more',
       label: t('nav.more'),
       icon:  MoreHorizontal,
-    },
+    }]),
     // Staff nav item only shown on Premium
     ...(isActive ? [{
       id:    '/app/staff',
@@ -200,7 +206,7 @@ function AppRoutes() {
       <Route path="/app/inventory"
         element={appShell(<RequireBusiness><InventoryPage /></RequireBusiness>, '/app/stock')} />
       <Route path="/app/reports"
-        element={appShell(<RequireBusiness><ReportsPage /></RequireBusiness>, '/app/more')} />
+        element={appShell(<RequireBusiness><ReportsPage /></RequireBusiness>, isService ? '/app/reports' : '/app/more')} />
       <Route path="/app/purchases"
         element={appShell(<RequireBusiness><PurchasesPage /></RequireBusiness>, '/app/stock')} />
       <Route path="/app/suppliers"
