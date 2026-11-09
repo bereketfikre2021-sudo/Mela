@@ -1,6 +1,6 @@
 # MELA — Project Context (Handoff Document)
 
-> **Current as of Phase 11** — Phase 11 (Subscriptions) complete, committed on branch `phase-1-onboarding`.
+> **Current as of Phase 12** — Phase 12 (Staff & Permissions) complete, committed on branch `phase-1-onboarding`.
 > This document supersedes all previous versions. Treat it as the single source of truth.
 
 ---
@@ -172,7 +172,8 @@ vercel.json         SPA rewrite rule
 | Test runner (Phase 13) | ✅ Complete — vitest@2.1.9 installed, vitest.config.ts created |
 | Production config (Phase 13) | ✅ Complete — sourcemap: false, VITE_APP_URL warning, env.appUrl |
 | Subscriptions (Phase 11) | ✅ Complete — Free/Premium plans, entitlement gates, payment flow, migration 0013 |
-| Staff/user management | ❌ Not implemented |
+| Staff & Permissions (Phase 12) | ✅ Complete — PIN-based staff switcher, role presets, per-permission toggles, activity log, migration 0014, Edge Function |
+| Staff/user management | ✅ Complete (Phase 12) |
 | F&B, Bakery, Service modules | ❌ Placeholder dirs only |
 
 ---
