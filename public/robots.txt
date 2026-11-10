@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /app/
+Disallow: /auth/
+
+Sitemap: https://mela.pro.et/sitemap.xml

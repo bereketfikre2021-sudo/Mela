@@ -78,3 +78,11 @@ export async function submitPayment(
   if (error) return { data: null, error: { message: error.message } }
   return { data: data as PaymentSubmission, error: null }
 }
+
+/** Fetch all site_settings rows (public read for authenticated users). */
+export async function getSiteSettingsPublic(): Promise<Record<string, string>> {
+  if (!supabase) return {}
+  const { data } = await supabase.from('site_settings').select('key, value')
+  if (!data) return {}
+  return Object.fromEntries(data.map((r: { key: string; value: string }) => [r.key, r.value]))
+}

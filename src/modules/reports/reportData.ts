@@ -64,7 +64,7 @@ export interface ReportData {
   totalExpenses: number
   cogs: number | null
   grossProfit: number | null
-  netProfit: number | null
+  netProfit: number
   cogsIncomplete: boolean
 
   // ── Sales aggregations ────────────────────────────────────────────────────
@@ -153,7 +153,7 @@ export async function getReportData(range: DateRange): Result<ReportData> {
   }
   const cogs        = hasAnyCost ? cogsKnown : null
   const grossProfit = cogs !== null ? paidRevenue - cogs : null
-  const netProfit   = grossProfit !== null ? grossProfit - totalExpenses : null
+  const netProfit   = paidRevenue - totalExpenses
 
   // ── Daily sales summary ───────────────────────────────────────────────────
   const dailyMap = new Map<string, DailySalesSummary>()

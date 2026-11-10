@@ -11,7 +11,10 @@ import { useNotification } from '../design-system/Notification'
 import { Select } from '../design-system/Select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../design-system/Table'
 import { useAuth } from '../modules/auth/AuthContext'
+import { Breadcrumb } from '../components/Breadcrumb'
 import { createExpense, deleteExpense, updateExpense } from '../modules/expenses/api'
+import { enqueueExpense } from '../lib/offlineQueue'
+import { useSyncContext } from '../context/SyncContext'
 import { ExpenseForm } from '../modules/expenses/ExpenseForm'
 import { EXPENSE_CATEGORIES, type Expense, type ExpenseCategory } from '../modules/expenses/types'
 import { useExpenses } from '../modules/expenses/useExpenses'
@@ -51,6 +54,8 @@ export function ExpensesPage() {
   function openDelete(e: Expense) { setSelected(e);     setDialogMode('delete') }
   function closeDialog()          { setDialogMode(null); setSelected(null) }
 
+  const { isOnline, refreshCount } = useSyncContext()
+
   // ── Filtered list ──────────────────────────────────────────────────────────
   const filtered = useMemo(() => {
     return expenses.filter(e => {
@@ -68,6 +73,14 @@ export function ExpensesPage() {
   async function handleAdd(input: Parameters<typeof createExpense>[0]) {
     if (!user) return
     setSubmitting(true)
+    if (!isOnline) {
+      await enqueueExpense({ ...input, owner_id: user.id })
+      await refreshCount()
+      setSubmitting(false)
+      notify({ tone: 'warning', title: t('sync.savedOffline'), description: t('sync.savedOfflineDesc') })
+      closeDialog()
+      return
+    }
     const { error } = await createExpense(input, user.id)
     setSubmitting(false)
     if (error) { notify({ tone: 'danger', title: t('notification.error.title'), description: error.message }); return }
@@ -134,6 +147,7 @@ export function ExpensesPage() {
     <div className="mb-6">
       <div className="flex items-start justify-between gap-4">
         <div>
+          <Breadcrumb items={[{ label: t('expenses.title') }]} />
           <h1 className="heading text-2xl md:text-3xl">{t('expenses.title')}</h1>
           <p className="mt-1 text-sm text-secondary">
             {expenses.length === 0

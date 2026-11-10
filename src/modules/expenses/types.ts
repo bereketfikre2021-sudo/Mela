@@ -10,11 +10,17 @@ export type ExpenseCategory =
   | 'salaries'
   | 'marketing'
   | 'maintenance'
+  | 'food_ingredients'
+  | 'packaging'
+  | 'bank_charges'
+  | 'taxes_fees'
+  | 'equipment'
   | 'other'
 
 export const EXPENSE_CATEGORIES: ExpenseCategory[] = [
-  'rent', 'utilities', 'transport', 'supplies',
-  'salaries', 'marketing', 'maintenance', 'other',
+  'rent', 'utilities', 'salaries', 'food_ingredients', 'supplies',
+  'transport', 'packaging', 'bank_charges', 'taxes_fees',
+  'equipment', 'marketing', 'maintenance', 'other',
 ]
 
 export interface Expense {

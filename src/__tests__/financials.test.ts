@@ -133,7 +133,7 @@ describe('getFinancialSummary', () => {
     expect(result.data!.pendingRevenue).toBe(200)
   })
 
-  it('all-null unit_cost → cogs=null, grossProfit=null, netProfit=null', async () => {
+  it('all-null unit_cost → cogs=null, grossProfit=null, netProfit=paidRevenue-expenses', async () => {
     const sale = makeSale('paid', 100, [
       { unit_cost: null, quantity: 2 },
       { unit_cost: null, quantity: 1 },
@@ -144,7 +144,8 @@ describe('getFinancialSummary', () => {
     const result = await getFinancialSummary(range)
     expect(result.data!.cogs).toBeNull()
     expect(result.data!.grossProfit).toBeNull()
-    expect(result.data!.netProfit).toBeNull()
+    // netProfit is always revenue - expenses even when COGS unknown
+    expect(result.data!.netProfit).toBe(100)
   })
 
   it('mixed cost → cogs is sum of known costs, cogsIncomplete=true', async () => {
@@ -177,16 +178,16 @@ describe('getFinancialSummary', () => {
     expect(result.data!.totalExpenses).toBe(0)
   })
 
-  it('known COGS + expenses → netProfit = grossProfit - totalExpenses', async () => {
+  it('known COGS + expenses → netProfit = paidRevenue - totalExpenses', async () => {
     const sale    = makeSale('paid', 200, [{ unit_cost: 80, quantity: 1 }])
     const expense = makeExpense(30)
     mockSalesDataRef.value    = [sale]
     mockExpensesDataRef.value = [expense]
 
     const result = await getFinancialSummary(range)
-    // grossProfit = 200 - 80 = 120; netProfit = 120 - 30 = 90
+    // grossProfit = 200 - 80 = 120; netProfit = revenue(200) - expenses(30) = 170
     expect(result.data!.grossProfit).toBe(120)
-    expect(result.data!.netProfit).toBe(90)
+    expect(result.data!.netProfit).toBe(170)
   })
 
   it('supabase error → returns { data: null, error: { message: ... } }', async () => {

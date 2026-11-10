@@ -70,7 +70,11 @@ export function Dialog({
     document.body.style.overflow = 'hidden'
 
     const focusTimer = window.setTimeout(() => {
-      const target = containerRef.current?.querySelector<HTMLElement>('[autofocus]') ?? containerRef.current?.querySelector<HTMLElement>(FOCUSABLE)
+      // Prefer the first input/select/textarea over buttons (avoids focusing close button)
+      const target =
+        containerRef.current?.querySelector<HTMLElement>('[autofocus]') ??
+        containerRef.current?.querySelector<HTMLElement>('input, select, textarea') ??
+        containerRef.current?.querySelector<HTMLElement>(FOCUSABLE)
       target?.focus()
     }, 0)
 

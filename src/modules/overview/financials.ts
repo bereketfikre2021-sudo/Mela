@@ -48,8 +48,8 @@ export interface FinancialSummary {
   /** true when at least one paid-sale item has unit_cost = NULL. */
   cogsIncomplete: boolean
   totalExpenses: number
-  /** grossProfit − totalExpenses. null when grossProfit is null. */
-  netProfit: number | null
+  /** grossProfit − totalExpenses. Always set (revenue − expenses when no COGS data). */
+  netProfit: number
   /** Paid sales only (for recent-activity display). */
   sales: SaleWithItems[]
   /** All expenses in the period (for recent-activity display). */
@@ -113,7 +113,10 @@ export async function getFinancialSummary(range: DateRange): Result<FinancialSum
 
   const cogs        = hasAnyCost ? cogsKnown : null
   const grossProfit = cogs !== null ? paidRevenue - cogs : null
-  const netProfit   = grossProfit !== null ? grossProfit - totalExpenses : null
+  // Net profit always shows: revenue - expenses (even without cost data).
+  // This way service businesses and product businesses without cost prices
+  // always see a meaningful profit figure.
+  const netProfit   = paidRevenue - totalExpenses
 
   return {
     data: {

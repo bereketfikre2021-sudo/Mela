@@ -13,7 +13,7 @@
     "home": "መነሻ",
     "products": "ምርቶች",
     "pos": "ሽያጭ",
-    "sales": "የሽያጭ ታሪክ",
+    "sales": "ሽያጭ",
     "expenses": "ወጪዎች",
     "reports": "ሪፖርቶች",
     "language": "ቋንቋ",
@@ -148,7 +148,11 @@
       "languageHelper": "በ MELA ውስጥ ጥቅም ላይ የሚውለው ቋንቋ።",
       "submitCreate": "ንግድ ፍጠር",
       "submitEdit": "ለውጦችን አስቀምጥ",
-      "submitting": "እየተቀመጠ ነው…"
+      "submitting": "እየተቀመጠ ነው…",
+      "typeLocked": "ተቆልፏል",
+      "typeLockedHelper": "ምርቶች ወይም አገልግሎቶች ከጨመሩ በኋላ የንግድ አይነቱን መቀየር አይቻልም።",
+      "closingTime": "የንግድ መዘጊያ ሰዓት",
+      "closingTimeHelper": "በዚህ ሰዓት የዕለት ማጠቃለያ እንልክልዎታለን።"
     }
   },
   "products": {
@@ -168,7 +172,9 @@
       "sku": "SKU",
       "price": "ዋጋ (ETB)",
       "stock": "ክምችት",
-      "unit": "መለኪያ"
+      "unit": "መለኪያ",
+      "serviceName": "አገልግሎት",
+      "servicePrice": "ዋጋ (ብር)"
     },
     "form": {
       "titleAdd": "ምርት ጨምር",
@@ -189,7 +195,11 @@
         "invalidQty": "ትክክለኛ መጠን ያስገቡ።"
       },
       "lowStockThreshold": "ዝቅተኛ ክምችት ማስጠንቀቂያ",
-      "lowStockThresholdHelper": "አማራጭ ነው። ክምችቱ ወደዚህ ደረጃ ሲደርስ ያሳውቃል።"
+      "lowStockThresholdHelper": "አማራጭ ነው። ክምችቱ ወደዚህ ደረጃ ሲደርስ ያሳውቃል።",
+      "servicePrice": "የአገልግሎት ዋጋ",
+      "serviceName": "የአገልግሎት ስም",
+      "titleAddService": "አገልግሎት ጨምር",
+      "titleEditService": "አገልግሎት አርትዕ"
     },
     "delete": {
       "title": "ምርት ሰርዝ",
@@ -203,6 +213,14 @@
       "added": "ምርት ታክሏል",
       "updated": "ምርት ተስተካክሏል",
       "deleted": "ምርት ተሰርዟል"
+    },
+    "titleServices": "አገልግሎቶች",
+    "addService": "አገልግሎት ጨምር",
+    "countService": "{{count}} አገልግሎት",
+    "countService_other": "{{count}} አገልግሎቶች",
+    "emptyService": {
+      "title": "እስካሁን አገልግሎቶች የሉም",
+      "desc": "ክፍያዎችን መመዝገብ ለመጀመር የመጀመሪያ አገልግሎትዎን ያክሉ።"
     }
   },
   "pos": {
@@ -226,13 +244,24 @@
     "payment": {
       "cash": "ጥሬ ገንዘብ",
       "telebirr": "ቴሌብር",
-      "bank_transfer": "ባንክ ዝውውር"
+      "bank_transfer": "ባንክ ዝውውር",
+      "cbe_birr": "ሲቢኢ ብር"
     },
     "checkoutResult": {
       "success": "ሽያጩ ተመዝግቧል",
       "successPending": "ሽያጩ ተመዝግቧል። ክፍያ ይጠብቃል።",
       "error": "ሽያጩ አልተሳካም"
-    }
+    },
+    "customer": "ደንበኛ",
+    "customerPlaceholder": "ስም ይፃፉ ወይም ካሉ ደንበኞች ይፈልጉ…",
+    "notes": "ማስታወሻ",
+    "notesPlaceholder": "አማራጭ ማስታወሻ",
+    "customerSelectPrompt": "— ካሉ ደንበኞች ይምረጡ —",
+    "customerNewPlaceholder": "ወይም አዲስ ደንበኛ ስም ይፃፉ…",
+    "customerClear": "ምርጫ አጥፋ",
+    "titleService": "ሽያጭ ይመዝግቡ",
+    "cartService": "የተመረጡ",
+    "quantity": "መጠን"
   },
   "sales": {
     "title": "የሽያጭ ታሪክ",
@@ -249,13 +278,15 @@
       "date": "ቀን",
       "total": "ጠቅላላ",
       "payment": "ክፍያ",
-      "status": "ሁኔታ"
+      "status": "ሁኔታ",
+      "customer": "ደንበኛ"
     },
     "view": "ይመልከቱ",
     "payment": {
       "cash": "ጥሬ ገንዘብ",
       "telebirr": "ቴሌብር",
-      "bank_transfer": "ባንክ ዝውውር"
+      "bank_transfer": "ባንክ ዝውውር",
+      "cbe_birr": "ሲቢኢ ብር"
     },
     "status": {
       "paid": "ተከፍሏል",
@@ -267,14 +298,23 @@
       "qty": "መጠን",
       "unitPrice": "ዋጋ",
       "lineTotal": "ድምር",
-      "total": "ጠቅላላ ድምር"
+      "total": "ጠቅላላ ድምር",
+      "customer": "ደንበኛ",
+      "notes": "ማስታወሻ"
     },
     "filter": {
       "today": "ዛሬ",
       "week": "ይህ ሳምንት",
       "month": "ይህ ወር",
       "all": "ሁሉ"
-    }
+    },
+    "titleService": "ሽያጮች",
+    "emptyService": {
+      "title": "እስካሁን ምንም ሽያጭ አልተመዘገበም",
+      "desc": "ለመጀመር የመጀመሪያ ሽያጭዎን ይመዝግቡ።"
+    },
+    "markPaid": "እንደከፈለ ምልክት አድርግ",
+    "markedPaid": "ሽያጭ እንደከፈለ ተምልክቷል"
   },
   "validation": {
     "required": "ይህ መስክ አስፈላጊ ነው።",
@@ -297,7 +337,8 @@
     "name": "ስም",
     "amount": "መጠን",
     "status": "ሁኔታ",
-    "date": "ቀን"
+    "date": "ቀን",
+    "back": "ተመለስ"
   },
   "status": {
     "paid": "ተከፍሏል",
@@ -374,7 +415,12 @@
       "salaries": "ደሞዝ",
       "marketing": "ማስታወቂያ",
       "maintenance": "ጥገና",
-      "other": "ሌላ"
+      "other": "ሌላ",
+      "food_ingredients": "ምግብ እና ጥሬ ዕቃ",
+      "packaging": "ማሸጊያ",
+      "bank_charges": "የባንክ ክፍያ",
+      "taxes_fees": "ታክስ እና ክፍያ",
+      "equipment": "መሳሪያ"
     },
     "filter": {
       "search": "ወጪዎችን ይፈልጉ…",
@@ -427,7 +473,11 @@
       "topProductsByQty": "ምርጥ ምርቶች በብዛት",
       "topProductsByRevenue": "ምርጥ ምርቶች በገቢ",
       "expensesByCategory": "ወጪ በምድብ",
-      "monthlyExpenses": "የወር ወጪ"
+      "monthlyExpenses": "የወር ወጪ",
+      "dailyServices": "ዕለታዊ አገልግሎቶች",
+      "monthlyServices": "ወርሃዊ አገልግሎቶች",
+      "topServicesByQty": "ምርጥ አገልግሎቶች በብዛት",
+      "topServicesByRevenue": "ምርጥ አገልግሎቶች በገቢ"
     },
     "sales": {
       "paidTransactions": "የተከፈሉ ግብይቶች",
@@ -452,6 +502,20 @@
     "empty": {
       "title": "ለዚህ ወቅት መረጃ የለም",
       "desc": "ሌላ ቀን ይምረጡ ወይም ሽያጮችን ይመዝግቡ።"
+    },
+    "tab": {
+      "summary": "ማጠቃለያ",
+      "sales": "ሽያጭ",
+      "services": "አገልግሎቶች",
+      "topProducts": "ምርጥ ምርቶች",
+      "topServices": "ምርጥ አገልግሎቶች",
+      "expenses": "ወጪዎች"
+    },
+    "metric": {
+      "serviceRevenue": "የአገልግሎት ገቢ"
+    },
+    "services": {
+      "totalRecorded": "ጠቅላላ የተመዘገቡ አገልግሎቶች"
     }
   },
   "profileMenu": {
@@ -534,13 +598,31 @@
     },
     "form": {
       "titleAdd": "ደንበኛ ጨምር",
-      "titleEdit": "ደንበኛ አርትዕ"
+      "titleEdit": "ደንበኛ አርትዕ",
+      "titleAddClient": "ደንበኛ ጨምር",
+      "titleEditClient": "ደንበኛ አርትዕ"
     },
     "notifications": {
       "added": "ደንበኛ ታክሏል",
       "updated": "ደንበኛ ተስተካክሏል",
-      "deleted": "ደንበኛ ተሰርዟል"
-    }
+      "deleted": "ደንበኛ ተሰርዟል",
+      "addedClient": "ደንበኛ ታክሏል",
+      "updatedClient": "ደንበኛ ተዘምኗል",
+      "deletedClient": "ደንበኛ ተሰርዟል"
+    },
+    "titleClients": "ደንበኞች",
+    "addClient": "ደንበኛ ጨምር",
+    "countClient": "{{count}} ደንበኛ",
+    "countClient_other": "{{count}} ደንበኞች",
+    "emptyClient": {
+      "title": "እስካሁን ደንበኞች የሉም",
+      "desc": "ለመጀመር የመጀመሪያ ደንበኛዎን ያክሉ።"
+    },
+    "historyTitle": "የግዢ ታሪክ",
+    "historyTitleService": "የአገልግሎት ታሪክ",
+    "viewHistory": "ታሪክ ለ {{name}}",
+    "noHistory": "እስካሁን ምንም ግብይት የለም።",
+    "pendingBalance": "{{amount}} ይጠይቃል"
   },
   "suppliers": {
     "title": "አቅራቢዎች",
@@ -691,7 +773,10 @@
     "pendingBanner": "{{amount}} ያልተከፈለ ሂሳብ አለ",
     "lowStockBanner": "{{count}} ምርት ክምችት አነሰ",
     "moreDetails": "ዝርዝር ትንታኔ ለማየት",
-    "viewFullReport": "ሪፖርቶችን ይከፍቱ"
+    "viewFullReport": "ሙሉ ሪፖርት ይመልከቱ",
+    "recentServices": "የቅርብ ጊዜ ሽያጮች",
+    "newServiceSale": "ሽያጭ ይመዝግቡ",
+    "quickActions": "ፈጣን እርምጃዎች"
   },
   "stock": {
     "title": "ክምችት",
@@ -720,7 +805,8 @@
       "settings": "መለያ እና ንግድ ቅንጅቶች",
       "clients": "የደንበኞችዎን ዝርዝር ያስተዳድሩ",
       "stock": "የዕቃ ክምችት ደረጃዎችን ይመልከቱ እና ያስተካክሉ",
-      "staff": "ሰራተኞችን እና ፈቃዶቻቸውን ያስተዳድሩ"
+      "staff": "ሰራተኞችን እና ፈቃዶቻቸውን ያስተዳድሩ",
+      "clientsService": "የደንበኞችዎን ዝርዝር ያስተዳድሩ"
     }
   },
   "sync": {
@@ -758,6 +844,20 @@
       "title": "ንግድዎን ያቋቁሙ",
       "subtitle": "ሁለት ደቂቃ ያህል ይወስዳል።",
       "back": "ዓይነት ቀይር"
+    },
+    "step": "ደረጃ {{current}} ከ {{total}}",
+    "stepLabel": {
+      "1": "የንግድ አይነት",
+      "2": "ዝርዝሮች",
+      "3": "ስለእርስዎ"
+    },
+    "step2": {
+      "title": "ንግድዎን ይሰይሙ",
+      "subtitle": "ንግድዎን ምን ልንለው?"
+    },
+    "step3": {
+      "title": "ስለእርስዎ",
+      "subtitle": "ስለ ባለቤቱ ጥቂት ዝርዝሮች።"
     }
   },
   "subscription": {
@@ -820,7 +920,17 @@
       "txRefHelper": "ከቴሌብር፣ CBE Birr ወይም ባንክ ዝውውር ያገኙትን ማጣቀሻ ቁጥር ያስገቡ (4–100 ቁምፊዎች)።",
       "txRefError": "የግብይት ማጣቀሻ ከ4 እስከ 100 ቁምፊዎች መሆን አለበት።",
       "submit": "ክፍያ ያስገቡ",
-      "submitSuccess": "ክፍያ ቀርቧል — ለፍተሻ ጠብቁ"
+      "submitSuccess": "ክፍያ ቀርቧል — ለፍተሻ ጠብቁ",
+      "payTo": "ክፍያ ወደዚህ ይላኩ",
+      "accountName": "የሂሳብ ስም",
+      "accountNum": "የሂሳብ ቁጥር",
+      "bankName": "ባንክ",
+      "phoneNumber": "ስልክ ቁጥር",
+      "copy": "ቅዳ",
+      "screenshot": "የክፍያ ስክሪንሾት አያይዝ",
+      "screenshotHelper": "ስክሪንሾቱን ወስደው እዚህ ይጫኑ።",
+      "screenshotRequired": "እባክዎ የክፍያ ስክሪንሾት ያያይዙ።",
+      "uploadScreenshot": "ስክሪንሾት ለመጫን ይጫኑ"
     },
     "usage": {
       "heading": "ነፃ ዕቅድ አጠቃቀም",
@@ -949,5 +1059,20 @@
         "staff_deleted": "ሰራተኛ ተወግዷል"
       }
     }
+  },
+  "notifications": {
+    "title": "ማሳወቂያዎች",
+    "bell": "ማሳወቂያዎች ({{count}} ያልተነበበ)",
+    "markAllRead": "ሁሉንም እንደተነበበ ምልክት አድርግ",
+    "delete": "ማሳወቂያ ሰርዝ",
+    "empty": {
+      "title": "ምንም ማሳወቂያ የለም",
+      "desc": "የዕለት ማጠቃለያዎ እና ማስጠንቀቂያዎ እዚህ ይታያሉ።"
+    }
+  },
+  "pwa": {
+    "installTitle": "MELA ጫን",
+    "installDesc": "ለተሻለ ልምድ ወደ ቤት ማያ ቁልፍ ያክሉ።",
+    "install": "ጫን"
   }
 }

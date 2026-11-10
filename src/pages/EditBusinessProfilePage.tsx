@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 
@@ -8,6 +8,7 @@ import { Spinner } from '../design-system/LoadingState'
 import { useAuth } from '../modules/auth/AuthContext'
 import { updateBusiness } from '../modules/auth/api'
 import { BusinessForm } from '../modules/auth/BusinessForm'
+import { getProducts } from '../modules/retail/api'
 import type { BusinessInput } from '../modules/auth/types'
 
 /** Edit the existing business profile, then route back to /app. */
@@ -17,6 +18,15 @@ export function EditBusinessProfilePage() {
   const { notify } = useNotification()
   const { user, profile, profileStatus, refreshProfile } = useAuth()
   const [submitting, setSubmitting] = useState(false)
+  const [hasData,    setHasData]    = useState(false)
+
+  // Check if owner has any products — if yes, lock the business type
+  useEffect(() => {
+    if (!user) return
+    getProducts().then(({ data }) => {
+      if (data && data.length > 0) setHasData(true)
+    })
+  }, [user])
 
   async function handleSubmit(input: BusinessInput) {
     if (!user || !profile) return
@@ -62,7 +72,7 @@ export function EditBusinessProfilePage() {
       <p className="mt-3 max-w-xl text-sm text-secondary">{t('business.edit.subtitle')}</p>
 
       <div className="mt-8">
-        <BusinessForm mode="edit" initial={profile} onSubmit={handleSubmit} submitting={submitting} />
+        <BusinessForm mode="edit" initial={profile} hasData={hasData} onSubmit={handleSubmit} submitting={submitting} />
       </div>
     </div>
   )

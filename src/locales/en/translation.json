@@ -148,7 +148,11 @@
       "languageHelper": "Used across MELA.",
       "submitCreate": "Create business",
       "submitEdit": "Save changes",
-      "submitting": "Saving…"
+      "submitting": "Saving…",
+      "typeLocked": "Locked",
+      "typeLockedHelper": "Business type cannot be changed after you have added products or services.",
+      "closingTime": "Business closing time",
+      "closingTimeHelper": "We will send you a daily summary at this time."
     }
   },
   "products": {
@@ -168,7 +172,9 @@
       "sku": "SKU",
       "price": "Price (ETB)",
       "stock": "Stock",
-      "unit": "Unit"
+      "unit": "Unit",
+      "serviceName": "Service",
+      "servicePrice": "Price (ETB)"
     },
     "form": {
       "titleAdd": "Add product",
@@ -189,7 +195,11 @@
         "invalidQty": "Enter a valid quantity (0 or more)."
       },
       "lowStockThreshold": "Low-stock alert threshold",
-      "lowStockThresholdHelper": "Optional. Alert when stock reaches this level or below."
+      "lowStockThresholdHelper": "Optional. Alert when stock reaches this level or below.",
+      "servicePrice": "Service price",
+      "serviceName": "Service name",
+      "titleAddService": "Add service",
+      "titleEditService": "Edit service"
     },
     "delete": {
       "title": "Delete product",
@@ -203,6 +213,14 @@
       "added": "Product added",
       "updated": "Product updated",
       "deleted": "Product deleted"
+    },
+    "titleServices": "Services",
+    "addService": "Add service",
+    "countService": "{{count}} service",
+    "countService_other": "{{count}} services",
+    "emptyService": {
+      "title": "No services yet",
+      "desc": "Add your first service to start recording payments."
     }
   },
   "pos": {
@@ -226,13 +244,24 @@
     "payment": {
       "cash": "Cash",
       "telebirr": "Telebirr",
-      "bank_transfer": "Bank transfer"
+      "bank_transfer": "Bank transfer",
+      "cbe_birr": "CBE Birr"
     },
     "checkoutResult": {
       "success": "Sale recorded",
       "successPending": "Sale recorded — payment pending",
       "error": "Checkout failed"
-    }
+    },
+    "customer": "Customer",
+    "customerPlaceholder": "Type a name or search existing customers…",
+    "notes": "Notes",
+    "notesPlaceholder": "Optional note (e.g. Room 3, Nov rent)",
+    "customerSelectPrompt": "— Select existing customer —",
+    "customerNewPlaceholder": "Or type a new customer name…",
+    "customerClear": "Clear selection",
+    "titleService": "Record Sale",
+    "cartService": "Selected",
+    "quantity": "Quantity"
   },
   "sales": {
     "title": "Sales",
@@ -249,13 +278,15 @@
       "date": "Date",
       "total": "Total",
       "payment": "Payment",
-      "status": "Status"
+      "status": "Status",
+      "customer": "Customer"
     },
     "view": "View",
     "payment": {
       "cash": "Cash",
       "telebirr": "Telebirr",
-      "bank_transfer": "Bank transfer"
+      "bank_transfer": "Bank transfer",
+      "cbe_birr": "CBE Birr"
     },
     "status": {
       "paid": "Paid",
@@ -267,14 +298,23 @@
       "qty": "Qty",
       "unitPrice": "Unit price",
       "lineTotal": "Total",
-      "total": "Total"
+      "total": "Total",
+      "customer": "Customer",
+      "notes": "Notes"
     },
     "filter": {
       "today": "Today",
       "week": "This week",
       "month": "This month",
       "all": "All time"
-    }
+    },
+    "titleService": "Sales",
+    "emptyService": {
+      "title": "No sales recorded yet",
+      "desc": "Record your first sale to get started."
+    },
+    "markPaid": "Mark paid",
+    "markedPaid": "Sale marked as paid"
   },
   "validation": {
     "required": "This field is required.",
@@ -297,7 +337,8 @@
     "name": "Name",
     "amount": "Amount",
     "status": "Status",
-    "date": "Date"
+    "date": "Date",
+    "back": "Back"
   },
   "status": {
     "paid": "Paid",
@@ -386,7 +427,12 @@
       "salaries": "Salaries",
       "marketing": "Marketing",
       "maintenance": "Maintenance",
-      "other": "Other"
+      "other": "Other",
+      "food_ingredients": "Food & Ingredients",
+      "packaging": "Packaging",
+      "bank_charges": "Bank Charges",
+      "taxes_fees": "Taxes & Fees",
+      "equipment": "Equipment"
     },
     "filter": {
       "search": "Search expenses…",
@@ -439,7 +485,11 @@
       "topProductsByQty": "Top products by quantity",
       "topProductsByRevenue": "Top products by revenue",
       "expensesByCategory": "Expenses by category",
-      "monthlyExpenses": "Monthly expenses"
+      "monthlyExpenses": "Monthly expenses",
+      "dailyServices": "Daily services",
+      "monthlyServices": "Monthly services",
+      "topServicesByQty": "Top services by count",
+      "topServicesByRevenue": "Top services by revenue"
     },
     "sales": {
       "paidTransactions": "Paid transactions",
@@ -464,6 +514,20 @@
     "empty": {
       "title": "No data for this period",
       "desc": "Try a different date range or check that sales and expenses have been recorded."
+    },
+    "tab": {
+      "summary": "Summary",
+      "sales": "Sales",
+      "services": "Services",
+      "topProducts": "Top Products",
+      "topServices": "Top Services",
+      "expenses": "Expenses"
+    },
+    "metric": {
+      "serviceRevenue": "Service revenue"
+    },
+    "services": {
+      "totalRecorded": "Total services recorded"
     }
   },
   "footer": {
@@ -534,13 +598,31 @@
     },
     "form": {
       "titleAdd": "Add customer",
-      "titleEdit": "Edit customer"
+      "titleEdit": "Edit customer",
+      "titleAddClient": "Add client",
+      "titleEditClient": "Edit client"
     },
     "notifications": {
       "added": "Customer added",
       "updated": "Customer updated",
-      "deleted": "Customer deleted"
-    }
+      "deleted": "Customer deleted",
+      "addedClient": "Client added",
+      "updatedClient": "Client updated",
+      "deletedClient": "Client deleted"
+    },
+    "titleClients": "Clients",
+    "addClient": "Add client",
+    "countClient": "{{count}} client",
+    "countClient_other": "{{count}} clients",
+    "emptyClient": {
+      "title": "No clients yet",
+      "desc": "Add your first client to get started."
+    },
+    "historyTitle": "Purchase history",
+    "historyTitleService": "Service history",
+    "viewHistory": "History for {{name}}",
+    "noHistory": "No transactions yet.",
+    "pendingBalance": "Owes {{amount}}"
   },
   "suppliers": {
     "title": "Suppliers",
@@ -691,7 +773,10 @@
     "pendingBanner": "{{amount}} in pending payments",
     "lowStockBanner": "{{count}} product(s) running low",
     "moreDetails": "Detailed analytics in",
-    "viewFullReport": "full reports"
+    "viewFullReport": "View full report",
+    "recentServices": "Recent sales",
+    "newServiceSale": "Record sale",
+    "quickActions": "Quick actions"
   },
   "stock": {
     "title": "Stock",
@@ -720,7 +805,8 @@
       "settings": "Profile and business settings",
       "clients": "Manage your client contacts",
       "stock": "View stock levels and adjust quantities",
-      "staff": "Manage staff members and permissions"
+      "staff": "Manage staff members and permissions",
+      "clientsService": "Manage your client contacts"
     }
   },
   "sync": {
@@ -758,6 +844,20 @@
       "title": "Set up your business",
       "subtitle": "This takes under two minutes.",
       "back": "Change type"
+    },
+    "step": "Step {{current}} of {{total}}",
+    "stepLabel": {
+      "1": "Business type",
+      "2": "Details",
+      "3": "About you"
+    },
+    "step2": {
+      "title": "Name your business",
+      "subtitle": "What should we call your business?"
+    },
+    "step3": {
+      "title": "About you",
+      "subtitle": "A few details about the owner."
     }
   },
   "subscription": {
@@ -820,7 +920,17 @@
       "txRefHelper": "Enter the reference number from your Telebirr, CBE Birr or bank transfer (4–100 characters).",
       "txRefError": "Transaction reference must be between 4 and 100 characters.",
       "submit": "Submit payment",
-      "submitSuccess": "Payment submitted — pending review"
+      "submitSuccess": "Payment submitted — pending review",
+      "payTo": "Send payment to",
+      "accountName": "Account name",
+      "accountNum": "Account number",
+      "bankName": "Bank",
+      "phoneNumber": "Phone number",
+      "copy": "Copy",
+      "screenshot": "Attach payment screenshot",
+      "screenshotHelper": "Take a screenshot of your payment confirmation and upload it here.",
+      "screenshotRequired": "Please attach a screenshot of your payment.",
+      "uploadScreenshot": "Tap to upload screenshot"
     },
     "usage": {
       "heading": "Free plan usage",
@@ -949,5 +1059,20 @@
         "staff_deleted": "Removed a staff member"
       }
     }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "bell": "Notifications ({{count}} unread)",
+    "markAllRead": "Mark all read",
+    "delete": "Delete notification",
+    "empty": {
+      "title": "No notifications",
+      "desc": "Your daily summaries and alerts will appear here."
+    }
+  },
+  "pwa": {
+    "installTitle": "Install MELA",
+    "installDesc": "Add to your home screen for the best experience.",
+    "install": "Install"
   }
 }

@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Mail, Pencil, Phone, Plus, Trash2, Users } from 'lucide-react'
+import { Mail, Pencil, Phone, Plus, ShoppingBag, Trash2, Users } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import { Button } from '../design-system/Button'
@@ -8,18 +8,24 @@ import { EmptyState } from '../design-system/EmptyState'
 import { Input } from '../design-system/Input'
 import { Skeleton } from '../design-system/LoadingState'
 import { useNotification } from '../design-system/Notification'
+import { StatusBadge } from '../design-system/StatusBadge'
 import { useAuth } from '../modules/auth/AuthContext'
 import { CustomerForm } from '../modules/customers/CustomerForm'
 import { createCustomer, deleteCustomer, updateCustomer } from '../modules/customers/api'
 import { useCustomers } from '../modules/customers/useCustomers'
 import type { Customer, CustomerInput } from '../modules/customers/types'
 import { useSubscription } from '../modules/subscriptions/SubscriptionContext'
+import { getBusinessConfig } from '../modules/auth/businessConfig'
+import { getSalesByCustomer } from '../modules/retail/salesApi'
+import { Breadcrumb } from '../components/Breadcrumb'
+import type { SaleWithItems } from '../modules/retail/types'
 
 type DialogMode = 'add' | 'edit' | 'delete' | null
 
 export function CustomersPage() {
   const { t } = useTranslation()
-  const { user } = useAuth()
+  const { user, profile } = useAuth()
+  const isService = getBusinessConfig(profile?.type ?? 'retail').isServiceBased
   const { customers, status, errorMessage, reload } = useCustomers()
   const { notify } = useNotification()
   const { canAddCustomer } = useSubscription()
@@ -28,6 +34,24 @@ export function CustomersPage() {
   const [selected,   setSelected]   = useState<Customer | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [search,     setSearch]     = useState('')
+
+  // Customer history
+  const [historyCustomer, setHistoryCustomer] = useState<Customer | null>(null)
+  const [history,         setHistory]         = useState<SaleWithItems[]>([])
+  const [historyLoading,  setHistoryLoading]  = useState(false)
+
+  async function openHistory(c: Customer) {
+    setHistoryCustomer(c)
+    setHistoryLoading(true)
+    setHistory([])
+    const { data } = await getSalesByCustomer(c.id)
+    setHistory(data ?? [])
+    setHistoryLoading(false)
+  }
+
+  const pendingBalance = history
+    .filter(s => s.payment_status === 'pending')
+    .reduce((sum, s) => sum + s.total, 0)
 
   function openAdd()              { setSelected(null);  setDialogMode('add') }
   function openEdit(c: Customer)  { setSelected(c);     setDialogMode('edit') }
@@ -102,15 +126,22 @@ export function CustomersPage() {
         {/* Header */}
         <div className="mb-6 flex items-start justify-between gap-4">
           <div>
-            <h1 className="heading text-2xl md:text-3xl">{t('customers.title')}</h1>
+            <Breadcrumb items={[{ label: isService ? t('customers.titleClients') : t('customers.title') }]} />
+            <h1 className="heading text-2xl md:text-3xl">
+              {isService ? t('customers.titleClients') : t('customers.title')}
+            </h1>
             <p className="mt-1 text-sm text-secondary">
-              {customers.length === 0 ? t('customers.subtitle') : t('customers.count', { count: customers.length })}
+              {customers.length === 0
+                ? t('customers.subtitle')
+                : isService
+                  ? t('customers.countClient', { count: customers.length })
+                  : t('customers.count', { count: customers.length })}
             </p>
           </div>
           <Button size="sm" leadingIcon={<Plus className="h-4 w-4" aria-hidden="true" />} onClick={openAdd}
             disabled={!canAddCustomer()}
             title={!canAddCustomer() ? t('subscription.customerLimitReached') : undefined}>
-            {t('customers.add')}
+            {isService ? t('customers.addClient') : t('customers.add')}
           </Button>
         </div>
 
@@ -128,10 +159,14 @@ export function CustomersPage() {
 
         {/* Empty */}
         {customers.length === 0 ? (
-          <EmptyState icon={Users} title={t('customers.empty.title')} description={t('customers.empty.desc')}
+          <EmptyState icon={Users}
+            title={isService ? t('customers.emptyClient.title') : t('customers.empty.title')}
+            description={isService ? t('customers.emptyClient.desc') : t('customers.empty.desc')}
             action={<Button leadingIcon={<Plus className="h-4 w-4" aria-hidden="true" />} onClick={openAdd}
               disabled={!canAddCustomer()}
-              title={!canAddCustomer() ? t('subscription.customerLimitReached') : undefined}>{t('customers.add')}</Button>} />
+              title={!canAddCustomer() ? t('subscription.customerLimitReached') : undefined}>
+              {isService ? t('customers.addClient') : t('customers.add')}
+            </Button>} />
         ) : filtered.length === 0 ? (
           <EmptyState icon={Users} title={t('contacts.noResults')} description={t('contacts.noResultsDesc')} />
         ) : (
@@ -155,6 +190,11 @@ export function CustomersPage() {
                   {c.address && <p className="mt-0.5 truncate text-xs text-secondary">{c.address}</p>}
                 </div>
                 <div className="flex shrink-0 items-center gap-1">
+                  <button type="button" onClick={() => void openHistory(c)}
+                    aria-label={t('customers.viewHistory', { name: c.name })}
+                    className="rounded p-1.5 text-secondary hover:bg-background hover:text-primary">
+                    <ShoppingBag className="h-4 w-4" aria-hidden="true" />
+                  </button>
                   <button type="button" onClick={() => openEdit(c)}
                     aria-label={t('contacts.actions.edit', { name: c.name })}
                     className="rounded p-1.5 text-secondary hover:bg-background hover:text-text">
@@ -173,12 +213,12 @@ export function CustomersPage() {
       </div>
 
       <Dialog open={dialogMode === 'add'} onOpenChange={o => { if (!o) closeDialog() }}
-        title={t('customers.form.titleAdd')} closeLabel={t('common.close')}>
+        title={isService ? t('customers.form.titleAddClient') : t('customers.form.titleAdd')} closeLabel={t('common.close')}>
         <CustomerForm mode="add" onSubmit={handleAdd} onCancel={closeDialog} submitting={submitting} />
       </Dialog>
 
       <Dialog open={dialogMode === 'edit' && selected !== null} onOpenChange={o => { if (!o) closeDialog() }}
-        title={t('customers.form.titleEdit')} closeLabel={t('common.close')}>
+        title={isService ? t('customers.form.titleEditClient') : t('customers.form.titleEdit')} closeLabel={t('common.close')}>
         {selected && <CustomerForm mode="edit" initial={selected} onSubmit={handleEdit} onCancel={closeDialog} submitting={submitting} />}
       </Dialog>
 
@@ -193,6 +233,46 @@ export function CustomersPage() {
           </>
         }
       />
+
+      {/* ── Customer history dialog ─────────────────────────────────── */}
+      <Dialog
+        open={historyCustomer !== null}
+        onOpenChange={o => { if (!o) setHistoryCustomer(null) }}
+        title={historyCustomer ? `${historyCustomer.name} — ${isService ? t('customers.historyTitleService') : t('customers.historyTitle')}` : ''}
+        closeLabel={t('common.close')}
+      >
+        {historyLoading ? (
+          <div className="space-y-2 py-2">
+            {[1,2,3].map(i => <div key={i} className="h-10 rounded bg-background animate-pulse" />)}
+          </div>
+        ) : history.length === 0 ? (
+          <p className="py-4 text-sm text-secondary text-center">{t('customers.noHistory')}</p>
+        ) : (
+          <div className="space-y-3">
+            {pendingBalance > 0 && (
+              <div className="rounded-lg bg-warning-soft px-4 py-2.5 text-sm text-warning font-medium">
+                {t('customers.pendingBalance', { amount: `ETB ${pendingBalance.toLocaleString('en-ET', { minimumFractionDigits: 2 })}` })}
+              </div>
+            )}
+            <div className="divide-y divide-border rounded-xl border border-border overflow-hidden">
+              {history.map(s => (
+                <div key={s.id} className="flex items-center justify-between px-4 py-3">
+                  <div>
+                    <p className="text-sm font-medium text-text">{s.sale_number}</p>
+                    <p className="text-xs text-secondary">{new Date(s.sold_at).toLocaleDateString('en-ET', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <StatusBadge tone={s.payment_status === 'paid' ? 'success' : s.payment_status === 'pending' ? 'warning' : 'neutral'} dot>
+                      {t(`sales.status.${s.payment_status}`)}
+                    </StatusBadge>
+                    <span className="text-sm font-semibold text-text">ETB {s.total.toLocaleString('en-ET', { minimumFractionDigits: 2 })}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </Dialog>
     </>
   )
 }

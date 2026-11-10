@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { BrowserRouter, Navigate, Route, Routes, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { BarChart2, Briefcase, Home, PackageSearch, Receipt, Users, Wallet } from 'lucide-react'
+import { BarChart2, Home, PackageSearch, Receipt, Users, Wallet } from 'lucide-react'
 
 import { NotificationProvider } from './design-system/Notification'
 import type { NavItem } from './design-system/BottomNav'
@@ -11,35 +11,50 @@ import { useAuth } from './modules/auth/AuthContext'
 import { PublicOnly, RequireBusiness, RequireProfile } from './modules/auth/RouteGuards'
 import { ProfileMenu } from './components/ProfileMenu'
 import { SyncBadge } from './components/SyncBadge'
+import { NotificationBell } from './components/NotificationBell'
+import { PWAInstallBanner } from './components/PWAInstallBanner'
 import { SyncProvider } from './context/SyncContext'
 import { SubscriptionProvider } from './modules/subscriptions/SubscriptionContext'
 import { StaffProvider } from './modules/staff/StaffContext'
+import { AppNotificationProvider } from './modules/notifications/NotificationContext'
 import { getBusinessConfig } from './modules/auth/businessConfig'
 
-// Pages
-import { AuthCallbackPage } from './pages/AuthCallbackPage'
-import { ContactPage } from './pages/ContactPage'
-import { CustomersPage } from './pages/CustomersPage'
-import { EditBusinessProfilePage } from './pages/EditBusinessProfilePage'
-import { ExpensesPage } from './pages/ExpensesPage'
-import { InventoryPage } from './pages/InventoryPage'
-import { LoginPage } from './pages/LoginPage'
-import { OnboardingPage } from './pages/OnboardingPage'
-import { OverviewPage } from './pages/OverviewPage'
-import { PosPage } from './pages/PosPage'
-import { PrivacyPage } from './pages/PrivacyPage'
-import { ProductsPage } from './pages/ProductsPage'
-import { PurchasesPage } from './pages/PurchasesPage'
-import { RegisterPage } from './pages/RegisterPage'
-import { ReportsPage } from './pages/ReportsPage'
-import { SalesPage } from './pages/SalesPage'
-import { StockPage } from './pages/StockPage'
-import { SuppliersPage } from './pages/SuppliersPage'
-import { TermsPage } from './pages/TermsPage'
-import { WelcomePage } from './pages/WelcomePage'
-import { SubscriptionPage } from './pages/SubscriptionPage'
-import { MorePage } from './pages/MorePage'
-import { StaffPage } from './pages/StaffPage'
+import { lazy, Suspense } from 'react'
+import { Spinner } from './design-system/LoadingState'
+
+// Lazy-load all pages for code splitting — each becomes its own chunk
+const AuthCallbackPage       = lazy(() => import('./pages/AuthCallbackPage').then(m => ({ default: m.AuthCallbackPage })))
+const ContactPage             = lazy(() => import('./pages/ContactPage').then(m => ({ default: m.ContactPage })))
+const CustomersPage           = lazy(() => import('./pages/CustomersPage').then(m => ({ default: m.CustomersPage })))
+const EditBusinessProfilePage = lazy(() => import('./pages/EditBusinessProfilePage').then(m => ({ default: m.EditBusinessProfilePage })))
+const ExpensesPage            = lazy(() => import('./pages/ExpensesPage').then(m => ({ default: m.ExpensesPage })))
+const InventoryPage           = lazy(() => import('./pages/InventoryPage').then(m => ({ default: m.InventoryPage })))
+const LoginPage               = lazy(() => import('./pages/LoginPage').then(m => ({ default: m.LoginPage })))
+const OnboardingPage          = lazy(() => import('./pages/OnboardingPage').then(m => ({ default: m.OnboardingPage })))
+const OverviewPage            = lazy(() => import('./pages/OverviewPage').then(m => ({ default: m.OverviewPage })))
+const PosPage                 = lazy(() => import('./pages/PosPage').then(m => ({ default: m.PosPage })))
+const PrivacyPage             = lazy(() => import('./pages/PrivacyPage').then(m => ({ default: m.PrivacyPage })))
+const ProductsPage            = lazy(() => import('./pages/ProductsPage').then(m => ({ default: m.ProductsPage })))
+const PurchasesPage           = lazy(() => import('./pages/PurchasesPage').then(m => ({ default: m.PurchasesPage })))
+const RegisterPage            = lazy(() => import('./pages/RegisterPage').then(m => ({ default: m.RegisterPage })))
+const ReportsPage             = lazy(() => import('./pages/ReportsPage').then(m => ({ default: m.ReportsPage })))
+const SalesPage               = lazy(() => import('./pages/SalesPage').then(m => ({ default: m.SalesPage })))
+const StockPage               = lazy(() => import('./pages/StockPage').then(m => ({ default: m.StockPage })))
+const SuppliersPage           = lazy(() => import('./pages/SuppliersPage').then(m => ({ default: m.SuppliersPage })))
+const TermsPage               = lazy(() => import('./pages/TermsPage').then(m => ({ default: m.TermsPage })))
+const WelcomePage             = lazy(() => import('./pages/WelcomePage').then(m => ({ default: m.WelcomePage })))
+const SubscriptionPage        = lazy(() => import('./pages/SubscriptionPage').then(m => ({ default: m.SubscriptionPage })))
+const MorePage                = lazy(() => import('./pages/MorePage').then(m => ({ default: m.MorePage })))
+const StaffPage               = lazy(() => import('./pages/StaffPage').then(m => ({ default: m.StaffPage })))
+const NotificationsPage       = lazy(() => import('./pages/NotificationsPage').then(m => ({ default: m.NotificationsPage })))
+
+function PageLoader() {
+  return (
+    <div className="flex min-h-[60dvh] items-center justify-center">
+      <Spinner size="lg" label="Loading" />
+    </div>
+  )
+}
 
 const brand = (
   <div className="flex items-center">
@@ -61,7 +76,12 @@ export function App() {
           <BrowserRouter>
             <SubscriptionProvider>
               <StaffProvider>
-                <AppRoutes />
+                <AppNotificationProvider>
+                  <Suspense fallback={<PageLoader />}>
+                    <AppRoutes />
+                  </Suspense>
+                  <PWAInstallBanner />
+                </AppNotificationProvider>
               </StaffProvider>
             </SubscriptionProvider>
           </BrowserRouter>
@@ -79,21 +99,10 @@ function AppRoutes() {
   const isService = bizConfig.isServiceBased
 
   /**
-   * Primary nav — max 5 items always.
-   *
-   * Product businesses:  Home | Sales | Expenses | Reports | [Staff]
-   * Service businesses:  Home | Services | Expenses | Reports | [Staff]
-   *
-   * Everything else (Customers, Products, Stock, Suppliers, Purchases,
-   * Inventory, More) lives in the "Advanced" section of the account menu.
-   */
-  /**
    * Primary nav — 6 items max.
-   *
-   * Product businesses:  Home | Sales | Expenses | Products | Customers | Reports
-   * Service businesses:  Home | Services | Expenses | Clients | Reports
-   *
-   * Staff lives in Advanced (account menu), not in nav.
+   * Sales is universal for all business types.
+   * Products → Services label for service businesses.
+   * Customers → Clients label for service businesses.
    */
   const appNav: NavItem[] = [
     {
@@ -103,18 +112,17 @@ function AppRoutes() {
     },
     {
       id:    '/app/sales',
-      label: isService ? t('nav.services') : t('nav.sales'),
-      icon:  isService ? Briefcase : Receipt,
+      label: t('nav.sales'),
+      icon:  Receipt,
     },
     {
       id:    '/app/expenses',
       label: t('nav.expenses'),
       icon:  Wallet,
     },
-    // Products — same label for both business types
     {
       id:    '/app/products',
-      label: t('nav.products'),
+      label: isService ? t('nav.services') : t('nav.products'),
       icon:  PackageSearch,
     },
     {
@@ -134,7 +142,7 @@ function AppRoutes() {
   )
 
   const profileMenu = status === 'authenticated'
-    ? <div className="flex items-center gap-1"><SyncBadge /><ProfileMenu /></div>
+    ? <div className="flex items-center gap-1"><SyncBadge /><NotificationBell /><ProfileMenu /></div>
     : null
 
   const appShell = (children: React.ReactNode, activeId: string) => (
@@ -194,6 +202,8 @@ function AppRoutes() {
         element={appShell(<RequireBusiness><SuppliersPage /></RequireBusiness>, '/app')} />
       <Route path="/app/staff"
         element={appShell(<RequireBusiness><StaffPage /></RequireBusiness>, '/app')} />
+      <Route path="/app/notifications"
+        element={appShell(<RequireBusiness><NotificationsPage /></RequireBusiness>, '/app')} />
       <Route path="/app/profile"
         element={appShell(<RequireBusiness><EditBusinessProfilePage /></RequireBusiness>, '/app')} />
       <Route path="/app/subscription"

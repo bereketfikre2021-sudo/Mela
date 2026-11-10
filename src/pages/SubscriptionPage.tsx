@@ -8,20 +8,18 @@
  *   4. Free plan usage display (progress bars)
  *   5. Payment history table
  */
-import { useEffect, useState } from 'react'
-import { CreditCard } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { Check, Copy, CreditCard, Upload } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import { Button } from '../design-system/Button'
 import { EmptyState } from '../design-system/EmptyState'
-import { Input } from '../design-system/Input'
 import { Skeleton } from '../design-system/LoadingState'
 import { useNotification } from '../design-system/Notification'
-import { Select } from '../design-system/Select'
 import { StatusBadge } from '../design-system/StatusBadge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../design-system/Table'
 import { useAuth } from '../modules/auth/AuthContext'
-import { getPaymentHistory, submitPayment } from '../modules/subscriptions/api'
+import { getPaymentHistory, submitPayment, getSiteSettingsPublic } from '../modules/subscriptions/api'
 import { useSubscription } from '../modules/subscriptions/SubscriptionContext'
 import type { PaymentSubmission } from '../modules/subscriptions/types'
 
@@ -86,6 +84,7 @@ function PlanCard({
   priceLabel,
   features,
   isCurrent,
+  currentPlanLabel,
   isHighlighted,
   onSelect,
   selectLabel,
@@ -96,6 +95,7 @@ function PlanCard({
   priceLabel: string
   features: string[]
   isCurrent: boolean
+  currentPlanLabel: string
   isHighlighted: boolean
   onSelect?: () => void
   selectLabel: string
@@ -113,7 +113,7 @@ function PlanCard({
         <h3 className="text-base font-semibold text-text">{name}</h3>
         {isCurrent && (
           <StatusBadge tone="success" dot>
-            Current plan
+            {currentPlanLabel}
           </StatusBadge>
         )}
       </div>
@@ -162,9 +162,45 @@ export function SubscriptionPage() {
   const [paymentMethod, setPaymentMethod] = useState<
     'telebirr' | 'cbe_birr' | 'bank_transfer'
   >('telebirr')
-  const [txRef, setTxRef] = useState('')
-  const [txRefError, setTxRefError] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [screenshot, setScreenshot] = useState<File | null>(null)
+  const [screenshotPreview, setScreenshotPreview] = useState<string | null>(null)
+  const [screenshotError, setScreenshotError] = useState('')
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [copiedKey, setCopiedKey] = useState<string | null>(null)
+
+  // Payment account details loaded dynamically from site_settings via paymentMethods state above
+
+  async function copyToClipboard(text: string, key: string) {
+    try {
+      await navigator.clipboard.writeText(text)
+      setCopiedKey(key)
+      setTimeout(() => setCopiedKey(null), 2000)
+    } catch {
+      // fallback silent fail
+    }
+  }
+
+  // ── Load payment methods from site_settings ───────────────────────────────
+  const [paymentMethods, setPaymentMethods] = useState<Array<{
+    id: string; label: string; holder: string; number: string; extra: string;
+    enabled: boolean; imageUrl: string;
+  }>>([
+    { id: 'telebirr',      label: 'Telebirr',       holder: 'Bereket Fikre', number: '', extra: '',                            enabled: true, imageUrl: '' },
+    { id: 'cbe_birr',      label: 'CBE Birr',        holder: 'Bereket Fikre', number: '', extra: '',                            enabled: true, imageUrl: '' },
+    { id: 'bank_transfer', label: 'Bank Transfer',   holder: 'Bereket Fikre', number: '', extra: 'Commercial Bank of Ethiopia', enabled: true, imageUrl: '' },
+  ])
+
+  useEffect(() => {
+    getSiteSettingsPublic().then(settings => {
+      if (settings.payment_methods_json) {
+        try {
+          const methods = JSON.parse(settings.payment_methods_json)
+          if (Array.isArray(methods) && methods.length > 0) setPaymentMethods(methods)
+        } catch { /* use defaults */ }
+      }
+    })
+  }, [])
 
   // Payment history
   const [history, setHistory] = useState<PaymentSubmission[]>([])
@@ -188,26 +224,28 @@ export function SubscriptionPage() {
   // Show form when a premium cycle is chosen
   function handleSelectPremium() {
     setShowForm(true)
-    setTxRef('')
-    setTxRefError('')
+    setScreenshot(null)
+    setScreenshotPreview(null)
+    setScreenshotError('')
   }
 
   // Validate and submit payment
   async function handleSubmitPayment() {
-    const trimmed = txRef.trim()
-    if (trimmed.length < 4 || trimmed.length > 100) {
-      setTxRefError(t('subscription.form.txRefError'))
+    if (!screenshot) {
+      setScreenshotError(t('subscription.form.screenshotRequired'))
       return
     }
     if (!user) return
     setSubmitting(true)
     const amount = billingCycle === 'monthly' ? MONTHLY_PRICE : YEARLY_PRICE
+    // Use screenshot filename + timestamp as the transaction reference
+    const txReference = `${screenshot.name}_${Date.now()}`
     const { error } = await submitPayment(user.id, {
       plan: 'premium',
       billing_cycle: billingCycle,
       amount_etb: amount,
       payment_method: paymentMethod,
-      transaction_reference: trimmed,
+      transaction_reference: txReference,
     })
     setSubmitting(false)
     if (error) {
@@ -223,7 +261,7 @@ export function SubscriptionPage() {
       title: t('subscription.form.submitSuccess'),
     })
     setShowForm(false)
-    setTxRef('')
+    setScreenshot(null)
     // Refresh history
     if (user) {
       const { data } = await getPaymentHistory(user.id)
@@ -391,6 +429,7 @@ export function SubscriptionPage() {
             priceLabel={t('subscription.pricing.freeForever')}
             features={freeFeatures}
             isCurrent={isCurrentFree}
+            currentPlanLabel={t('subscription.pricing.currentPlanLabel')}
             isHighlighted={false}
             selectLabel={t('subscription.pricing.currentPlanLabel')}
           />
@@ -406,6 +445,7 @@ export function SubscriptionPage() {
             }
             features={premiumFeatures}
             isCurrent={billingCycle === 'monthly' ? isCurrentMonthly : isCurrentYearly}
+            currentPlanLabel={t('subscription.pricing.currentPlanLabel')}
             isHighlighted
             onSelect={handleSelectPremium}
             selectLabel={t('subscription.pricing.upgrade')}
@@ -414,7 +454,6 @@ export function SubscriptionPage() {
         </div>
       </section>
 
-      {/* ── Section 3: Payment submission form ────────────────────────────── */}
       {showForm && !isActive && (
         <section aria-labelledby="payment-form-heading" className="mb-8">
           <div className="rounded-xl border border-border bg-surface p-5">
@@ -422,62 +461,148 @@ export function SubscriptionPage() {
               {t('subscription.form.heading')}
             </h2>
 
-            <div className="flex flex-col gap-4 max-w-md">
-              {/* Amount (read-only) */}
+            <div className="flex flex-col gap-5 max-w-md">
+              {/* Amount */}
               <div className="rounded-lg border border-border bg-background px-4 py-3">
                 <p className="text-xs text-secondary">{t('subscription.form.amount')}</p>
                 <p className="text-xl font-bold text-figures">
                   ETB {premiumPrice.toLocaleString('en-ET')}
                   <span className="ml-1 text-sm font-normal text-secondary">
-                    {billingCycle === 'monthly'
-                      ? t('subscription.pricing.perMonth')
-                      : t('subscription.pricing.perYear')}
+                    {billingCycle === 'monthly' ? t('subscription.pricing.perMonth') : t('subscription.pricing.perYear')}
                   </span>
                 </p>
               </div>
 
-              {/* Payment method */}
-              <Select
-                label={t('subscription.form.paymentMethod')}
-                options={[
-                  { value: 'telebirr', label: 'Telebirr' },
-                  { value: 'cbe_birr', label: 'CBE Birr' },
-                  { value: 'bank_transfer', label: t('subscription.form.bankTransfer') },
-                ]}
-                value={paymentMethod}
-                onChange={(e) =>
-                  setPaymentMethod(
-                    e.target.value as 'telebirr' | 'cbe_birr' | 'bank_transfer'
-                  )
-                }
-              />
+              {/* Step 1: Payment method grid */}
+              <div>
+                <p className="mb-3 text-sm font-medium text-text">{t('subscription.form.paymentMethod')}</p>
+                <div className="grid grid-cols-3 gap-3">
+                  {paymentMethods.filter(m => m.enabled).map(m => (
+                    <button
+                      key={m.id}
+                      type="button"
+                      onClick={() => setPaymentMethod(m.id as typeof paymentMethod)}
+                      className={[
+                        'flex flex-col items-center gap-2 rounded-xl border-2 p-3 text-center transition-all',
+                        paymentMethod === m.id
+                          ? 'border-primary bg-mint shadow-sm'
+                          : 'border-border bg-surface hover:border-primary/40',
+                      ].join(' ')}
+                    >
+                      {/* Logo — image or initials fallback */}
+                      {m.imageUrl ? (
+                        <img
+                          src={m.imageUrl}
+                          alt={m.label}
+                          className="h-12 w-12 rounded-xl object-cover border border-border bg-white"
+                        />
+                      ) : (
+                        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-background border border-border text-lg font-bold text-secondary">
+                          {m.label.slice(0, 1).toUpperCase()}
+                        </div>
+                      )}
+                      <span className="text-xs font-medium text-text leading-tight">{m.label}</span>
+                      {paymentMethod === m.id && (
+                        <span className="flex h-4 w-4 items-center justify-center rounded-full bg-primary">
+                          <Check className="h-2.5 w-2.5 text-white" />
+                        </span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
 
-              {/* Transaction reference */}
-              <Input
-                label={t('subscription.form.txRef')}
-                helperText={t('subscription.form.txRefHelper')}
-                value={txRef}
-                onChange={(e) => {
-                  setTxRef(e.target.value)
-                  setTxRefError('')
-                }}
-                error={txRefError}
-                maxLength={100}
-              />
+              {/* Step 2: Reveal account details */}
+              {(() => {
+                const selected = paymentMethods.find(m => m.id === paymentMethod)
+                if (!selected) return null
+                const rows = [
+                  ...(selected.extra ? [{ label: selected.id === 'bank_transfer' ? t('subscription.form.bankName') : t('subscription.form.accountName'), value: selected.extra, key: 'extra' }] : []),
+                  { label: t('subscription.form.accountName'), value: selected.holder, key: 'holder' },
+                  { label: selected.id === 'bank_transfer' ? t('subscription.form.accountNum') : t('subscription.form.phoneNumber'), value: selected.number, key: 'number' },
+                ]
+                return (
+                  <div className="rounded-xl border-2 border-primary/20 bg-mint p-4 space-y-3">
+                    <div className="flex items-center gap-2">
+                      {selected.imageUrl ? (
+                        <img src={selected.imageUrl} alt={selected.label}
+                          className="h-8 w-8 rounded-xl object-cover border border-primary/20" />
+                      ) : (
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-sm font-bold text-primary">
+                          {selected.label.slice(0, 1)}
+                        </div>
+                      )}
+                      <p className="text-xs font-semibold uppercase tracking-wide text-primary">
+                        {t('subscription.form.payTo')} · {selected.label}
+                      </p>
+                    </div>
+                    {rows.map(row => (
+                      <div key={row.key} className="flex items-center justify-between gap-2">
+                        <div>
+                          <p className="text-xs text-secondary">{row.label}</p>
+                          <p className="text-sm font-semibold text-text">{row.value || '—'}</p>
+                        </div>
+                        {row.value && (
+                          <button type="button" onClick={() => void copyToClipboard(row.value, row.key)}
+                            className="rounded-lg p-2 text-primary hover:bg-primary/10 transition-colors"
+                            aria-label={t('subscription.form.copy')}>
+                            {copiedKey === row.key
+                              ? <Check className="h-4 w-4 text-success" />
+                              : <Copy className="h-4 w-4" />}
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )
+              })()}
 
-              {/* Actions */}
-              <div className="flex items-center gap-3 pt-1">
-                <Button
-                  loading={submitting}
-                  onClick={() => void handleSubmitPayment()}
-                >
+              {/* Step 3: Screenshot upload */}
+              <div>
+                <p className="mb-1.5 text-sm font-medium text-text">{t('subscription.form.screenshot')}</p>
+                <p className="mb-3 text-xs text-secondary">{t('subscription.form.screenshotHelper')}</p>
+                <input ref={fileInputRef} type="file" accept="image/*" className="hidden"
+                  onChange={e => {
+                    const f = e.target.files?.[0] ?? null
+                    setScreenshot(f)
+                    setScreenshotError('')
+                    if (f) { const url = URL.createObjectURL(f); setScreenshotPreview(url) }
+                    else setScreenshotPreview(null)
+                  }}
+                />
+                <button type="button" onClick={() => fileInputRef.current?.click()}
+                  className={[
+                    'flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed py-6 transition-colors',
+                    screenshot
+                      ? 'border-success bg-success-soft text-success'
+                      : 'border-border bg-background text-secondary hover:border-primary hover:text-primary',
+                    screenshotError ? 'border-danger' : '',
+                  ].join(' ')}>
+                  {screenshot
+                    ? <><Check className="h-5 w-5" /><span className="text-sm font-medium">{screenshot.name}</span></>
+                    : <><Upload className="h-5 w-5" /><span className="text-sm font-medium">{t('subscription.form.uploadScreenshot')}</span></>}
+                </button>
+                {screenshotPreview && (
+                  <div className="mt-3 relative rounded-xl overflow-hidden border border-border">
+                    <img src={screenshotPreview} alt="Payment screenshot"
+                      className="w-full max-h-64 object-contain bg-background" />
+                    <button type="button"
+                      onClick={() => { setScreenshot(null); setScreenshotPreview(null) }}
+                      className="absolute top-2 right-2 rounded-full bg-black/50 p-1 text-white hover:bg-black/70">
+                      ✕
+                    </button>
+                  </div>
+                )}
+                {screenshotError && <p className="mt-1.5 text-xs text-danger">{screenshotError}</p>}
+              </div>
+
+              {/* Submit */}
+              <div className="flex items-center gap-3">
+                <Button loading={submitting} onClick={() => void handleSubmitPayment()}>
                   {t('subscription.form.submit')}
                 </Button>
-                <Button
-                  variant="ghost"
-                  disabled={submitting}
-                  onClick={() => setShowForm(false)}
-                >
+                <Button variant="ghost" disabled={submitting}
+                  onClick={() => { setShowForm(false); setScreenshot(null); setScreenshotPreview(null) }}>
                   {t('common.cancel')}
                 </Button>
               </div>

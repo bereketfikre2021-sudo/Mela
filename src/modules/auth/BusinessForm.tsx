@@ -13,22 +13,25 @@ interface BusinessFormProps {
   initial?: Business
   /** Pre-selected type (from the type picker in onboarding) */
   preselectedType?: BusinessType
+  /** When true (edit mode + owner has existing data), business type is locked */
+  hasData?: boolean
   onSubmit: (input: BusinessInput) => Promise<void>
   submitting: boolean
 }
 
-export function BusinessForm({ mode, initial, preselectedType, onSubmit, submitting }: BusinessFormProps) {
+export function BusinessForm({ mode, initial, preselectedType, hasData = false, onSubmit, submitting }: BusinessFormProps) {
   const { t, i18n } = useTranslation()
 
   const [name,      setName]      = useState(initial?.name ?? '')
   const [type,      setType]      = useState<BusinessType>(
     (initial?.type as BusinessType) ?? preselectedType ?? 'retail'
   )
-  const [ownerName, setOwnerName] = useState(initial?.owner_name ?? '')
-  const [phone,     setPhone]     = useState(initial?.phone ?? '')
-  const [language,  setLanguage]  = useState<'en' | 'am'>(
+  const [ownerName,    setOwnerName]    = useState(initial?.owner_name ?? '')
+  const [phone,        setPhone]        = useState(initial?.phone ?? '')
+  const [language,     setLanguage]     = useState<'en' | 'am'>(
     initial?.language ?? (i18n.resolvedLanguage === 'am' ? 'am' : 'en')
   )
+  const [closingTime,  setClosingTime]  = useState(initial?.closing_time ?? '')
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   const typeOptions: SelectOption[] = ALL_BUSINESS_TYPES.map(c => ({
@@ -36,6 +39,7 @@ export function BusinessForm({ mode, initial, preselectedType, onSubmit, submitt
     label: t(`businessTypes.${c.type}`),
   }))
   const languageOptions: SelectOption[] = supportedLanguages.map(l => ({ value: l.code, label: l.label }))
+  const currentTypeLabel = t(`businessTypes.${type}`)
 
   function validate(field: string, value: string): string {
     if (field === 'name')      return value.trim().length < 2 ? t('validation.nameMin') : ''
@@ -57,7 +61,7 @@ export function BusinessForm({ mode, initial, preselectedType, onSubmit, submitt
     }
     setErrors(next)
     if (Object.values(next).some(Boolean)) return
-    await onSubmit({ name: name.trim(), type, owner_name: ownerName.trim(), phone: phone.trim(), language })
+    await onSubmit({ name: name.trim(), type, owner_name: ownerName.trim(), phone: phone.trim(), language, closing_time: closingTime || null })
   }
 
   return (
@@ -76,12 +80,23 @@ export function BusinessForm({ mode, initial, preselectedType, onSubmit, submitt
 
       {/* Only show type selector in edit mode — onboarding uses the visual picker */}
       {mode === 'edit' && (
-        <Select
-          label={t('business.form.businessType')}
-          options={typeOptions}
-          value={type}
-          onChange={e => setType(e.target.value as BusinessType)}
-        />
+        hasData ? (
+          <div>
+            <p className="mb-1.5 text-sm font-medium text-text">{t('business.form.businessType')}</p>
+            <div className="flex items-center gap-2 rounded-md border border-border bg-background px-3 py-2">
+              <span className="text-sm text-text">{currentTypeLabel}</span>
+              <span className="ml-auto text-xs text-secondary">{t('business.form.typeLocked')}</span>
+            </div>
+            <p className="mt-1.5 text-xs text-secondary">{t('business.form.typeLockedHelper')}</p>
+          </div>
+        ) : (
+          <Select
+            label={t('business.form.businessType')}
+            options={typeOptions}
+            value={type}
+            onChange={e => setType(e.target.value as BusinessType)}
+          />
+        )
       )}
 
       <section className="flex flex-col gap-4">
@@ -115,6 +130,13 @@ export function BusinessForm({ mode, initial, preselectedType, onSubmit, submitt
           options={languageOptions}
           value={language}
           onChange={e => setLanguage(e.target.value as 'en' | 'am')}
+        />
+        <Input
+          label={t('business.form.closingTime')}
+          helperText={t('business.form.closingTimeHelper')}
+          type="time"
+          value={closingTime}
+          onChange={e => setClosingTime(e.target.value)}
         />
       </section>
 

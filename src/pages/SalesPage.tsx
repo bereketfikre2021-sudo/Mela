@@ -9,10 +9,11 @@ import { EmptyState } from '../design-system/EmptyState'
 import { Skeleton } from '../design-system/LoadingState'
 import { StatusBadge } from '../design-system/StatusBadge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../design-system/Table'
-import { useAuth } from '../modules/auth/AuthContext'
-import { getBusinessConfig } from '../modules/auth/businessConfig'
 import { useSales } from '../modules/retail/useSales'
+import { markSaleAsPaid } from '../modules/retail/salesApi'
+import { useNotification } from '../design-system/Notification'
 import type { PaymentStatus, SaleWithItems } from '../modules/retail/types'
+import { Breadcrumb } from '../components/Breadcrumb'
 
 type Period = 'today' | 'week' | 'month' | 'all'
 
@@ -53,13 +54,20 @@ function startOf(period: Period): Date | null {
 export function SalesPage() {
   const { t }       = useTranslation()
   const navigate    = useNavigate()
-  const { profile } = useAuth()
-  const bizConfig   = getBusinessConfig(profile?.type ?? 'retail')
-  const isService   = bizConfig.isServiceBased
-
+  const { notify }  = useNotification()
   const { sales, status, errorMessage, reload } = useSales()
-  const [period,   setPeriod]   = useState<Period>('today')
-  const [selected, setSelected] = useState<SaleWithItems | null>(null)
+  const [period,       setPeriod]       = useState<Period>('today')
+  const [selected,     setSelected]     = useState<SaleWithItems | null>(null)
+  const [markingPaidId, setMarkingPaidId] = useState<string | null>(null)
+
+  async function handleMarkPaid(saleId: string) {
+    setMarkingPaidId(saleId)
+    const { error } = await markSaleAsPaid(saleId)
+    setMarkingPaidId(null)
+    if (error) { notify({ tone: 'danger', title: t('notification.error.title'), description: error.message }); return }
+    notify({ tone: 'success', title: t('sales.markedPaid') })
+    void reload()
+  }
 
   const filtered = useMemo(() => {
     const cutoff = startOf(period)
@@ -74,8 +82,8 @@ export function SalesPage() {
     { key: 'all',   label: t('sales.filter.all')   },
   ]
 
-  const pageTitle = isService ? t('nav.services') : t('sales.title')
-  const newLabel  = isService ? t('nav.newService') : t('nav.newSale')
+  const pageTitle = t('sales.title')
+  const newLabel  = t('nav.newSale')
 
   if (status === 'loading') {
     return (
@@ -107,7 +115,10 @@ export function SalesPage() {
       <div className="py-6 md:py-10 space-y-4">
         {/* Header */}
         <div className="flex items-center justify-between gap-4">
-          <h1 className="text-2xl font-bold text-text">{pageTitle}</h1>
+          <div>
+            <Breadcrumb items={[{ label: pageTitle }]} />
+            <h1 className="text-2xl font-bold text-text">{pageTitle}</h1>
+          </div>
           <Button
             size="sm"
             leadingIcon={<Plus className="h-4 w-4" />}
@@ -189,13 +200,25 @@ export function SalesPage() {
                       </StatusBadge>
                     </TableCell>
                     <TableCell>
-                      <button
-                        type="button"
-                        onClick={() => setSelected(s)}
-                        className="text-xs font-medium text-primary hover:underline"
-                      >
-                        {t('sales.view')}
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setSelected(s)}
+                          className="text-xs font-medium text-primary hover:underline"
+                        >
+                          {t('sales.view')}
+                        </button>
+                        {s.payment_status === 'pending' && (
+                          <button
+                            type="button"
+                            disabled={markingPaidId === s.id}
+                            onClick={() => void handleMarkPaid(s.id)}
+                            className="text-xs font-medium text-success hover:underline disabled:opacity-50"
+                          >
+                            {markingPaidId === s.id ? '…' : t('sales.markPaid')}
+                          </button>
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -231,6 +254,18 @@ export function SalesPage() {
                   </StatusBadge>
                 </dd>
               </div>
+              {selected.customer_name && (
+                <div>
+                  <dt className="text-secondary">{t('sales.detail.customer')}</dt>
+                  <dd className="font-medium">{selected.customer_name}</dd>
+                </div>
+              )}
+              {selected.notes && (
+                <div className="col-span-2">
+                  <dt className="text-secondary">{t('sales.detail.notes')}</dt>
+                  <dd className="font-medium">{selected.notes}</dd>
+                </div>
+              )}
             </dl>
             <div className="rounded-lg border border-border overflow-hidden">
               <table className="w-full text-sm">

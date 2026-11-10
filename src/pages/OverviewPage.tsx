@@ -12,7 +12,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { AlertTriangle, ArrowRight, Plus, Receipt, ShoppingCart, TrendingDown, TrendingUp, Wallet } from 'lucide-react'
+import { AlertTriangle, ArrowRight, BarChart2, Bell, PackageSearch, Receipt, ShoppingCart, TrendingDown, TrendingUp, Users, Wallet } from 'lucide-react'
 
 import { Button } from '../design-system/Button'
 import { Skeleton } from '../design-system/LoadingState'
@@ -90,8 +90,8 @@ export function OverviewPage() {
   }
 
   const s = summary!
-  const isProfit = s.netProfit !== null && s.netProfit >= 0
-  const isLoss   = s.netProfit !== null && s.netProfit < 0
+  const isProfit = s.netProfit >= 0
+  const isLoss   = s.netProfit < 0
 
   return (
     <div className="py-6 md:py-10 space-y-5">
@@ -141,7 +141,7 @@ export function OverviewPage() {
             {t('home.profit')}
           </p>
           <p className={`mt-0.5 text-lg font-bold text-figures truncate ${isLoss ? 'text-danger' : isProfit ? 'text-text' : 'text-muted'}`}>
-            {s.netProfit !== null ? fmtETBCompact(s.netProfit) : '—'}
+            {fmtETBCompact(s.netProfit)}
           </p>
           {!bizConfig.isServiceBased && s.cogsIncomplete && (
             <p className="mt-0.5 text-[10px] text-warning">{t('overview.metric.partial')}</p>
@@ -184,19 +184,48 @@ export function OverviewPage() {
         {bizConfig.newSaleLabel}
       </Button>
 
-      {/* Quick actions */}
-      <div className="grid grid-cols-3 gap-2">
-        {[
-          { icon: <Plus className="h-4 w-4" aria-hidden="true" />, label: t('home.quickExpense'),  route: '/app/expenses'  },
-          { icon: <Receipt className="h-4 w-4" aria-hidden="true" />, label: t('home.quickSales'),  route: '/app/sales'    },
-          { icon: <Wallet className="h-4 w-4" aria-hidden="true" />, label: t('home.quickReport'),  route: '/app/reports'  },
-        ].map(a => (
-          <button key={a.route} type="button" onClick={() => navigate(a.route)}
-            className="flex flex-col items-center gap-1.5 rounded-xl border border-border bg-surface py-3 text-center transition-colors hover:bg-background">
-            <span className="text-secondary">{a.icon}</span>
-            <span className="text-[11px] font-medium text-secondary leading-tight">{a.label}</span>
-          </button>
-        ))}
+      {/* Quick actions — business-type aware */}
+      <div className="space-y-2">
+        <h2 className="text-xs font-semibold uppercase tracking-wide text-secondary">{t('home.quickActions')}</h2>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          {[
+            { icon: <ShoppingCart className="h-5 w-5" aria-hidden="true" />, label: bizConfig.newSaleLabel, route: '/app/pos',      primary: true },
+            { icon: <Wallet className="h-5 w-5" aria-hidden="true" />,       label: t('home.quickExpense'), route: '/app/expenses',  primary: false },
+            { icon: <Receipt className="h-5 w-5" aria-hidden="true" />,      label: t('home.quickSales'),   route: '/app/sales',     primary: false },
+            { icon: <BarChart2 className="h-5 w-5" aria-hidden="true" />,    label: t('home.quickReport'),  route: '/app/reports',   primary: false },
+          ].map(a => (
+            <button key={a.route} type="button" onClick={() => navigate(a.route)}
+              className={[
+                'flex flex-col items-center gap-2 rounded-xl border py-4 text-center transition-colors',
+                a.primary
+                  ? 'border-primary bg-primary text-white hover:bg-primary-interactive'
+                  : 'border-border bg-surface text-secondary hover:bg-background hover:text-text',
+              ].join(' ')}>
+              {a.icon}
+              <span className="text-xs font-medium leading-tight">{a.label}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* Secondary quick actions row */}
+        <div className="grid grid-cols-3 gap-2">
+          {[
+            ...(!bizConfig.isServiceBased ? [
+              { icon: <PackageSearch className="h-4 w-4" aria-hidden="true" />, label: t('nav.products'), route: '/app/products' },
+              { icon: <Users className="h-4 w-4" aria-hidden="true" />,         label: t('nav.customers'), route: '/app/customers' },
+            ] : [
+              { icon: <PackageSearch className="h-4 w-4" aria-hidden="true" />, label: t('nav.services'), route: '/app/products' },
+              { icon: <Users className="h-4 w-4" aria-hidden="true" />,         label: t('nav.clients'), route: '/app/customers' },
+            ]),
+            { icon: <Bell className="h-4 w-4" aria-hidden="true" />, label: t('notifications.title'), route: '/app/notifications' },
+          ].map(a => (
+            <button key={a.route} type="button" onClick={() => navigate(a.route)}
+              className="flex items-center gap-2 rounded-xl border border-border bg-surface px-3 py-2.5 text-left transition-colors hover:bg-background">
+              <span className="text-secondary">{a.icon}</span>
+              <span className="text-xs font-medium text-secondary">{a.label}</span>
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Recent sales */}
@@ -237,14 +266,15 @@ export function OverviewPage() {
         )}
       </section>
 
-      {/* Full report link */}
-      <p className="text-center text-xs text-secondary">
-        {t('home.moreDetails')}{' '}
-        <button type="button" onClick={() => navigate('/app/reports')}
-          className="font-medium text-primary hover:underline">
-          {t('home.viewFullReport')}
-        </button>
-      </p>
+      {/* View full report — prominent button */}
+      <Button
+        variant="secondary"
+        fullWidth
+        leadingIcon={<BarChart2 className="h-4 w-4" aria-hidden="true" />}
+        onClick={() => navigate('/app/reports')}
+      >
+        {t('home.viewFullReport')}
+      </Button>
     </div>
   )
 }

@@ -12,6 +12,7 @@ export interface Product {
   cost_price: number | null
   stock_quantity: number
   unit: string
+  low_stock_threshold: number | null
   created_at: string
   updated_at: string
 }
@@ -24,11 +25,12 @@ export interface ProductInput {
   cost_price: number | null
   stock_quantity: number
   unit: string
+  low_stock_threshold: number | null
 }
 
 // ── Sales ─────────────────────────────────────────────────────────────────────
 
-export type PaymentMethod = 'cash' | 'telebirr' | 'bank_transfer'
+export type PaymentMethod = 'cash' | 'telebirr' | 'cbe_birr' | 'bank_transfer'
 export type PaymentStatus = 'paid' | 'pending' | 'cancelled'
 
 export interface Sale {
@@ -39,6 +41,9 @@ export interface Sale {
   total: number
   payment_method: PaymentMethod
   payment_status: PaymentStatus
+  customer_name: string | null
+  customer_id: string | null
+  notes: string | null
   sold_at: string
   created_at: string
   updated_at: string
@@ -71,8 +76,9 @@ export interface CheckoutPayload {
   owner_id: string
   sale_number: string
   payment_method: PaymentMethod
-  /** UUID generated once per checkout attempt. Re-sending the same key is safe
-   *  — the RPC returns the original result instead of creating a duplicate. */
   idempotency_key: string
   items: { product_id: string; quantity: number }[]
+  customer_name?: string | null
+  customer_id?: string | null
+  notes?: string | null
 }

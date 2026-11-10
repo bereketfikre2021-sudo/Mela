@@ -1,37 +1,126 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { ArrowRight } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Check } from 'lucide-react'
 
 import { Button } from '../design-system/Button'
+import { Input } from '../design-system/Input'
+import { Select } from '../design-system/Select'
 import { useNotification } from '../design-system/Notification'
 import { Spinner } from '../design-system/LoadingState'
 import { useAuth } from '../modules/auth/AuthContext'
 import { createBusiness } from '../modules/auth/api'
 import { createProduct, getProducts } from '../modules/retail/api'
-import { BusinessForm } from '../modules/auth/BusinessForm'
 import { ALL_BUSINESS_TYPES, getBusinessConfig, type BusinessType } from '../modules/auth/businessConfig'
+import { supportedLanguages } from '../locales/i18n'
 import type { BusinessInput } from '../modules/auth/types'
 
-type Step = 'pick-type' | 'fill-details'
+type Step = 1 | 2 | 3
+
+const STEPS = 3
+
+function ProgressBar({ current, total }: { current: Step; total: number }) {
+  const { t } = useTranslation()
+  return (
+    <div className="mb-8">
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-xs font-medium text-secondary">
+          {t('onboarding.step', { current, total })}
+        </span>
+        <span className="text-xs text-secondary">
+          {Math.round(((current - 1) / total) * 100)}%
+        </span>
+      </div>
+      <div className="h-1.5 w-full rounded-full bg-border overflow-hidden">
+        <div
+          className="h-full rounded-full bg-primary transition-all duration-300"
+          style={{ width: `${((current - 1) / total) * 100}%` }}
+        />
+      </div>
+      <div className="mt-3 flex justify-between">
+        {Array.from({ length: total }, (_, i) => (
+          <div key={i} className="flex flex-col items-center gap-1">
+            <div className={[
+              'flex h-7 w-7 items-center justify-center rounded-full border-2 text-xs font-bold transition-colors',
+              i + 1 < current
+                ? 'border-primary bg-primary text-white'
+                : i + 1 === current
+                  ? 'border-primary bg-surface text-primary'
+                  : 'border-border bg-surface text-muted',
+            ].join(' ')}>
+              {i + 1 < current ? <Check className="h-3.5 w-3.5" /> : i + 1}
+            </div>
+            <span className="text-[10px] text-secondary whitespace-nowrap">
+              {t(`onboarding.stepLabel.${i + 1}`)}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
 
 export function OnboardingPage() {
-  const { t }      = useTranslation()
-  const navigate   = useNavigate()
-  const { notify } = useNotification()
+  const { t, i18n } = useTranslation()
+  const navigate    = useNavigate()
+  const { notify }  = useNotification()
   const { user, refreshProfile } = useAuth()
 
-  const [step,       setStep]       = useState<Step>('pick-type')
+  const [step,       setStep]       = useState<Step>(1)
   const [bizType,    setBizType]    = useState<BusinessType>('retail')
+  const [bizName,    setBizName]    = useState('')
+  const [ownerName,  setOwnerName]  = useState('')
+  const [phone,      setPhone]      = useState('')
+  const [language,   setLanguage]   = useState<'en' | 'am'>(
+    i18n.resolvedLanguage === 'am' ? 'am' : 'en'
+  )
+  const [closingTime, setClosingTime] = useState('')
+  const [errors,     setErrors]     = useState<Record<string, string>>({})
   const [submitting, setSubmitting] = useState(false)
 
-  async function handleSubmit(input: BusinessInput) {
+  const languageOptions = supportedLanguages.map(l => ({ value: l.code, label: l.label }))
+
+  function validateStep2() {
+    const next: Record<string, string> = {}
+    if (bizName.trim().length < 2) next.bizName = t('validation.nameMin')
+    setErrors(next)
+    return Object.keys(next).length === 0
+  }
+
+  function validateStep3() {
+    const next: Record<string, string> = {}
+    if (ownerName.trim().length < 2) next.ownerName = t('validation.nameMin')
+    if (phone.trim().length < 7) next.phone = t('validation.phone')
+    setErrors(next)
+    return Object.keys(next).length === 0
+  }
+
+  function next() {
+    if (step === 1) { setStep(2); return }
+    if (step === 2 && !validateStep2()) return
+    if (step === 2) { setStep(3); return }
+  }
+
+  function back() {
+    if (step === 2) setStep(1)
+    if (step === 3) setStep(2)
+  }
+
+  async function handleSubmit() {
+    if (!validateStep3()) return
     if (!user) return
     setSubmitting(true)
 
-    // Create the business with the chosen type
-    const toCreate = { ...input, type: bizType }
-    const { error } = await createBusiness(toCreate, user.id)
+    const input: BusinessInput = {
+      name:         bizName.trim(),
+      type:         bizType,
+      owner_name:   ownerName.trim(),
+      phone:        phone.trim(),
+      language,
+      closing_time: closingTime || null,
+    }
+
+    const { error } = await createBusiness(input, user.id)
 
     if (error && /duplicate|unique|constraint/i.test(error.message)) {
       await refreshProfile()
@@ -46,22 +135,18 @@ export function OnboardingPage() {
       return
     }
 
-    // Silently add starter products only if the user has no products yet
-    // (prevents duplicate seeding on retries or re-onboarding)
-    const { data: existingProducts } = await getProducts()
-    const alreadyHasProducts = existingProducts && existingProducts.length > 0
-
-    if (!alreadyHasProducts) {
-      const config  = getBusinessConfig(bizType)
+    // Seed starter products
+    const { data: existing } = await getProducts()
+    if (!existing || existing.length === 0) {
+      const config = getBusinessConfig(bizType)
       await Promise.allSettled(
         config.starterProducts.map(p =>
           createProduct({
-            name:                p.name,
-            sku:                 null,
-            selling_price:       p.defaultPrice,
-            cost_price:          null,
-            stock_quantity:      0,
-            unit:                p.unit,
+            name: p.name, sku: null,
+            selling_price: p.defaultPrice,
+            cost_price: null,
+            stock_quantity: getBusinessConfig(bizType).isServiceBased ? 999999 : 0,
+            unit: p.unit,
             low_stock_threshold: null,
           }, user.id)
         )
@@ -82,83 +167,135 @@ export function OnboardingPage() {
     )
   }
 
-  // ── Step 1: pick business type ─────────────────────────────────────────────
-  if (step === 'pick-type') {
-    return (
-      <div className="mx-auto max-w-lg px-4 py-10 md:py-16">
-        {/* Header */}
-        <h1 className="heading text-2xl md:text-3xl">{t('onboarding.pickType.title')}</h1>
-        <p className="mt-2 text-sm text-secondary">{t('onboarding.pickType.subtitle')}</p>
-
-        {/* Type grid */}
-        <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
-          {ALL_BUSINESS_TYPES.map(config => {
-            const selected = bizType === config.type
-            return (
-              <button
-                key={config.type}
-                type="button"
-                onClick={() => setBizType(config.type)}
-                className={[
-                  'flex flex-col items-start gap-2 rounded-xl border p-4 text-left transition-colors',
-                  selected
-                    ? 'border-primary bg-primary-soft'
-                    : 'border-border bg-surface hover:border-primary/40 hover:bg-background',
-                ].join(' ')}
-              >
-                <config.icon
-                  className={`h-5 w-5 ${selected ? 'text-primary' : 'text-secondary'}`}
-                  aria-hidden="true"
-                />
-                <span className={`text-sm font-semibold leading-snug ${selected ? 'text-primary' : 'text-text'}`}>
-                  {t(`businessTypes.${config.type}`)}
-                </span>
-                <span className="text-xs text-secondary leading-snug">{t(`businessTypes.${config.type}_desc`)}</span>
-              </button>
-            )
-          })}
-        </div>
-
-        <Button
-          size="lg"
-          fullWidth
-          className="mt-8"
-          trailingIcon={<ArrowRight className="h-4 w-4" aria-hidden="true" />}
-          onClick={() => setStep('fill-details')}
-        >
-          {t('onboarding.pickType.continue')}
-        </Button>
-      </div>
-    )
-  }
-
-  // ── Step 2: fill business details ──────────────────────────────────────────
-  const config = getBusinessConfig(bizType)
   return (
-    <div className="mx-auto max-w-xl px-4 py-8 md:py-14">
-      {/* Back + type badge */}
-      <div className="mb-6 flex items-center gap-3">
-        <button type="button" onClick={() => setStep('pick-type')}
-          className="text-xs font-medium text-secondary hover:text-text">
-          ← {t('onboarding.details.back')}
-        </button>
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface px-2.5 py-0.5 text-xs font-medium text-secondary">
-          <config.icon className="h-3 w-3" aria-hidden="true" />
-          {t(`businessTypes.${config.type}`)}
-        </span>
-      </div>
+    <div className="mx-auto max-w-lg px-4 py-8 md:py-12">
+      <ProgressBar current={step} total={STEPS} />
 
-      <h1 className="heading text-2xl md:text-3xl">{t('onboarding.details.title')}</h1>
-      <p className="mt-2 text-sm text-secondary">{t('onboarding.details.subtitle')}</p>
+      {/* ── Step 1: Choose business type ───────────────────────────────── */}
+      {step === 1 && (
+        <div>
+          <h1 className="text-2xl font-bold text-text">{t('onboarding.pickType.title')}</h1>
+          <p className="mt-1 text-sm text-secondary">{t('onboarding.pickType.subtitle')}</p>
 
-      <div className="mt-6">
-        <BusinessForm
-          mode="create"
-          preselectedType={bizType}
-          onSubmit={handleSubmit}
-          submitting={submitting}
-        />
-      </div>
+          <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
+            {ALL_BUSINESS_TYPES.map(config => {
+              const selected = bizType === config.type
+              return (
+                <button
+                  key={config.type}
+                  type="button"
+                  onClick={() => setBizType(config.type)}
+                  className={[
+                    'flex flex-col items-start gap-2 rounded-xl border p-4 text-left transition-colors',
+                    selected
+                      ? 'border-primary bg-primary-soft'
+                      : 'border-border bg-surface hover:border-primary/40 hover:bg-background',
+                  ].join(' ')}
+                >
+                  <config.icon className={`h-5 w-5 ${selected ? 'text-primary' : 'text-secondary'}`} aria-hidden="true" />
+                  <span className={`text-sm font-semibold leading-snug ${selected ? 'text-primary' : 'text-text'}`}>
+                    {t(`businessTypes.${config.type}`)}
+                  </span>
+                  <span className="text-xs text-secondary leading-snug">
+                    {t(`businessTypes.${config.type}_desc`)}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+
+          <Button size="lg" fullWidth className="mt-8"
+            trailingIcon={<ArrowRight className="h-4 w-4" />}
+            onClick={next}>
+            {t('onboarding.pickType.continue')}
+          </Button>
+        </div>
+      )}
+
+      {/* ── Step 2: Business details ────────────────────────────────────── */}
+      {step === 2 && (
+        <div>
+          <h1 className="text-2xl font-bold text-text">{t('onboarding.step2.title')}</h1>
+          <p className="mt-1 text-sm text-secondary">{t('onboarding.step2.subtitle')}</p>
+
+          <div className="mt-6 space-y-4">
+            <Input
+              label={t('business.form.businessName')}
+              helperText={t('business.form.businessNameHelper')}
+              value={bizName}
+              onChange={e => setBizName(e.target.value)}
+              onBlur={() => bizName.trim().length < 2 && setErrors(p => ({ ...p, bizName: t('validation.nameMin') }))}
+              error={errors.bizName}
+              autoFocus
+              autoComplete="organization"
+              maxLength={100}
+            />
+          </div>
+
+          <div className="mt-8 flex gap-3">
+            <Button variant="ghost" size="lg" leadingIcon={<ArrowLeft className="h-4 w-4" />} onClick={back}>
+              {t('common.back')}
+            </Button>
+            <Button size="lg" fullWidth trailingIcon={<ArrowRight className="h-4 w-4" />} onClick={next}>
+              {t('onboarding.pickType.continue')}
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* ── Step 3: About you + preferences ────────────────────────────── */}
+      {step === 3 && (
+        <div>
+          <h1 className="text-2xl font-bold text-text">{t('onboarding.step3.title')}</h1>
+          <p className="mt-1 text-sm text-secondary">{t('onboarding.step3.subtitle')}</p>
+
+          <div className="mt-6 space-y-4">
+            <Input
+              label={t('business.form.ownerName')}
+              helperText={t('business.form.ownerNameHelper')}
+              value={ownerName}
+              onChange={e => setOwnerName(e.target.value)}
+              error={errors.ownerName}
+              autoComplete="name"
+              maxLength={100}
+              autoFocus
+            />
+            <Input
+              label={t('business.form.phone')}
+              helperText={t('business.form.phoneHelper')}
+              value={phone}
+              onChange={e => setPhone(e.target.value)}
+              error={errors.phone}
+              inputMode="tel"
+              autoComplete="tel"
+              maxLength={20}
+            />
+            <Select
+              label={t('business.form.language')}
+              helperText={t('business.form.languageHelper')}
+              options={languageOptions}
+              value={language}
+              onChange={e => setLanguage(e.target.value as 'en' | 'am')}
+            />
+            <Input
+              label={t('business.form.closingTime')}
+              helperText={t('business.form.closingTimeHelper')}
+              type="time"
+              value={closingTime}
+              onChange={e => setClosingTime(e.target.value)}
+            />
+          </div>
+
+          <div className="mt-8 flex gap-3">
+            <Button variant="ghost" size="lg" leadingIcon={<ArrowLeft className="h-4 w-4" />} onClick={back} disabled={submitting}>
+              {t('common.back')}
+            </Button>
+            <Button size="lg" fullWidth loading={submitting} onClick={() => void handleSubmit()}>
+              {t('business.form.submitCreate')}
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

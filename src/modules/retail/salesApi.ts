@@ -28,6 +28,9 @@ export async function completeSale(
     p_payment_method:  payload.payment_method,
     p_idempotency_key: payload.idempotency_key,
     p_items:           payload.items,
+    p_customer_name:   payload.customer_name ?? null,
+    p_customer_id:     payload.customer_id ?? null,
+    p_notes:           payload.notes ?? null,
   })
   if (error) return { data: null, error: { message: error.message } }
   return { data: data as { sale_id: string; total: number; payment_status: string; already_exists: boolean }, error: null }
@@ -64,4 +67,41 @@ export async function getSale(id: string): Result<SaleWithItems> {
     .single()
   if (error) return { data: null, error: { message: error.message } }
   return { data: data as SaleWithItems, error: null }
+}
+
+/**
+ * Mark a pending sale as paid.
+ * Only updates sales that belong to the owner (RLS enforced).
+ */
+export async function markSaleAsPaid(
+  saleId: string
+): Result<{ id: string; payment_status: string }> {
+  if (!supabase) return noClient()
+  const { data, error } = await supabase
+    .from('sales')
+    .update({ payment_status: 'paid' })
+    .eq('id', saleId)
+    .eq('payment_status', 'pending')   // safety: only pending → paid
+    .select('id, payment_status')
+    .single()
+  if (error) return { data: null, error: { message: error.message } }
+  return { data: data as { id: string; payment_status: string }, error: null }
+}
+
+/**
+ * Fetch all sales for a given customer_id, newest first.
+ */
+export async function getSalesByCustomer(
+  customerId: string,
+  limit = 50
+): Result<SaleWithItems[]> {
+  if (!supabase) return noClient()
+  const { data, error } = await supabase
+    .from('sales')
+    .select('*, sale_items(*)')
+    .eq('customer_id', customerId)
+    .order('sold_at', { ascending: false })
+    .limit(limit)
+  if (error) return { data: null, error: { message: error.message } }
+  return { data: (data as SaleWithItems[]) ?? [], error: null }
 }

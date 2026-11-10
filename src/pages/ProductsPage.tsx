@@ -19,6 +19,8 @@ import { useProducts } from '../modules/retail/useProducts'
 import type { Product, ProductInput } from '../modules/retail/types'
 import type { MovementType } from '../modules/retail/inventoryTypes'
 import { useSubscription } from '../modules/subscriptions/SubscriptionContext'
+import { getBusinessConfig } from '../modules/auth/businessConfig'
+import { Breadcrumb } from '../components/Breadcrumb'
 
 type DialogMode = 'add' | 'edit' | 'delete' | 'adjust' | null
 
@@ -34,7 +36,8 @@ function fmtQty(n: number) {
 /** Retail products CRUD page — Phase 2.2. */
 export function ProductsPage() {
   const { t } = useTranslation()
-  const { user } = useAuth()
+  const { user, profile } = useAuth()
+  const isServiceBased = getBusinessConfig(profile?.type ?? 'retail').isServiceBased
   const { products, status, errorMessage, reload } = useProducts()
   const { notify } = useNotification()
   const { canAddProduct } = useSubscription()
@@ -184,11 +187,16 @@ export function ProductsPage() {
   const header = (
     <div className="mb-6 flex items-start justify-between gap-4">
       <div>
-        <h1 className="heading text-2xl md:text-3xl">{t('products.title')}</h1>
+        <Breadcrumb items={[{ label: isServiceBased ? t('products.titleServices') : t('products.title') }]} />
+        <h1 className="heading text-2xl md:text-3xl">
+          {isServiceBased ? t('products.titleServices') : t('products.title')}
+        </h1>
         <p className="mt-1 text-sm text-secondary">
           {products.length === 0
             ? t('products.subtitle')
-            : t('products.count', { count: products.length })}
+            : isServiceBased
+              ? t('products.countService', { count: products.length })
+              : t('products.count', { count: products.length })}
         </p>
       </div>
       <Button
@@ -198,7 +206,7 @@ export function ProductsPage() {
         disabled={!canAddProduct()}
         title={!canAddProduct() ? t('subscription.productLimitReached') : undefined}
       >
-        {t('products.addProduct')}
+        {isServiceBased ? t('products.addService') : t('products.addProduct')}
       </Button>
     </div>
   )
@@ -207,8 +215,8 @@ export function ProductsPage() {
   const content = products.length === 0 ? (
     <EmptyState
       icon={Package}
-      title={t('products.empty.title')}
-      description={t('products.empty.desc')}
+      title={isServiceBased ? t('products.emptyService.title') : t('products.empty.title')}
+      description={isServiceBased ? t('products.emptyService.desc') : t('products.empty.desc')}
       action={
         <Button
           leadingIcon={<Plus className="h-4 w-4" aria-hidden="true" />}
@@ -216,7 +224,7 @@ export function ProductsPage() {
           disabled={!canAddProduct()}
           title={!canAddProduct() ? t('subscription.productLimitReached') : undefined}
         >
-          {t('products.addProduct')}
+          {isServiceBased ? t('products.addService') : t('products.addProduct')}
         </Button>
       }
     />
@@ -226,11 +234,12 @@ export function ProductsPage() {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>{t('products.col.name')}</TableHead>
-            <TableHead className="hidden sm:table-cell">{t('products.col.sku')}</TableHead>
-            <TableHead className="text-right">{t('products.col.price')}</TableHead>
-            <TableHead className="text-right">{t('products.col.stock')}</TableHead>
-            <TableHead className="hidden md:table-cell">{t('products.col.unit')}</TableHead>
+            <TableHead>{isServiceBased ? t('products.col.serviceName') : t('products.col.name')}</TableHead>
+            <TableHead className="text-right">
+              {isServiceBased ? t('products.col.servicePrice') : t('products.col.price')}
+            </TableHead>
+            {!isServiceBased && <TableHead className="text-right">{t('products.col.stock')}</TableHead>}
+            {!isServiceBased && <TableHead className="hidden md:table-cell">{t('products.col.unit')}</TableHead>}
             <TableHead className="w-20" />
           </TableRow>
         </TableHeader>
@@ -238,14 +247,13 @@ export function ProductsPage() {
           {products.map(p => (
             <TableRow key={p.id}>
               <TableCell className="font-medium">{p.name}</TableCell>
-              <TableCell className="hidden text-secondary sm:table-cell">
-                {p.sku ?? '—'}
-              </TableCell>
               <TableCell className="text-right text-figures">{fmtPrice(p.selling_price)}</TableCell>
-              <TableCell className="text-right text-figures">{fmtQty(p.stock_quantity)}</TableCell>
-              <TableCell className="hidden text-secondary md:table-cell">{p.unit}</TableCell>
+              {!isServiceBased && <TableCell className="text-right text-figures">{fmtQty(p.stock_quantity)}</TableCell>}
+              {!isServiceBased && <TableCell className="hidden text-secondary md:table-cell">{p.unit}</TableCell>}
               <TableCell>
                 <div className="flex items-center justify-end gap-1">
+                  {/* Stock adjust — product businesses only */}
+                  {!isServiceBased && (
                   <button
                     type="button"
                     onClick={() => openAdjust(p)}
@@ -254,6 +262,7 @@ export function ProductsPage() {
                   >
                     <ArrowDownUp className="h-4 w-4" aria-hidden="true" />
                   </button>
+                  )}
                   <button
                     type="button"
                     onClick={() => openEdit(p)}
@@ -290,11 +299,12 @@ export function ProductsPage() {
       <Dialog
         open={dialogMode === 'add'}
         onOpenChange={open => { if (!open) closeDialog() }}
-        title={t('products.form.titleAdd')}
+        title={isServiceBased ? t('products.form.titleAddService') : t('products.form.titleAdd')}
         closeLabel={t('common.close')}
       >
         <ProductForm
           mode="add"
+          isServiceBased={isServiceBased}
           onSubmit={handleAdd}
           onCancel={closeDialog}
           submitting={submitting}
@@ -305,13 +315,14 @@ export function ProductsPage() {
       <Dialog
         open={dialogMode === 'edit' && selected !== null}
         onOpenChange={open => { if (!open) closeDialog() }}
-        title={t('products.form.titleEdit')}
+        title={isServiceBased ? t('products.form.titleEditService') : t('products.form.titleEdit')}
         closeLabel={t('common.close')}
       >
         {selected && (
           <ProductForm
             mode="edit"
             initial={selected}
+            isServiceBased={isServiceBased}
             onSubmit={handleEdit}
             onCancel={closeDialog}
             submitting={submitting}

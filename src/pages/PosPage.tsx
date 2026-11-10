@@ -15,6 +15,7 @@ import { enqueueSale } from '../lib/offlineQueue'
 import { useSyncContext } from '../context/SyncContext'
 import { getBusinessConfig } from '../modules/auth/businessConfig'
 import { useProducts } from '../modules/retail/useProducts'
+import { useCustomers } from '../modules/customers/useCustomers'
 import type { CartItem, PaymentMethod } from '../modules/retail/types'
 import { useSubscription } from '../modules/subscriptions/SubscriptionContext'
 
@@ -35,7 +36,9 @@ export function PosPage() {
   const { t } = useTranslation()
   const { user, profile } = useAuth()
   const bizConfig = getBusinessConfig(profile?.type ?? 'retail')
+  const isService = bizConfig.isServiceBased
   const { products, status, reload: reloadProducts } = useProducts()
+  const { customers } = useCustomers()
   const { notify } = useNotification()
   const { usageCounts, limits, isActive } = useSubscription()
 
@@ -47,6 +50,11 @@ export function PosPage() {
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cash')
   const [submitting, setSubmitting] = useState(false)
   const [salesBannerDismissed, setSalesBannerDismissed] = useState(false)
+
+  // Customer fields
+  const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null)
+  const [customCustomerName, setCustomCustomerName] = useState('')
+  const [notes,              setNotes]              = useState('')
   // One UUID per checkout attempt. Regenerated after each successful sale or
   // when the dialog is opened, so retries on the same open dialog are safe.
   const [idempotencyKey, setIdempotencyKey] = useState(() => crypto.randomUUID())
@@ -59,7 +67,10 @@ export function PosPage() {
     usageCounts.salesThisMonth / limits.max_sales_per_month >= 0.8
 
   function openCheckout() {
-    setIdempotencyKey(crypto.randomUUID()) // fresh key for this attempt
+    setIdempotencyKey(crypto.randomUUID())
+    setSelectedCustomerId(null)
+    setCustomCustomerName('')
+    setNotes('')
     setCheckoutOpen(true)
   }
 
@@ -107,6 +118,16 @@ export function PosPage() {
     })
   }
 
+  function setQty(productId: string, value: string) {
+    const n = parseInt(value, 10)
+    if (isNaN(n) || n < 1) return
+    const product = products.find(p => p.id === productId)
+    if (!product) return
+    const max = bizConfig.isServiceBased ? 9999 : product.stock_quantity
+    const capped = Math.min(n, max)
+    setCart(prev => prev.map(c => c.product.id === productId ? { ...c, quantity: capped } : c))
+  }
+
   function removeFromCart(productId: string) {
     setCart(prev => prev.filter(c => c.product.id !== productId))
   }
@@ -120,12 +141,19 @@ export function PosPage() {
     if (!user || cart.length === 0) return
     setSubmitting(true)
 
+    const resolvedCustomerName = selectedCustomerId
+      ? (customers.find(c => c.id === selectedCustomerId)?.name ?? null)
+      : (customCustomerName.trim() || null)
+
     const payload = {
       owner_id:        user.id,
       sale_number:     genSaleNumber(),
       payment_method:  paymentMethod,
       idempotency_key: idempotencyKey,
       items:           cart.map(c => ({ product_id: c.product.id, quantity: c.quantity })),
+      customer_name:   resolvedCustomerName,
+      customer_id:     selectedCustomerId,
+      notes:           notes.trim() || null,
     }
 
     // If offline, queue for later sync — stock NOT deducted until synced
@@ -165,11 +193,8 @@ export function PosPage() {
     await reloadProducts()
   }
 
-  const paymentOptions = [
-    { value: 'cash',          label: t('pos.payment.cash') },
-    { value: 'telebirr',      label: t('pos.payment.telebirr') },
-    { value: 'bank_transfer', label: t('pos.payment.bank_transfer') },
-  ]
+  // Show payment selector for all business types — service businesses also use Telebirr/CBE Birr
+  const showPaymentSelector = true
 
   // ── Loading / no products ──────────────────────────────────────────────────
   if (status === 'loading') {
@@ -216,7 +241,9 @@ export function PosPage() {
             </button>
           </div>
         )}
-        <h1 className="heading mb-4 text-2xl md:text-3xl">{t('pos.title')}</h1>
+        <h1 className="heading mb-4 text-2xl md:text-3xl">
+          {isService ? t('pos.titleService') : t('pos.title')}
+        </h1>
 
         <div className="flex flex-col gap-6 md:flex-row md:items-start">
 
@@ -255,7 +282,6 @@ export function PosPage() {
                       ].join(' ')}
                     >
                       <span className="truncate text-sm font-medium text-text">{p.name}</span>
-                      {p.sku && <span className="mt-0.5 truncate text-xs text-secondary">{p.sku}</span>}
                       <span className="mt-2 text-sm font-semibold text-figures text-text">
                         {fmtPrice(p.selling_price)}
                       </span>
@@ -328,9 +354,14 @@ export function PosPage() {
                         >
                           <Minus className="h-3.5 w-3.5" aria-hidden="true" />
                         </button>
-                        <span className="w-6 text-center text-sm text-figures font-medium">
-                          {item.quantity}
-                        </span>
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          value={item.quantity}
+                          onChange={e => setQty(item.product.id, e.target.value)}
+                          className="w-10 rounded border border-border bg-background text-center text-sm font-medium text-text focus:border-primary focus:outline-none"
+                          aria-label={t('pos.quantity')}
+                        />
                         <button
                           type="button"
                           onClick={() => addToCart(item.product.id)}
@@ -413,12 +444,64 @@ export function PosPage() {
             </div>
           </div>
 
-          {/* Payment method */}
-          <Select
-            label={t('pos.paymentMethod')}
-            options={paymentOptions}
-            value={paymentMethod}
-            onChange={e => setPaymentMethod(e.target.value as PaymentMethod)}
+          {/* Customer — pick from existing OR type a new name */}
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-text">{t('pos.customer')}</label>
+            {/* Dropdown of registered customers */}
+            <Select
+              options={[
+                { value: '', label: t('pos.customerSelectPrompt') },
+                ...customers.map(c => ({
+                  value: c.id,
+                  label: c.name + (c.phone ? ` · ${c.phone}` : ''),
+                })),
+              ]}
+              value={selectedCustomerId ?? ''}
+              onChange={e => {
+                setSelectedCustomerId(e.target.value || null)
+                setCustomCustomerName('')
+              }}
+            />
+            {/* Or type a new name if not in the list */}
+            {!selectedCustomerId && (
+              <Input
+                value={customCustomerName}
+                onChange={e => setCustomCustomerName(e.target.value)}
+                placeholder={t('pos.customerNewPlaceholder')}
+              />
+            )}
+            {/* Clear selection link */}
+            {selectedCustomerId && (
+              <button
+                type="button"
+                className="text-xs text-secondary hover:text-danger"
+                onClick={() => setSelectedCustomerId(null)}
+              >
+                {t('pos.customerClear')}
+              </button>
+            )}
+          </div>
+
+          {showPaymentSelector && (
+            <Select
+              label={t('pos.paymentMethod')}
+              options={[
+                { value: 'cash',          label: t('pos.payment.cash') },
+                { value: 'telebirr',      label: t('pos.payment.telebirr') },
+                { value: 'cbe_birr',      label: t('pos.payment.cbe_birr') },
+                { value: 'bank_transfer', label: t('pos.payment.bank_transfer') },
+              ]}
+              value={paymentMethod}
+              onChange={e => setPaymentMethod(e.target.value as PaymentMethod)}
+            />
+          )}
+
+          {/* Notes */}
+          <Input
+            label={t('pos.notes')}
+            value={notes}
+            onChange={e => setNotes(e.target.value)}
+            placeholder={t('pos.notesPlaceholder')}
           />
         </div>
       </Dialog>

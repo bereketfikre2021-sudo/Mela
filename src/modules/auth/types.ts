@@ -1,13 +1,9 @@
 /**
- * Auth + business profile domain types for MELA Phase 1.
- *
- * Phase 1 = a single business per owner. Owner details (owner_name, phone) and
- * the language preference live on the business row itself; the owner's email
- * comes from auth.users.
+ * Auth + business profile domain types — Phase 9 adds cosmetics and salon.
  */
 
-/** The four supported business types (stored as `businesses.type`). */
-export type BusinessType = 'retail' | 'fnb' | 'bakery' | 'service'
+/** All supported business types (stored as `businesses.type`). */
+export type BusinessType = 'retail' | 'fnb' | 'bakery' | 'service' | 'cosmetics' | 'salon'
 
 /** A persisted business profile row. */
 export interface Business {
@@ -18,6 +14,7 @@ export interface Business {
   owner_name: string
   phone: string
   language: 'en' | 'am'
+  closing_time: string | null  // HH:MM format, e.g. "18:00"
   created_at: string
   updated_at: string
 }
@@ -29,4 +26,5 @@ export interface BusinessInput {
   owner_name: string
   phone: string
   language: 'en' | 'am'
+  closing_time: string | null
 }
