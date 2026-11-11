@@ -43,8 +43,37 @@ export function useAdminAuth() {
   return useContext(AdminAuthContext)
 }
 
-/** SSO destination key stored in sessionStorage before the OAuth redirect. */
 export const SSO_DESTINATION_KEY = 'mela_admin_sso_destination'
+
+/** Allowlist of valid SSO destinations — prevents open redirect attacks. */
+const ALLOWED_SSO_DESTINATIONS = ['/admin', '/admin/', '/admin/dashboard']
+
+/** Store with timestamp so stale entries don't misdirect unrelated flows. */
+export function storeSSODestination(destination: string): void {
+  try {
+    sessionStorage.setItem(SSO_DESTINATION_KEY, JSON.stringify({
+      path:      destination,
+      timestamp: Date.now(),
+    }))
+  } catch { /* sessionStorage unavailable */ }
+}
+
+/** Read, validate, and clear the SSO destination. Returns null if stale/missing/disallowed. */
+export function consumeSSODestination(): string | null {
+  try {
+    const raw = sessionStorage.getItem(SSO_DESTINATION_KEY)
+    sessionStorage.removeItem(SSO_DESTINATION_KEY)
+    if (!raw) return null
+    const { path, timestamp } = JSON.parse(raw) as { path: string; timestamp: number }
+    // Reject if stored more than 10 minutes ago
+    if (Date.now() - timestamp > 10 * 60 * 1000) return null
+    // Allowlist check — never redirect to an external URL
+    if (!ALLOWED_SSO_DESTINATIONS.includes(path)) return null
+    return path
+  } catch {
+    return null
+  }
+}
 
 async function checkIsAdmin(userId: string): Promise<boolean> {
   if (!supabase) return false
@@ -107,7 +136,7 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
     if (!supabase) return { error: 'Supabase client is not configured.' }
 
     try {
-      sessionStorage.setItem(SSO_DESTINATION_KEY, '/admin')
+      storeSSODestination('/admin/')
     } catch { /* ignore */ }
 
     // Per spec: window.location.origin + /auth/callback, no extra query params
