@@ -7,6 +7,7 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import { AdminAuthProvider, useAdminAuth } from './lib/AdminAuthContext'
 import { AdminLayout } from './components/AdminLayout'
 import { AdminLoginPage }    from './pages/AdminLoginPage'
+import { AdminSSOPage }      from './pages/AdminSSOPage'
 import { DashboardPage }     from './pages/DashboardPage'
 import { UsersPage }         from './pages/UsersPage'
 import { UserDetailPage }    from './pages/UserDetailPage'
@@ -43,6 +44,7 @@ export function AdminApp() {
       <Routes>
         {/* Public */}
         <Route path="/admin/login"          element={<AdminLoginPage />} />
+        <Route path="/admin/sso"            element={<AdminSSOPage />} />
         <Route path="/admin/auth/callback"  element={<AdminCallbackPage />} />
 
         {/* Protected */}

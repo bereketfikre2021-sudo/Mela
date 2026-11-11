@@ -2,6 +2,12 @@
  * AdminAuthContext — manages admin session and gate check.
  * Uses the anon-key supabase client for auth + is_admin check.
  * Does NOT import anything from the customer-facing app except supabase.ts.
+ *
+ * Auth methods:
+ *  - signInWithGoogle()  — existing Google OAuth
+ *  - signInWithSSO()     — Central Admin OIDC via custom:central-admin provider
+ *                          PKCE flow; redirects to window.location.origin/auth/callback
+ *                          Stores intended destination in sessionStorage before redirect.
  */
 import {
   createContext,
@@ -21,6 +27,7 @@ interface AdminAuthContextValue {
   status: AdminAuthStatus
   user: User | null
   signInWithGoogle: () => Promise<void>
+  signInWithSSO: () => Promise<{ error: string | null }>
   signOut: () => Promise<void>
 }
 
@@ -28,12 +35,16 @@ const AdminAuthContext = createContext<AdminAuthContextValue>({
   status: 'loading',
   user: null,
   signInWithGoogle: async () => { /* no-op */ },
-  signOut: async () => { /* no-op */ },
+  signInWithSSO:    async () => ({ error: null }),
+  signOut:          async () => { /* no-op */ },
 })
 
 export function useAdminAuth() {
   return useContext(AdminAuthContext)
 }
+
+/** SSO destination key stored in sessionStorage before the OAuth redirect. */
+export const SSO_DESTINATION_KEY = 'mela_admin_sso_destination'
 
 async function checkIsAdmin(userId: string): Promise<boolean> {
   if (!supabase) return false
@@ -54,7 +65,6 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
     setUser(u)
     setStatus(ok ? 'admin' : 'denied')
     if (!ok) {
-      // sign them out immediately so they don't retain a session
       await supabase?.auth.signOut()
     }
   }, [])
@@ -82,6 +92,7 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
     return () => sub.subscription.unsubscribe()
   }, [verify])
 
+  // ── Existing Google sign-in (unchanged) ───────────────────────────────────
   const signInWithGoogle = useCallback(async () => {
     if (!supabase) return
     const base = import.meta.env.VITE_APP_URL || window.location.origin
@@ -89,6 +100,41 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
       provider: 'google',
       options: { redirectTo: `${base}/admin/auth/callback` },
     })
+  }, [])
+
+  // ── Central Admin SSO via custom OIDC provider ────────────────────────────
+  const signInWithSSO = useCallback(async (): Promise<{ error: string | null }> => {
+    if (!supabase) return { error: 'Supabase client is not configured.' }
+
+    // Store intended destination so the callback can restore navigation
+    try {
+      sessionStorage.setItem(SSO_DESTINATION_KEY, '/admin')
+    } catch {
+      // sessionStorage unavailable — proceed anyway
+    }
+
+    // Requirement: use window.location.origin, no extra query params on redirect URL
+    const redirectTo = `${window.location.origin}/auth/callback`
+
+    const { error } = await supabase.auth.signInWithOAuth({
+      // Supabase custom OIDC provider ID registered as 'central-admin'
+      provider: 'custom:central-admin' as Parameters<typeof supabase.auth.signInWithOAuth>[0]['provider'],
+      options: {
+        redirectTo,
+        scopes:       'openid email',
+        // PKCE flow — Supabase JS v2 uses PKCE by default for signInWithOAuth;
+        // explicitly declare the query param to satisfy the spec requirement.
+        queryParams: { response_type: 'code' },
+        skipBrowserRedirect: false,
+      },
+    })
+
+    if (error) {
+      // Surface the actual error — never hide it silently
+      return { error: error.message }
+    }
+
+    return { error: null }
   }, [])
 
   const signOut = useCallback(async () => {
@@ -99,8 +145,8 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const value = useMemo<AdminAuthContextValue>(
-    () => ({ status, user, signInWithGoogle, signOut }),
-    [status, user, signInWithGoogle, signOut]
+    () => ({ status, user, signInWithGoogle, signInWithSSO, signOut }),
+    [status, user, signInWithGoogle, signInWithSSO, signOut]
   )
 
   return <AdminAuthContext.Provider value={value}>{children}</AdminAuthContext.Provider>
