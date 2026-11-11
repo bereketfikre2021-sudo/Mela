@@ -4,7 +4,7 @@
  */
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { ClipboardList, History, Package, Truck, UserCog } from 'lucide-react'
+import { BarChart2, ClipboardList, History, Package, Truck, UserCog } from 'lucide-react'
 
 import { useAuth } from '../modules/auth/AuthContext'
 import { getBusinessConfig } from '../modules/auth/businessConfig'
@@ -44,7 +44,15 @@ export function MorePage() {
   const isService   = bizConfig.isServiceBased
 
   const tiles = [
-    // Product businesses only — stock/purchases/suppliers/inventory
+    // Reports — product businesses (services have it in nav directly)
+    {
+      icon:  <BarChart2 className="h-5 w-5" aria-hidden="true" />,
+      label: t('nav.reports'),
+      desc:  t('more.desc.reports'),
+      route: '/app/reports',
+      show:  !isService,
+    },
+    // Product businesses only
     {
       icon:  <Package className="h-5 w-5" aria-hidden="true" />,
       label: t('nav.stock'),

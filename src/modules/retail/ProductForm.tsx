@@ -1,5 +1,6 @@
-import { useState, type FormEvent } from 'react'
+import { useRef, useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Camera, X } from 'lucide-react'
 
 import { Button } from '../../design-system/Button'
 import { Input } from '../../design-system/Input'
@@ -8,14 +9,12 @@ import type { Product, ProductInput } from './types'
 interface ProductFormProps {
   mode: 'add' | 'edit'
   initial?: Product
-  /** When true, hides stock fields and submits a large stock quantity automatically */
   isServiceBased?: boolean
   onSubmit: (input: ProductInput) => Promise<void>
   onCancel: () => void
   submitting: boolean
 }
 
-/** Validate a field and return an error string (empty = no error). */
 function validate(field: string, value: string, t: (k: string) => string): string {
   switch (field) {
     case 'name':
@@ -25,7 +24,7 @@ function validate(field: string, value: string, t: (k: string) => string): strin
       return isNaN(n) || n < 0 ? t('products.form.errors.invalidPrice') : ''
     }
     case 'cost_price': {
-      if (value.trim() === '') return '' // optional
+      if (value.trim() === '') return ''
       const n = parseFloat(value)
       return isNaN(n) || n < 0 ? t('products.form.errors.invalidPrice') : ''
     }
@@ -34,7 +33,7 @@ function validate(field: string, value: string, t: (k: string) => string): strin
       return isNaN(n) || n < 0 ? t('products.form.errors.invalidQty') : ''
     }
     case 'low_stock_threshold': {
-      if (value.trim() === '') return '' // optional
+      if (value.trim() === '') return ''
       const n = parseFloat(value)
       return isNaN(n) || n < 0 ? t('products.form.errors.invalidQty') : ''
     }
@@ -45,27 +44,34 @@ function validate(field: string, value: string, t: (k: string) => string): strin
   }
 }
 
-/** Shared product form used for both adding and editing. */
 export function ProductForm({ mode, initial, isServiceBased = false, onSubmit, onCancel, submitting }: ProductFormProps) {
   const { t } = useTranslation()
+  const imgRef = useRef<HTMLInputElement>(null)
 
-  const [name,          setName]         = useState(initial?.name ?? '')
-  const [sellingPrice,  setSellingPrice] = useState(initial?.selling_price.toString() ?? '')
-  const [costPrice,     setCostPrice]    = useState(initial?.cost_price?.toString() ?? '')
-  // Service businesses: stock is not tracked, default to large number so POS never blocks
-  // Product businesses: default to 1 for new products (more practical than 0)
-  const [stockQty, setStockQty] = useState(
-    initial != null
-      ? initial.stock_quantity.toString()
-      : isServiceBased ? '999999' : '1'
+  const [name,         setName]        = useState(initial?.name ?? '')
+  const [sellingPrice, setSellingPrice]= useState(initial?.selling_price.toString() ?? '')
+  const [costPrice,    setCostPrice]   = useState(initial?.cost_price?.toString() ?? '')
+  const [stockQty,     setStockQty]    = useState(
+    initial != null ? initial.stock_quantity.toString() : isServiceBased ? '999999' : '1'
   )
-  const [unit,          setUnit]         = useState(initial?.unit ?? (isServiceBased ? 'session' : 'pcs'))
-  const [threshold,     setThreshold]    = useState(initial?.low_stock_threshold?.toString() ?? '')
-  const [errors,        setErrors]       = useState<Record<string, string>>({})
+  const [unit,         setUnit]        = useState(initial?.unit ?? (isServiceBased ? 'session' : 'pcs'))
+  const [threshold,    setThreshold]   = useState(initial?.low_stock_threshold?.toString() ?? '')
+  const [barcode,      setBarcode]     = useState(initial?.barcode ?? '')
+  const [imageUrl,     setImageUrl]    = useState(initial?.image_url ?? '')
+  const [imagePreview, setImagePreview]= useState<string | null>(initial?.image_url ?? null)
+  const [errors,       setErrors]      = useState<Record<string, string>>({})
 
   function blur(field: string, value: string) {
-    const msg = validate(field, value, t)
-    setErrors(prev => ({ ...prev, [field]: msg }))
+    setErrors(prev => ({ ...prev, [field]: validate(field, value, t) }))
+  }
+
+  function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    // Create a local object URL for preview — in production, upload to Supabase Storage
+    const url = URL.createObjectURL(file)
+    setImagePreview(url)
+    setImageUrl(url)  // Replace with Storage URL after upload
   }
 
   async function handleSubmit(e: FormEvent) {
@@ -86,16 +92,50 @@ export function ProductForm({ mode, initial, isServiceBased = false, onSubmit, o
       sku:                 null,
       selling_price:       parseFloat(sellingPrice),
       cost_price:          costPrice.trim() ? parseFloat(costPrice) : null,
-      // Service businesses never run out — use a large fixed quantity
       stock_quantity:      isServiceBased ? 999999 : parseFloat(stockQty),
       unit:                unit.trim(),
       low_stock_threshold: isServiceBased ? null : (threshold.trim() ? parseFloat(threshold) : null),
+      image_url:           isServiceBased ? null : (imageUrl.trim() || null),
+      barcode:             isServiceBased ? null : (barcode.trim() || null),
     }
     await onSubmit(input)
   }
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
+      {/* Product image — optional, product businesses only */}
+      {!isServiceBased && (
+        <div>
+          <p className="mb-1.5 text-sm font-medium text-text">{t('products.form.image')}</p>
+          <div className="flex items-center gap-3">
+            {/* Preview */}
+            <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl border border-border bg-background">
+              {imagePreview ? (
+                <>
+                  <img src={imagePreview} alt="" className="h-full w-full object-cover" />
+                  <button type="button"
+                    onClick={() => { setImagePreview(null); setImageUrl(''); if (imgRef.current) imgRef.current.value = '' }}
+                    className="absolute right-1 top-1 rounded-full bg-black/50 p-0.5 text-white hover:bg-black/70">
+                    <X className="h-3 w-3" />
+                  </button>
+                </>
+              ) : (
+                <div className="flex h-full w-full items-center justify-center text-muted">
+                  <Camera className="h-6 w-6" />
+                </div>
+              )}
+            </div>
+            <div>
+              <input ref={imgRef} type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
+              <Button type="button" variant="secondary" size="sm" onClick={() => imgRef.current?.click()}>
+                {imagePreview ? t('products.form.changeImage') : t('products.form.uploadImage')}
+              </Button>
+              <p className="mt-1 text-xs text-secondary">{t('products.form.imageHelper')}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       <Input
         label={isServiceBased ? t('products.form.serviceName') : t('products.form.name')}
         value={name}
@@ -117,7 +157,6 @@ export function ProductForm({ mode, initial, isServiceBased = false, onSubmit, o
           onBlur={e => blur('selling_price', e.target.value)}
           error={errors.selling_price}
         />
-        {/* Cost price — hide for service businesses (no cost of goods) */}
         {!isServiceBased && (
           <Input
             label={t('products.form.costPrice')}
@@ -131,7 +170,6 @@ export function ProductForm({ mode, initial, isServiceBased = false, onSubmit, o
         )}
       </div>
 
-      {/* Stock + unit — hidden for service businesses */}
       {!isServiceBased && (
         <div className="grid grid-cols-2 gap-3">
           <Input
@@ -155,7 +193,6 @@ export function ProductForm({ mode, initial, isServiceBased = false, onSubmit, o
         </div>
       )}
 
-      {/* Low stock threshold — hidden for service businesses */}
       {!isServiceBased && (
         <Input
           label={t('products.form.lowStockThreshold')}
@@ -165,6 +202,18 @@ export function ProductForm({ mode, initial, isServiceBased = false, onSubmit, o
           onChange={e => setThreshold(e.target.value)}
           onBlur={e => blur('low_stock_threshold', e.target.value)}
           error={errors.low_stock_threshold}
+        />
+      )}
+
+      {/* Barcode — optional, product businesses only */}
+      {!isServiceBased && (
+        <Input
+          label={t('products.form.barcode')}
+          helperText={t('products.form.barcodeHelper')}
+          value={barcode}
+          onChange={e => setBarcode(e.target.value)}
+          autoComplete="off"
+          maxLength={100}
         />
       )}
 

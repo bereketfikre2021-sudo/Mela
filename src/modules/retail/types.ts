@@ -13,6 +13,8 @@ export interface Product {
   stock_quantity: number
   unit: string
   low_stock_threshold: number | null
+  image_url: string | null
+  barcode: string | null
   created_at: string
   updated_at: string
 }
@@ -26,6 +28,8 @@ export interface ProductInput {
   stock_quantity: number
   unit: string
   low_stock_threshold: number | null
+  image_url: string | null
+  barcode: string | null
 }
 
 // ── Sales ─────────────────────────────────────────────────────────────────────

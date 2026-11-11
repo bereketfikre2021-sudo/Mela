@@ -148,6 +148,8 @@ export function OnboardingPage() {
             stock_quantity: getBusinessConfig(bizType).isServiceBased ? 999999 : 0,
             unit: p.unit,
             low_stock_threshold: null,
+            image_url: null,
+            barcode: null,
           }, user.id)
         )
       )

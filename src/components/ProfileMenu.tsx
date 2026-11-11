@@ -11,14 +11,13 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { ChevronDown, CreditCard, LayoutGrid, LogOut, Settings, UserCog } from 'lucide-react'
+import { ChevronDown, CreditCard, LogOut, Settings, UserCog } from 'lucide-react'
 
 import { useAuth } from '../modules/auth/AuthContext'
 import { useSubscription } from '../modules/subscriptions/SubscriptionContext'
 import { useStaff } from '../modules/staff/StaffContext'
 import { listStaff } from '../modules/staff/api'
 import { StaffSwitcher } from './StaffSwitcher'
-import { getBusinessConfig } from '../modules/auth/businessConfig'
 import type { StaffMember } from '../modules/staff/types'
 
 function initials(name: string): string {
@@ -68,7 +67,6 @@ export function ProfileMenu() {
 
   const ownerName    = profile?.owner_name ?? user?.email ?? ''
   const businessName = profile?.name ?? ''
-  const isService    = getBusinessConfig(profile?.type ?? 'retail').isServiceBased
   // Show the active staff member name in the avatar if staff is active
   const displayName  = currentStaffMember ? currentStaffMember.name : ownerName
   const avatarText   = initials(displayName) || '?'
@@ -134,10 +132,6 @@ export function ProfileMenu() {
                 onClick={() => go('/app/profile')} />
               <MenuItem icon={<CreditCard className="h-4 w-4" />} label={t('profileMenu.subscription')}
                 onClick={() => go('/app/subscription')} />
-              {!isService && (
-                <MenuItem icon={<LayoutGrid className="h-4 w-4" />} label={t('profileMenu.advanced')}
-                  onClick={() => go('/app/more')} />
-              )}
               {isActive && staffList.length > 0 && (
                 <MenuItem icon={<UserCog className="h-4 w-4" />} label={t('profileMenu.switchStaff')}
                   onClick={openSwitcher} />

@@ -199,7 +199,13 @@
       "servicePrice": "Service price",
       "serviceName": "Service name",
       "titleAddService": "Add service",
-      "titleEditService": "Edit service"
+      "titleEditService": "Edit service",
+      "image": "Product image",
+      "uploadImage": "Upload image",
+      "changeImage": "Change image",
+      "imageHelper": "Optional. PNG, JPG up to 5MB.",
+      "barcode": "Barcode",
+      "barcodeHelper": "Optional. Scan or type barcode."
     },
     "delete": {
       "title": "Delete product",

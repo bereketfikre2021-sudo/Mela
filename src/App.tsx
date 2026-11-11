@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { BrowserRouter, Navigate, Route, Routes, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { BarChart2, Home, PackageSearch, Receipt, Users, Wallet } from 'lucide-react'
+import { BarChart2, Home, MoreHorizontal, PackageSearch, Receipt, Users, Wallet } from 'lucide-react'
 
 import { NotificationProvider } from './design-system/Notification'
 import type { NavItem } from './design-system/BottomNav'
@@ -104,27 +104,13 @@ function AppRoutes() {
   const isService = bizConfig.isServiceBased
 
   /**
-   * Primary nav — 6 items max.
-   * Sales is universal for all business types.
-   * Products → Services label for service businesses.
-   * Customers → Clients label for service businesses.
+   * Product businesses:  Home | Sales | Expenses | Products | Customers | More
+   * Service businesses:  Home | Services | Expenses | Products(=Services) | Clients | Reports
    */
   const appNav: NavItem[] = [
-    {
-      id:    '/app',
-      label: t('nav.home'),
-      icon:  Home,
-    },
-    {
-      id:    '/app/sales',
-      label: t('nav.sales'),
-      icon:  Receipt,
-    },
-    {
-      id:    '/app/expenses',
-      label: t('nav.expenses'),
-      icon:  Wallet,
-    },
+    { id: '/app',       label: t('nav.home'),     icon: Home },
+    { id: '/app/sales', label: t('nav.sales'),    icon: Receipt },
+    { id: '/app/expenses', label: t('nav.expenses'), icon: Wallet },
     {
       id:    '/app/products',
       label: isService ? t('nav.services') : t('nav.products'),
@@ -135,11 +121,11 @@ function AppRoutes() {
       label: isService ? t('nav.clients') : t('nav.customers'),
       icon:  Users,
     },
-    {
-      id:    '/app/reports',
-      label: t('nav.reports'),
-      icon:  BarChart2,
-    },
+    // Product businesses: More hub (Reports + Stock + Purchases + etc.)
+    // Service businesses: Reports directly
+    isService
+      ? { id: '/app/reports', label: t('nav.reports'), icon: BarChart2 }
+      : { id: '/app/more',    label: t('nav.more'),    icon: MoreHorizontal },
   ]
 
   const publicShell = (children: React.ReactNode) => (
@@ -188,11 +174,11 @@ function AppRoutes() {
         element={appShell(<RequireBusiness><ExpensesPage /></RequireBusiness>, '/app/expenses')} />
 
       <Route path="/app/reports"
-        element={appShell(<RequireBusiness><ReportsPage /></RequireBusiness>, '/app/reports')} />
+        element={appShell(<RequireBusiness><ReportsPage /></RequireBusiness>, isService ? '/app/reports' : '/app/more')} />
 
       {/* ── Secondary routes (via account Advanced menu) ──────────────────── */}
       <Route path="/app/more"
-        element={appShell(<RequireBusiness><MorePage /></RequireBusiness>, '/app')} />
+        element={appShell(<RequireBusiness><MorePage /></RequireBusiness>, '/app/more')} />
       <Route path="/app/products"
         element={appShell(<RequireBusiness><ProductsPage /></RequireBusiness>, '/app/products')} />
       <Route path="/app/stock"

@@ -199,7 +199,13 @@
       "servicePrice": "የአገልግሎት ዋጋ",
       "serviceName": "የአገልግሎት ስም",
       "titleAddService": "አገልግሎት ጨምር",
-      "titleEditService": "አገልግሎት አርትዕ"
+      "titleEditService": "አገልግሎት አርትዕ",
+      "image": "የምርት ፎቶ",
+      "uploadImage": "ፎቶ ስቀል",
+      "changeImage": "ፎቶ ቀይር",
+      "imageHelper": "አማራጭ። PNG, JPG።",
+      "barcode": "ባርኮድ",
+      "barcodeHelper": "አማራጭ። ባርኮድ ያስገቡ።"
     },
     "delete": {
       "title": "ምርት ሰርዝ",
