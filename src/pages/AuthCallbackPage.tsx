@@ -7,18 +7,17 @@ import { supabase } from '../lib/supabase'
 import { consumeSSODestination } from '../admin/lib/AdminAuthContext'
 
 /**
- * AuthCallbackPage — PKCE code exchange for both customer and admin SSO flows.
+ * AuthCallbackPage — handles OAuth / PKCE callback for both customer and
+ * admin SSO flows.
  *
- * Flow detection:
- *  - Admin SSO:    consumeSSODestination() returns '/admin/' (allowlisted,
- *                  timestamped). After session is established the admin auth
- *                  context re-runs checkIsAdmin() — SSO does NOT grant admin
- *                  privileges automatically.
- *  - Customer:     No SSO destination stored → navigate to '/app'.
- *  - Error:        Show the actual error; never silently redirect to homepage.
+ * Strategy:
+ *  Supabase JS v2 automatically detects the `code` param (or hash fragment)
+ *  in the URL and exchanges it via PKCE on `getSession()`. We do NOT call
+ *  `exchangeCodeForSession` manually — doing so loses the code verifier that
+ *  Supabase stored before the redirect.
  *
- * Open redirect prevention: consumeSSODestination() validates against an
- * internal-path allowlist and rejects stale (>10 min) entries.
+ *  We poll `getSession()` briefly to let the SDK complete the exchange, then
+ *  read the SSO destination from sessionStorage to decide where to navigate.
  */
 export function AuthCallbackPage() {
   const { t }    = useTranslation()
@@ -31,36 +30,39 @@ export function AuthCallbackPage() {
       return
     }
 
-    // Read (and immediately clear) the SSO destination before any async work,
-    // so it's consumed even if the exchange fails.
+    // Read (and immediately clear) the SSO destination before any async work.
     const ssoDestination = consumeSSODestination()
 
-    supabase.auth
-      .exchangeCodeForSession(window.location.href)
+    // Let Supabase JS v2 handle PKCE exchange automatically via getSession().
+    // It detects the `code` in the URL hash/query and exchanges it internally.
+    supabase.auth.getSession()
       .then(({ data, error }) => {
         if (error) {
-          // Surface the actual error — do not silently fall back to homepage
-          console.error('[AuthCallback] PKCE exchange failed:', error.message)
+          console.error('[AuthCallback] getSession error:', error.message)
           setErrorMsg(error.message)
           return
         }
 
         if (!data.session) {
-          setErrorMsg('No session returned after code exchange.')
+          // No session yet — Supabase may still be processing the hash.
+          // Wait a tick and retry once.
+          setTimeout(() => {
+            supabase!.auth.getSession().then(({ data: d2, error: e2 }) => {
+              if (e2 || !d2.session) {
+                setErrorMsg(e2?.message ?? 'No session returned. Please try signing in again.')
+                return
+              }
+              navigate(ssoDestination ?? '/app', { replace: true })
+            })
+          }, 800)
           return
         }
 
-        // Admin SSO: valid, allowlisted, recent destination → go to admin
-        if (ssoDestination) {
-          navigate(ssoDestination, { replace: true })
-          return
-        }
-
-        // Customer flow: route guards handle onboarding vs /app
-        navigate('/app', { replace: true })
+        // Session established — go to admin or customer app
+        navigate(ssoDestination ?? '/app', { replace: true })
       })
       .catch((e: unknown) => {
-        const msg = e instanceof Error ? e.message : 'Unknown error during authentication.'
+        const msg = e instanceof Error ? e.message : 'Unexpected error during authentication.'
         console.error('[AuthCallback] Unexpected error:', msg)
         setErrorMsg(msg)
       })
