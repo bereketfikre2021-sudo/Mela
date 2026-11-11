@@ -267,7 +267,8 @@
     "customerClear": "ምርጫ አጥፋ",
     "titleService": "ሽያጭ ይመዝግቡ",
     "cartService": "የተመረጡ",
-    "quantity": "መጠን"
+    "quantity": "መጠን",
+    "addCustomerOrNote": "ደንበኛ ወይም ማስታወሻ ጨምር"
   },
   "sales": {
     "title": "የሽያጭ ታሪክ",
@@ -324,6 +325,7 @@
     "markedPaid": "ሽያጭ እንደከፈለ ተምልክቷል",
     "recordPayment": "ክፍያ ምዝግብ",
     "paymentRecorded": "ክፍያ ተመዝግቧል",
+    "viewFullReport": "ሙሉ ሪፖርት ይመልከቱ",
     "balanceDue": "ቀሪ ሂሳብ: {{amount}}",
     "amountPaid": "እስካሁን ተከፍሏል: {{amount}}",
     "paymentHistory": "የክፍያ ታሪክ",
@@ -556,7 +558,8 @@
     "switchStaff": "ሰራተኛ ቀይር",
     "staffActive": "ንቁ: {{name}}",
     "subscription": "ደንበኝነት እና ክፍያ",
-    "advanced": "የላቀ"
+    "advanced": "የላቀ",
+    "staff": "ሰራተኞች"
   },
   "footer": {
     "tagline": "ለኢትዮጵያ ንግዶች የተሰራ ቀላል የቢዝነስ አስተዳደር ስርዓት።",
@@ -876,6 +879,7 @@
     "viewPurchases": "የግዢ ታሪክ",
     "manageProducts": "የምርት ዝርዝር ለማስተካከል?",
     "manageProductsLink": "ምርቶችን ያስተዳድሩ",
+    "manageSuppliers": "አቅራቢዎችን ያስተዳድሩ →",
     "addService": "አገልግሎት ጨምር",
     "emptyServices": "አገልግሎት አልተጨመረም",
     "editServicePrices": "የአገልግሎት ዝርዝር ለማስተካከል?"
@@ -1150,7 +1154,6 @@
   },
   "notifications": {
     "title": "ማሳወቂያዎች",
-    "bell": "ማሳወቂያዎች ({{count}} ያልተነበበ)",
     "markAllRead": "ሁሉንም እንደተነበበ ምልክት አድርግ",
     "delete": "ማሳወቂያ ሰርዝ",
     "empty": {

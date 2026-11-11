@@ -267,7 +267,8 @@
     "customerClear": "Clear selection",
     "titleService": "Record Sale",
     "cartService": "Selected",
-    "quantity": "Quantity"
+    "quantity": "Quantity",
+    "addCustomerOrNote": "Add customer or note"
   },
   "sales": {
     "title": "Sales",
@@ -324,6 +325,7 @@
     "markedPaid": "Sale marked as paid",
     "recordPayment": "Record payment",
     "paymentRecorded": "Payment recorded",
+    "viewFullReport": "View full report",
     "balanceDue": "Balance due: {{amount}}",
     "amountPaid": "Paid so far: {{amount}}",
     "paymentHistory": "Payment history",
@@ -398,7 +400,8 @@
     "switchStaff": "Switch staff",
     "staffActive": "Active: {{name}}",
     "subscription": "Subscription & billing",
-    "advanced": "Advanced"
+    "advanced": "Advanced",
+    "staff": "Staff"
   },
   "overview": {
     "period": {
@@ -876,6 +879,7 @@
     "viewPurchases": "Purchase history",
     "manageProducts": "Need to edit product details?",
     "manageProductsLink": "Manage products",
+    "manageSuppliers": "Manage suppliers →",
     "addService": "Add service",
     "emptyServices": "No services yet",
     "editServicePrices": "Need to edit service details?"
@@ -1150,7 +1154,6 @@
   },
   "notifications": {
     "title": "Notifications",
-    "bell": "Notifications ({{count}} unread)",
     "markAllRead": "Mark all read",
     "delete": "Delete notification",
     "empty": {

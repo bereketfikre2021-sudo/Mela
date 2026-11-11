@@ -4,11 +4,10 @@
  */
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { BarChart2, ClipboardList, History, Package, Truck, UserCog, Users } from 'lucide-react'
+import { BarChart2, ClipboardList, History } from 'lucide-react'
 
 import { useAuth } from '../modules/auth/AuthContext'
 import { getBusinessConfig } from '../modules/auth/businessConfig'
-import { useSubscription } from '../modules/subscriptions/SubscriptionContext'
 
 interface TileProps {
   icon: React.ReactNode
@@ -39,7 +38,6 @@ export function MorePage() {
   const { t }       = useTranslation()
   const navigate    = useNavigate()
   const { profile } = useAuth()
-  const { isActive } = useSubscription()
   const bizConfig   = getBusinessConfig(profile?.type ?? 'retail')
   const isService   = bizConfig.isServiceBased
 
@@ -52,22 +50,7 @@ export function MorePage() {
       route: '/app/reports',
       show:  !isService,
     },
-    // Customers — product businesses (service has Clients in nav)
-    {
-      icon:  <Users className="h-5 w-5" aria-hidden="true" />,
-      label: t('nav.customers'),
-      desc:  t('more.desc.customers'),
-      route: '/app/customers',
-      show:  !isService,
-    },
     // Product businesses only
-    {
-      icon:  <Package className="h-5 w-5" aria-hidden="true" />,
-      label: t('nav.stock'),
-      desc:  t('more.desc.stock'),
-      route: '/app/stock',
-      show:  !isService,
-    },
     {
       icon:  <ClipboardList className="h-5 w-5" aria-hidden="true" />,
       label: t('nav.purchases'),
@@ -76,26 +59,11 @@ export function MorePage() {
       show:  !isService,
     },
     {
-      icon:  <Truck className="h-5 w-5" aria-hidden="true" />,
-      label: t('nav.suppliers'),
-      desc:  t('more.desc.suppliers'),
-      route: '/app/suppliers',
-      show:  !isService,
-    },
-    {
       icon:  <History className="h-5 w-5" aria-hidden="true" />,
       label: t('nav.inventory'),
       desc:  t('more.desc.inventory'),
       route: '/app/inventory',
       show:  !isService,
-    },
-    // Staff — Premium only
-    {
-      icon:  <UserCog className="h-5 w-5" aria-hidden="true" />,
-      label: t('nav.staff'),
-      desc:  t('more.desc.staff'),
-      route: '/app/staff',
-      show:  isActive,
     },
   ].filter(t => t.show)
 

@@ -6,7 +6,7 @@
  * are accessible via action buttons — nothing is removed.
  */
 import { useState } from 'react'
-import { AlertTriangle, ArrowDownUp, ClipboardList, History, PackageX, Plus } from 'lucide-react'
+import { AlertTriangle, ArrowDownUp, ClipboardList, History, PackageX, Pencil, Plus, Trash2 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 
@@ -22,7 +22,7 @@ import { adjustStock } from '../modules/retail/inventoryApi'
 import { receivePurchase } from '../modules/purchases/api'
 import { enqueueStockAdjust, enqueuePurchase } from '../lib/offlineQueue'
 import { useSyncContext } from '../context/SyncContext'
-import { createProduct } from '../modules/retail/api'
+import { createProduct, updateProduct, deleteProduct } from '../modules/retail/api'
 import { ProductForm } from '../modules/retail/ProductForm'
 import { MANUAL_MOVEMENT_TYPES } from '../modules/retail/inventoryTypes'
 import { useProducts } from '../modules/retail/useProducts'
@@ -83,6 +83,14 @@ export function StockPage() {
   const [addOpen,     setAddOpen]     = useState(false)
   const [addSubmit,   setAddSubmit]   = useState(false)
 
+  // Edit product dialog
+  const [editProduct,  setEditProduct]  = useState<Product | null>(null)
+  const [editSubmit,   setEditSubmit]   = useState(false)
+
+  // Delete product dialog
+  const [deleteProductState, setDeleteProductState] = useState<Product | null>(null)
+  const [deleteSubmit, setDeleteSubmit] = useState(false)
+
   // Adjust stock dialog
   const [adjProduct,  setAdjProduct]  = useState<Product | null>(null)
   const [adjType,     setAdjType]     = useState<MovementType>('purchase')
@@ -121,6 +129,28 @@ export function StockPage() {
     if (error) { notify({ tone: 'danger', title: t('notification.error.title'), description: error.message }); return }
     notify({ tone: 'success', title: t('products.notifications.added') })
     setAddOpen(false)
+    await reload()
+  }
+
+  async function handleEdit(input: ProductInput) {
+    if (!user || !editProduct) return
+    setEditSubmit(true)
+    const { error } = await updateProduct(editProduct.id, input, user.id)
+    setEditSubmit(false)
+    if (error) { notify({ tone: 'danger', title: t('notification.error.title'), description: error.message }); return }
+    notify({ tone: 'success', title: t('products.notifications.updated') })
+    setEditProduct(null)
+    await reload()
+  }
+
+  async function handleDelete() {
+    if (!user || !deleteProductState) return
+    setDeleteSubmit(true)
+    const { error } = await deleteProduct(deleteProductState.id, user.id)
+    setDeleteSubmit(false)
+    if (error) { notify({ tone: 'danger', title: t('notification.error.title'), description: error.message }); return }
+    notify({ tone: 'success', title: t('products.notifications.deleted') })
+    setDeleteProductState(null)
     await reload()
   }
 
@@ -348,6 +378,24 @@ export function StockPage() {
                     </div>
                   </div>
 
+                  {/* Action buttons — edit/delete for service businesses */}
+                  {bizConfig.isServiceBased && (
+                    <div className="flex shrink-0 items-center gap-1">
+                      <button type="button"
+                        onClick={() => setEditProduct(p)}
+                        aria-label={t('products.actions.edit', { name: p.name })}
+                        className="rounded p-1.5 text-secondary hover:bg-background hover:text-text">
+                        <Pencil className="h-4 w-4" aria-hidden="true" />
+                      </button>
+                      <button type="button"
+                        onClick={() => setDeleteProductState(p)}
+                        aria-label={t('products.actions.delete', { name: p.name })}
+                        className="rounded p-1.5 text-secondary hover:bg-danger-soft hover:text-danger">
+                        <Trash2 className="h-4 w-4" aria-hidden="true" />
+                      </button>
+                    </div>
+                  )}
+
                   {/* Action buttons — only restock + adjust for physical-stock businesses */}
                   {!bizConfig.isServiceBased && (
                     <div className="flex shrink-0 items-center gap-1">
@@ -369,6 +417,18 @@ export function StockPage() {
                         className="rounded p-1.5 text-secondary hover:bg-background hover:text-text">
                         <ArrowDownUp className="h-4 w-4" aria-hidden="true" />
                       </button>
+                      <button type="button"
+                        onClick={() => setEditProduct(p)}
+                        aria-label={t('products.actions.edit', { name: p.name })}
+                        className="rounded p-1.5 text-secondary hover:bg-background hover:text-text">
+                        <Pencil className="h-4 w-4" aria-hidden="true" />
+                      </button>
+                      <button type="button"
+                        onClick={() => setDeleteProductState(p)}
+                        aria-label={t('products.actions.delete', { name: p.name })}
+                        className="rounded p-1.5 text-secondary hover:bg-danger-soft hover:text-danger">
+                        <Trash2 className="h-4 w-4" aria-hidden="true" />
+                      </button>
                     </div>
                   )}
                 </div>
@@ -377,16 +437,7 @@ export function StockPage() {
           </div>
         )}
 
-        {/* Link to full products management */}
-        {products.length > 0 && (
-          <p className="text-center text-xs text-secondary">
-            {bizConfig.isServiceBased ? t('stock.editServicePrices') : t('stock.manageProducts')}{' '}
-            <button type="button" onClick={() => navigate('/app/products')}
-              className="font-medium text-primary hover:underline">
-              {t('stock.manageProductsLink')}
-            </button>
-          </p>
-        )}
+        {/* [products management link removed — edit/delete now inline] */}
       </div>
 
       {/* ── Add product dialog ─────────────────────────────────────────────── */}
@@ -437,6 +488,12 @@ export function StockPage() {
             </div>
             <Select label={t('purchases.form.supplier')} options={supplierOptions}
               value={rstSupplier} onChange={e => setRstSupplier(e.target.value)} />
+            <div className="-mt-2">
+              <button type="button" onClick={() => navigate('/app/suppliers')}
+                className="text-xs font-medium text-primary hover:underline">
+                {t('stock.manageSuppliers')}
+              </button>
+            </div>
             <div className="grid grid-cols-2 gap-3">
               <Input label={t('inventory.restock.quantity')} inputMode="decimal"
                 value={rstQty} onChange={e => setRstQty(e.target.value)} />
@@ -450,6 +507,41 @@ export function StockPage() {
           </div>
         )}
       </Dialog>
+
+      {/* ── Edit product dialog ────────────────────────────────────────────── */}
+      <Dialog open={editProduct !== null} onOpenChange={o => { if (!o) setEditProduct(null) }}
+        title={bizConfig.isServiceBased ? t('products.form.titleEditService') : t('products.form.titleEdit')}
+        closeLabel={t('common.close')}>
+        {editProduct && (
+          <ProductForm
+            mode="edit"
+            initial={editProduct}
+            isServiceBased={bizConfig.isServiceBased}
+            onSubmit={handleEdit}
+            onCancel={() => setEditProduct(null)}
+            submitting={editSubmit}
+          />
+        )}
+      </Dialog>
+
+      {/* ── Delete confirmation dialog ─────────────────────────────────────── */}
+      <Dialog
+        open={deleteProductState !== null}
+        onOpenChange={o => { if (!o) setDeleteProductState(null) }}
+        title={t('products.delete.title')}
+        description={t('products.delete.desc', { name: deleteProductState?.name ?? '' })}
+        closeLabel={t('common.cancel')}
+        footer={
+          <>
+            <Button variant="ghost" onClick={() => setDeleteProductState(null)} disabled={deleteSubmit}>
+              {t('common.cancel')}
+            </Button>
+            <Button variant="danger" loading={deleteSubmit} onClick={() => void handleDelete()}>
+              {t('common.delete')}
+            </Button>
+          </>
+        }
+      />
     </>
   )
 }

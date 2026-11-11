@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { CheckCircle2, Plus, Receipt } from 'lucide-react'
+import { ArrowRight, CheckCircle2, Plus, Receipt } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import { Button } from '../design-system/Button'
@@ -255,6 +255,14 @@ export function SalesPage() {
             </Table>
           </div>
         )}
+
+        {/* View full report link */}
+        <div className="mt-6 flex justify-end">
+          <button type="button" onClick={() => navigate('/app/reports')}
+            className="flex items-center gap-1.5 text-sm font-medium text-primary hover:underline">
+            {t('sales.viewFullReport')} <ArrowRight className="h-4 w-4" aria-hidden="true" />
+          </button>
+        </div>
       </div>
 
       {/* ── Sale detail dialog ───────────────────────────────────────────── */}

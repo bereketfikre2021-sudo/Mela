@@ -55,6 +55,7 @@ export function PosPage() {
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null)
   const [customCustomerName, setCustomCustomerName] = useState('')
   const [notes,              setNotes]              = useState('')
+  const [customerExpanded,   setCustomerExpanded]   = useState(false)
   // One UUID per checkout attempt. Regenerated after each successful sale or
   // when the dialog is opened, so retries on the same open dialog are safe.
   const [idempotencyKey, setIdempotencyKey] = useState(() => crypto.randomUUID())
@@ -71,6 +72,7 @@ export function PosPage() {
     setSelectedCustomerId(null)
     setCustomCustomerName('')
     setNotes('')
+    setCustomerExpanded(false)
     setCheckoutOpen(true)
   }
 
@@ -444,43 +446,51 @@ export function PosPage() {
             </div>
           </div>
 
-          {/* Customer — pick from existing OR type a new name */}
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-text">{t('pos.customer')}</label>
-            {/* Dropdown of registered customers */}
-            <Select
-              options={[
-                { value: '', label: t('pos.customerSelectPrompt') },
-                ...customers.map(c => ({
-                  value: c.id,
-                  label: c.name + (c.phone ? ` · ${c.phone}` : ''),
-                })),
-              ]}
-              value={selectedCustomerId ?? ''}
-              onChange={e => {
-                setSelectedCustomerId(e.target.value || null)
-                setCustomCustomerName('')
-              }}
-            />
-            {/* Or type a new name if not in the list */}
-            {!selectedCustomerId && (
-              <Input
-                value={customCustomerName}
-                onChange={e => setCustomCustomerName(e.target.value)}
-                placeholder={t('pos.customerNewPlaceholder')}
+          {/* Customer — collapsed by default, expand to add */}
+          {!customerExpanded ? (
+            <button type="button" onClick={() => setCustomerExpanded(true)}
+              className="text-sm text-secondary hover:text-primary flex items-center gap-1">
+              <Plus className="h-3.5 w-3.5" aria-hidden="true" />
+              {t('pos.addCustomerOrNote')}
+            </button>
+          ) : (
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-text">{t('pos.customer')}</label>
+              {/* Dropdown of registered customers */}
+              <Select
+                options={[
+                  { value: '', label: t('pos.customerSelectPrompt') },
+                  ...customers.map(c => ({
+                    value: c.id,
+                    label: c.name + (c.phone ? ` · ${c.phone}` : ''),
+                  })),
+                ]}
+                value={selectedCustomerId ?? ''}
+                onChange={e => {
+                  setSelectedCustomerId(e.target.value || null)
+                  setCustomCustomerName('')
+                }}
               />
-            )}
-            {/* Clear selection link */}
-            {selectedCustomerId && (
-              <button
-                type="button"
-                className="text-xs text-secondary hover:text-danger"
-                onClick={() => setSelectedCustomerId(null)}
-              >
-                {t('pos.customerClear')}
-              </button>
-            )}
-          </div>
+              {/* Or type a new name if not in the list */}
+              {!selectedCustomerId && (
+                <Input
+                  value={customCustomerName}
+                  onChange={e => setCustomCustomerName(e.target.value)}
+                  placeholder={t('pos.customerNewPlaceholder')}
+                />
+              )}
+              {/* Clear selection link */}
+              {selectedCustomerId && (
+                <button
+                  type="button"
+                  className="text-xs text-secondary hover:text-danger"
+                  onClick={() => setSelectedCustomerId(null)}
+                >
+                  {t('pos.customerClear')}
+                </button>
+              )}
+            </div>
+          )}
 
           {showPaymentSelector && (
             <Select
@@ -496,13 +506,15 @@ export function PosPage() {
             />
           )}
 
-          {/* Notes */}
-          <Input
-            label={t('pos.notes')}
-            value={notes}
-            onChange={e => setNotes(e.target.value)}
-            placeholder={t('pos.notesPlaceholder')}
-          />
+          {/* Notes — only shown when customer section is expanded */}
+          {customerExpanded && (
+            <Input
+              label={t('pos.notes')}
+              value={notes}
+              onChange={e => setNotes(e.target.value)}
+              placeholder={t('pos.notesPlaceholder')}
+            />
+          )}
         </div>
       </Dialog>
     </>

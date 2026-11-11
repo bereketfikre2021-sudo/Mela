@@ -21,7 +21,6 @@ import {
   AlertTriangle,
   ArrowRight,
   BarChart2,
-  Bell,
   HelpCircle,
   PackageSearch,
   Receipt,
@@ -435,16 +434,15 @@ export function OverviewPage() {
         </div>
 
         {/* Secondary quick actions */}
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-2 gap-2">
           {[
             ...(!bizConfig.isServiceBased ? [
-              { icon: <PackageSearch className="h-4 w-4" aria-hidden="true" />, label: t('nav.products'),   route: '/app/products' },
+              { icon: <PackageSearch className="h-4 w-4" aria-hidden="true" />, label: t('nav.stock'),      route: '/app/stock' },
               { icon: <Users className="h-4 w-4" aria-hidden="true" />,         label: t('nav.customers'),  route: '/app/customers' },
             ] : [
               { icon: <PackageSearch className="h-4 w-4" aria-hidden="true" />, label: t('nav.services'),   route: '/app/products' },
               { icon: <Users className="h-4 w-4" aria-hidden="true" />,         label: t('nav.clients'),    route: '/app/customers' },
             ]),
-            { icon: <Bell className="h-4 w-4" aria-hidden="true" />, label: t('notifications.title'), route: '/app/notifications' },
           ].map(a => (
             <button key={a.route} type="button" onClick={() => navigate(a.route)}
               className="flex items-center gap-2 rounded-xl border border-border bg-surface px-3 py-2.5 text-left transition-colors hover:bg-background">

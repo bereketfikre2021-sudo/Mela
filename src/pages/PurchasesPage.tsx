@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { CheckCircle2, CreditCard, Plus, ShoppingBag, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
@@ -48,6 +49,7 @@ function todayISO() { return new Date().toISOString().slice(0, 10) }
 export function PurchasesPage() {
   const { t }    = useTranslation()
   const { user } = useAuth()
+  const navigate = useNavigate()
   const { isOnline, refreshCount } = useSyncContext()
   const { purchases, status, errorMessage, reload } = usePurchases()
   const { products } = useProducts()
@@ -386,6 +388,12 @@ export function PurchasesPage() {
               value={supplierId} onChange={e => setSupplierId(e.target.value)} />
             <Input label={t('purchases.form.date')} type="date"
               value={purchDate} onChange={e => setPurchDate(e.target.value)} />
+          </div>
+          <div className="-mt-2">
+            <button type="button" onClick={() => { setCreateOpen(false); navigate('/app/suppliers') }}
+              className="text-xs font-medium text-primary hover:underline">
+              {t('stock.manageSuppliers')}
+            </button>
           </div>
 
           <div>

@@ -132,6 +132,10 @@ export function ProfileMenu() {
                 onClick={() => go('/app/profile')} />
               <MenuItem icon={<CreditCard className="h-4 w-4" />} label={t('profileMenu.subscription')}
                 onClick={() => go('/app/subscription')} />
+              {isActive && (
+                <MenuItem icon={<UserCog className="h-4 w-4" />} label={t('profileMenu.staff')}
+                  onClick={() => go('/app/staff')} />
+              )}
               {isActive && staffList.length > 0 && (
                 <MenuItem icon={<UserCog className="h-4 w-4" />} label={t('profileMenu.switchStaff')}
                   onClick={openSwitcher} />

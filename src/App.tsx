@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { BrowserRouter, Navigate, Route, Routes, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { BarChart2, Home, MoreHorizontal, PackageSearch, Receipt, Users, Wallet } from 'lucide-react'
+import { BarChart2, Home, Package, PackageSearch, Receipt, Users, Wallet } from 'lucide-react'
 
 import { NotificationProvider } from './design-system/Notification'
 import type { NavItem } from './design-system/BottomNav'
@@ -11,7 +11,6 @@ import { useAuth } from './modules/auth/AuthContext'
 import { PublicOnly, RequireBusiness, RequireProfile } from './modules/auth/RouteGuards'
 import { ProfileMenu } from './components/ProfileMenu'
 import { SyncBadge } from './components/SyncBadge'
-import { NotificationBell } from './components/NotificationBell'
 import { PWAInstallBanner } from './components/PWAInstallBanner'
 import { PaywallGate } from './components/PaywallGate'
 import { TrialBanner } from './components/TrialBanner'
@@ -36,7 +35,6 @@ const OnboardingPage          = lazy(() => import('./pages/OnboardingPage').then
 const OverviewPage            = lazy(() => import('./pages/OverviewPage').then(m => ({ default: m.OverviewPage })))
 const PosPage                 = lazy(() => import('./pages/PosPage').then(m => ({ default: m.PosPage })))
 const PrivacyPage             = lazy(() => import('./pages/PrivacyPage').then(m => ({ default: m.PrivacyPage })))
-const ProductsPage            = lazy(() => import('./pages/ProductsPage').then(m => ({ default: m.ProductsPage })))
 const PurchasesPage           = lazy(() => import('./pages/PurchasesPage').then(m => ({ default: m.PurchasesPage })))
 const RegisterPage            = lazy(() => import('./pages/RegisterPage').then(m => ({ default: m.RegisterPage })))
 const ReportsPage             = lazy(() => import('./pages/ReportsPage').then(m => ({ default: m.ReportsPage })))
@@ -48,7 +46,6 @@ const WelcomePage             = lazy(() => import('./pages/WelcomePage').then(m 
 const SubscriptionPage        = lazy(() => import('./pages/SubscriptionPage').then(m => ({ default: m.SubscriptionPage })))
 const MorePage                = lazy(() => import('./pages/MorePage').then(m => ({ default: m.MorePage })))
 const StaffPage               = lazy(() => import('./pages/StaffPage').then(m => ({ default: m.StaffPage })))
-const NotificationsPage       = lazy(() => import('./pages/NotificationsPage').then(m => ({ default: m.NotificationsPage })))
 
 function PageLoader() {
   return (
@@ -104,25 +101,22 @@ function AppRoutes() {
   const isService = bizConfig.isServiceBased
 
   /**
-   * Product businesses:  Home | Sales | Expenses | Products | More
-   * Service businesses:  Home | Services | Expenses | Products(=Services) | Clients | Reports
+   * Product businesses:  Home | Sales | Stock | Customers | Expenses
+   * Service businesses:  Home | Sales | Expenses | Services | Clients | Reports
    */
-  const appNav: NavItem[] = [
+  const appNav: NavItem[] = isService ? [
     { id: '/app',          label: t('nav.home'),     icon: Home },
     { id: '/app/sales',    label: t('nav.sales'),    icon: Receipt },
     { id: '/app/expenses', label: t('nav.expenses'), icon: Wallet },
-    {
-      id:    '/app/products',
-      label: isService ? t('nav.services') : t('nav.products'),
-      icon:  PackageSearch,
-    },
-    // Service businesses keep Clients in nav; product businesses use More
-    ...(isService ? [
-      { id: '/app/customers', label: t('nav.clients'),  icon: Users },
-      { id: '/app/reports',   label: t('nav.reports'),  icon: BarChart2 },
-    ] : [
-      { id: '/app/more', label: t('nav.more'), icon: MoreHorizontal },
-    ]),
+    { id: '/app/products', label: t('nav.services'), icon: PackageSearch },
+    { id: '/app/customers', label: t('nav.clients'), icon: Users },
+    { id: '/app/reports',   label: t('nav.reports'), icon: BarChart2 },
+  ] : [
+    { id: '/app',           label: t('nav.home'),      icon: Home },
+    { id: '/app/sales',     label: t('nav.sales'),     icon: Receipt },
+    { id: '/app/stock',     label: t('nav.stock'),     icon: Package },
+    { id: '/app/customers', label: t('nav.customers'), icon: Users },
+    { id: '/app/expenses',  label: t('nav.expenses'),  icon: Wallet },
   ]
 
   const publicShell = (children: React.ReactNode) => (
@@ -130,7 +124,7 @@ function AppRoutes() {
   )
 
   const profileMenu = status === 'authenticated'
-    ? <div className="flex items-center gap-1"><SyncBadge /><NotificationBell /><ProfileMenu /></div>
+    ? <div className="flex items-center gap-1"><SyncBadge /><ProfileMenu /></div>
     : null
 
   const appShell = (children: React.ReactNode, activeId: string) => (
@@ -177,21 +171,21 @@ function AppRoutes() {
       <Route path="/app/more"
         element={appShell(<RequireBusiness><MorePage /></RequireBusiness>, '/app/more')} />
       <Route path="/app/products"
-        element={appShell(<RequireBusiness><ProductsPage /></RequireBusiness>, '/app/products')} />
+        element={isService
+          ? appShell(<RequireBusiness><StockPage /></RequireBusiness>, '/app/products')
+          : <Navigate to="/app/stock" replace />} />
       <Route path="/app/stock"
-        element={appShell(<RequireBusiness><StockPage /></RequireBusiness>, '/app')} />
+        element={appShell(<RequireBusiness><StockPage /></RequireBusiness>, '/app/stock')} />
       <Route path="/app/inventory"
         element={appShell(<RequireBusiness><InventoryPage /></RequireBusiness>, '/app')} />
       <Route path="/app/purchases"
         element={appShell(<RequireBusiness><PurchasesPage /></RequireBusiness>, '/app')} />
       <Route path="/app/customers"
-        element={appShell(<RequireBusiness><CustomersPage /></RequireBusiness>, isService ? '/app/customers' : '/app/more')} />
+        element={appShell(<RequireBusiness><CustomersPage /></RequireBusiness>, '/app/customers')} />
       <Route path="/app/suppliers"
         element={appShell(<RequireBusiness><SuppliersPage /></RequireBusiness>, '/app')} />
       <Route path="/app/staff"
         element={appShell(<RequireBusiness><StaffPage /></RequireBusiness>, '/app')} />
-      <Route path="/app/notifications"
-        element={appShell(<RequireBusiness><NotificationsPage /></RequireBusiness>, '/app')} />
       <Route path="/app/profile"
         element={appShell(<RequireBusiness><EditBusinessProfilePage /></RequireBusiness>, '/app')} />
       <Route path="/app/subscription"
