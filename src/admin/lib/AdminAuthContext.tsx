@@ -106,34 +106,24 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
   const signInWithSSO = useCallback(async (): Promise<{ error: string | null }> => {
     if (!supabase) return { error: 'Supabase client is not configured.' }
 
-    // Store intended destination so the callback can restore navigation
     try {
       sessionStorage.setItem(SSO_DESTINATION_KEY, '/admin')
-    } catch {
-      // sessionStorage unavailable — proceed anyway
-    }
+    } catch { /* ignore */ }
 
-    // Requirement: use window.location.origin, no extra query params on redirect URL
+    // Per spec: window.location.origin + /auth/callback, no extra query params
     const redirectTo = `${window.location.origin}/auth/callback`
 
     const { error } = await supabase.auth.signInWithOAuth({
-      // Supabase custom OIDC provider ID registered as 'central-admin'
       provider: 'custom:central-admin' as Parameters<typeof supabase.auth.signInWithOAuth>[0]['provider'],
       options: {
         redirectTo,
-        scopes:       'openid email',
-        // PKCE flow — Supabase JS v2 uses PKCE by default for signInWithOAuth;
-        // explicitly declare the query param to satisfy the spec requirement.
-        queryParams: { response_type: 'code' },
+        scopes: 'openid email',
         skipBrowserRedirect: false,
+        // No queryParams — PKCE is handled automatically by Supabase JS v2
       },
     })
 
-    if (error) {
-      // Surface the actual error — never hide it silently
-      return { error: error.message }
-    }
-
+    if (error) return { error: error.message }
     return { error: null }
   }, [])
 
