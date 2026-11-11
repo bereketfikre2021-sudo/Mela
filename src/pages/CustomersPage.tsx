@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react'
-import { Mail, Pencil, Phone, Plus, ShoppingBag, Trash2, Users } from 'lucide-react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { CheckCircle2, Mail, Pencil, Phone, Plus, ShoppingBag, Trash2, Users, Wallet } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import { Button } from '../design-system/Button'
@@ -8,6 +8,7 @@ import { EmptyState } from '../design-system/EmptyState'
 import { Input } from '../design-system/Input'
 import { Skeleton } from '../design-system/LoadingState'
 import { useNotification } from '../design-system/Notification'
+import { Select } from '../design-system/Select'
 import { StatusBadge } from '../design-system/StatusBadge'
 import { useAuth } from '../modules/auth/AuthContext'
 import { CustomerForm } from '../modules/customers/CustomerForm'
@@ -16,9 +17,9 @@ import { useCustomers } from '../modules/customers/useCustomers'
 import type { Customer, CustomerInput } from '../modules/customers/types'
 import { useSubscription } from '../modules/subscriptions/SubscriptionContext'
 import { getBusinessConfig } from '../modules/auth/businessConfig'
-import { getSalesByCustomer } from '../modules/retail/salesApi'
+import { getOutstandingBalances, getSalesByCustomer, recordSalePayment } from '../modules/retail/salesApi'
 import { Breadcrumb } from '../components/Breadcrumb'
-import type { SaleWithItems } from '../modules/retail/types'
+import type { PaymentMethod, SaleWithItems } from '../modules/retail/types'
 
 type DialogMode = 'add' | 'edit' | 'delete' | null
 
@@ -40,6 +41,17 @@ export function CustomersPage() {
   const [history,         setHistory]         = useState<SaleWithItems[]>([])
   const [historyLoading,  setHistoryLoading]  = useState(false)
 
+  // Per-sale payment history — not expanded inline in this dialog;
+  // full history is available via the Sales page.
+
+  // Record-payment dialog state (inside customer history dialog)
+  const [payDialogSale, setPayDialogSale] = useState<SaleWithItems | null>(null)
+  const [payAmount,     setPayAmount]     = useState('')
+  const [payMethod,     setPayMethod]     = useState<PaymentMethod>('cash')
+  const [payDate,       setPayDate]       = useState(() => new Date().toISOString().slice(0, 10))
+  const [payNote,       setPayNote]       = useState('')
+  const [paySubmitting, setPaySubmitting] = useState(false)
+
   async function openHistory(c: Customer) {
     setHistoryCustomer(c)
     setHistoryLoading(true)
@@ -49,9 +61,76 @@ export function CustomersPage() {
     setHistoryLoading(false)
   }
 
+  // Outstanding = sum of (total - amount_paid) for unpaid/partial sales
   const pendingBalance = history
-    .filter(s => s.payment_status === 'pending')
-    .reduce((sum, s) => sum + s.total, 0)
+    .filter(s => s.payment_status === 'pending' || s.payment_status === 'partial')
+    .reduce((sum, s) => sum + (s.total - (s.amount_paid ?? 0)), 0)
+
+  function openPayDialog(sale: SaleWithItems) {
+    setPayDialogSale(sale)
+    setPayAmount('')
+    setPayMethod('cash')
+    setPayDate(new Date().toISOString().slice(0, 10))
+    setPayNote('')
+  }
+
+  async function handleRecordPayment() {
+    if (!user || !payDialogSale || !historyCustomer) return
+    const amt = parseFloat(payAmount)
+    if (isNaN(amt) || amt <= 0) {
+      notify({ tone: 'danger', title: t('expenses.form.errors.invalidAmount') })
+      return
+    }
+    const balance = payDialogSale.total - (payDialogSale.amount_paid ?? 0)
+    if (amt > balance + 0.001) {
+      notify({ tone: 'danger', title: t('sales.payment.overpay') })
+      return
+    }
+    setPaySubmitting(true)
+    const { error } = await recordSalePayment({
+      owner_id:        user.id,
+      sale_id:         payDialogSale.id,
+      amount:          amt,
+      payment_method:  payMethod,
+      payment_date:    payDate,
+      note:            payNote.trim() || null,
+      idempotency_key: crypto.randomUUID(),
+    })
+    setPaySubmitting(false)
+    if (error) {
+      notify({ tone: 'danger', title: t('notification.error.title'), description: error.message })
+      return
+    }
+    notify({ tone: 'success', title: t('sales.paymentRecorded') })
+    setPayDialogSale(null)
+    await Promise.all([openHistory(historyCustomer), loadOutstanding()])
+  }
+
+  // ── Outstanding receivables ("who owes me money") ───────────────────────
+  // One query fetches every customer's pending-sales total; no schema change.
+  const [outstanding, setOutstanding] = useState<Map<string, number>>(new Map())
+  const [showOnlyOwing, setShowOnlyOwing] = useState(false)
+
+  const loadOutstanding = useCallback(async () => {
+    const { data } = await getOutstandingBalances()
+    const map = new Map<string, number>()
+    for (const row of data ?? []) map.set(row.customerId, row.amount)
+    setOutstanding(map)
+  }, [])
+
+  useEffect(() => { void loadOutstanding() }, [loadOutstanding])
+
+  const totalOutstanding = useMemo(
+    () => [...outstanding.values()].reduce((sum, n) => sum + n, 0),
+    [outstanding]
+  )
+  const owingCount = useMemo(
+    () => [...outstanding.values()].filter(n => n > 0).length,
+    [outstanding]
+  )
+  // If everyone settles their debt, drop the "only owing" filter so the list
+  // doesn't appear empty.
+  useEffect(() => { if (owingCount === 0) setShowOnlyOwing(false) }, [owingCount])
 
   function openAdd()              { setSelected(null);  setDialogMode('add') }
   function openEdit(c: Customer)  { setSelected(c);     setDialogMode('edit') }
@@ -60,12 +139,16 @@ export function CustomersPage() {
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
-    if (!q) return customers
-    return customers.filter(c =>
-      c.name.toLowerCase().includes(q) ||
-      (c.phone && c.phone.includes(q))
-    )
-  }, [customers, search])
+    let list = customers
+    if (q) {
+      list = list.filter(c =>
+        c.name.toLowerCase().includes(q) ||
+        (c.phone && c.phone.includes(q))
+      )
+    }
+    if (showOnlyOwing) list = list.filter(c => (outstanding.get(c.id) ?? 0) > 0)
+    return list
+  }, [customers, search, showOnlyOwing, outstanding])
 
   async function handleAdd(input: CustomerInput) {
     if (!user) return
@@ -157,6 +240,34 @@ export function CustomersPage() {
           </div>
         )}
 
+        {/* Outstanding receivables — who owes me money */}
+        {totalOutstanding > 0 && (
+          <div className="mb-4 rounded-xl border border-warning-soft bg-warning-soft px-4 py-3">
+            <div className="flex items-center gap-2">
+              <Wallet className="h-4 w-4 text-warning shrink-0" aria-hidden="true" />
+              <span className="text-sm font-semibold text-text">
+                {t('customers.outstanding.totalLabel')}: ETB {totalOutstanding.toLocaleString('en-ET', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </span>
+            </div>
+            <p className="mt-0.5 text-xs text-secondary">
+              {t('customers.outstanding.owesYou', { count: owingCount })}
+            </p>
+          </div>
+        )}
+
+        {/* Filter: show only customers who owe */}
+        {owingCount > 0 && (
+          <label className="mb-4 flex items-center gap-2 text-sm text-secondary select-none cursor-pointer">
+            <input
+              type="checkbox"
+              checked={showOnlyOwing}
+              onChange={e => setShowOnlyOwing(e.target.checked)}
+              className="h-4 w-4 rounded border-border"
+            />
+            {t('customers.outstanding.filterOwed')}
+          </label>
+        )}
+
         {/* Empty */}
         {customers.length === 0 ? (
           <EmptyState icon={Users}
@@ -175,6 +286,11 @@ export function CustomersPage() {
               <div key={c.id} className="flex items-start justify-between gap-3 bg-surface px-4 py-3">
                 <div className="min-w-0 flex-1">
                   <p className="font-medium text-text truncate">{c.name}</p>
+                  {(outstanding.get(c.id) ?? 0) > 0 && (
+                    <span className="mt-1 inline-flex w-fit items-center gap-1 rounded-full bg-warning-soft px-2 py-0.5 text-xs font-medium text-warning">
+                      {t('customers.pendingBalance', { amount: `ETB ${(outstanding.get(c.id) ?? 0).toLocaleString('en-ET', { minimumFractionDigits: 2 })}` })}
+                    </span>
+                  )}
                   <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-secondary">
                     {c.phone && (
                       <span className="flex items-center gap-1">
@@ -254,24 +370,71 @@ export function CustomersPage() {
                 {t('customers.pendingBalance', { amount: `ETB ${pendingBalance.toLocaleString('en-ET', { minimumFractionDigits: 2 })}` })}
               </div>
             )}
-            <div className="divide-y divide-border rounded-xl border border-border overflow-hidden">
+          <div className="divide-y divide-border rounded-xl border border-border overflow-hidden">
               {history.map(s => (
-                <div key={s.id} className="flex items-center justify-between px-4 py-3">
+                <div key={s.id} className="flex flex-wrap items-center justify-between gap-2 px-4 py-3">
                   <div>
                     <p className="text-sm font-medium text-text">{s.sale_number}</p>
                     <p className="text-xs text-secondary">{new Date(s.sold_at).toLocaleDateString('en-ET', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+                    {(s.payment_status === 'partial') && (s.amount_paid ?? 0) > 0 && (
+                      <p className="text-xs text-warning">{t('sales.amountPaid', { amount: `ETB ${(s.amount_paid ?? 0).toLocaleString('en-ET', { minimumFractionDigits: 2 })}` })}</p>
+                    )}
                   </div>
                   <div className="flex items-center gap-3">
-                    <StatusBadge tone={s.payment_status === 'paid' ? 'success' : s.payment_status === 'pending' ? 'warning' : 'neutral'} dot>
+                    <StatusBadge tone={s.payment_status === 'paid' ? 'success' : s.payment_status === 'partial' ? 'warning' : s.payment_status === 'pending' ? 'warning' : 'neutral'} dot>
                       {t(`sales.status.${s.payment_status}`)}
                     </StatusBadge>
                     <span className="text-sm font-semibold text-text">ETB {s.total.toLocaleString('en-ET', { minimumFractionDigits: 2 })}</span>
+                    {(s.payment_status === 'pending' || s.payment_status === 'partial') && (
+                      <button type="button" onClick={() => openPayDialog(s)}
+                        className="inline-flex items-center gap-1 rounded-md border border-border bg-surface px-2 py-1 text-xs font-medium text-secondary hover:bg-background hover:text-primary">
+                        <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
+                        {t('sales.recordPayment')}
+                      </button>
+                    )}
                   </div>
                 </div>
               ))}
             </div>
           </div>
         )}
+      </Dialog>
+
+      {/* ── Record payment dialog (inside customer context) ───────────── */}
+      <Dialog open={payDialogSale !== null} onOpenChange={o => { if (!o && !paySubmitting) setPayDialogSale(null) }}
+        title={t('sales.recordPayment')} closeLabel={t('common.cancel')}>
+        <div className="flex flex-col gap-4">
+          {payDialogSale && (() => {
+            const balance = payDialogSale.total - (payDialogSale.amount_paid ?? 0)
+            return <p className="text-sm text-secondary">{t('sales.balanceDue', { amount: `ETB ${balance.toLocaleString('en-ET', { minimumFractionDigits: 2 })}` })}</p>
+          })()}
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <Input label={t('sales.payment.amount')} inputMode="decimal"
+              value={payAmount} onChange={e => setPayAmount(e.target.value)} />
+            <Input label={t('sales.payment.date')} type="date"
+              value={payDate} onChange={e => setPayDate(e.target.value)} />
+          </div>
+          <Select label={t('sales.payment.method')}
+            options={[
+              { value: 'cash',          label: t('pos.payment.cash') },
+              { value: 'telebirr',      label: t('pos.payment.telebirr') },
+              { value: 'cbe_birr',      label: t('pos.payment.cbe_birr') },
+              { value: 'bank_transfer', label: t('pos.payment.bank_transfer') },
+            ]}
+            value={payMethod}
+            onChange={e => setPayMethod(e.target.value as PaymentMethod)}
+          />
+          <Input label={t('sales.payment.note')} value={payNote}
+            onChange={e => setPayNote(e.target.value)} maxLength={1000} />
+          <div className="flex justify-end gap-2 pt-1">
+            <Button variant="ghost" onClick={() => setPayDialogSale(null)} disabled={paySubmitting}>
+              {t('common.cancel')}
+            </Button>
+            <Button loading={paySubmitting} onClick={() => void handleRecordPayment()}>
+              {t('sales.payment.submit')}
+            </Button>
+          </div>
+        </div>
       </Dialog>
     </>
   )

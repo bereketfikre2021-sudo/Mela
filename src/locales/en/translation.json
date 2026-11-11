@@ -296,7 +296,8 @@
     },
     "status": {
       "paid": "Paid",
-      "pending": "Pending",
+      "partial": "Partially paid",
+      "pending": "Unpaid",
       "cancelled": "Cancelled"
     },
     "detail": {
@@ -320,7 +321,28 @@
       "desc": "Record your first sale to get started."
     },
     "markPaid": "Mark paid",
-    "markedPaid": "Sale marked as paid"
+    "markedPaid": "Sale marked as paid",
+    "recordPayment": "Record payment",
+    "paymentRecorded": "Payment recorded",
+    "balanceDue": "Balance due: {{amount}}",
+    "amountPaid": "Paid so far: {{amount}}",
+    "paymentHistory": "Payment history",
+    "noPayments": "No payments recorded yet.",
+    "payment": {
+      "amount": "Amount",
+      "method": "Payment method",
+      "date": "Payment date",
+      "note": "Note",
+      "noteHelper": "Optional.",
+      "submit": "Record payment",
+      "overpay": "Amount exceeds the remaining balance.",
+      "col": {
+        "date": "Date",
+        "amount": "Amount",
+        "method": "Method",
+        "note": "Note"
+      }
+    }
   },
   "validation": {
     "required": "This field is required.",
@@ -628,7 +650,13 @@
     "historyTitleService": "Service history",
     "viewHistory": "History for {{name}}",
     "noHistory": "No transactions yet.",
-    "pendingBalance": "Owes {{amount}}"
+    "pendingBalance": "Owes {{amount}}",
+    "outstanding": {
+      "totalLabel": "Total outstanding",
+      "owesYou": "{{count}} customer owes you",
+      "owesYou_other": "{{count}} customers owe you",
+      "filterOwed": "Show only customers who owe"
+    }
   },
   "suppliers": {
     "title": "Suppliers",
@@ -636,6 +664,13 @@
     "count": "{{count}} supplier",
     "count_other": "{{count}} suppliers",
     "add": "Add supplier",
+    "outstanding": {
+      "totalLabel": "Total owed to suppliers",
+      "owesCount": "{{count}} supplier you owe",
+      "owesCount_other": "{{count}} suppliers you owe",
+      "filterOwed": "Show only suppliers you owe",
+      "balance": "Owe {{amount}}"
+    },
     "empty": {
       "title": "No suppliers yet",
       "desc": "Add your first supplier to get started."
@@ -741,6 +776,7 @@
       "date": "Purchase date",
       "items": "Products received",
       "product": "Product",
+      "selectProduct": "Select product…",
       "qty": "Qty",
       "qtyPlaceholder": "Qty",
       "unitCost": "Unit cost",
@@ -766,12 +802,46 @@
     },
     "notifications": {
       "received": "Stock received and updated"
+    },
+    "paymentStatus": {
+      "unpaid": "Unpaid",
+      "partial": "Partial",
+      "paid": "Paid"
+    },
+    "outstanding": {
+      "totalLabel": "Total owed to suppliers",
+      "owesCount": "{{count}} supplier you owe",
+      "owesCount_other": "{{count}} suppliers you owe",
+      "filterOwed": "Show only suppliers you owe",
+      "balance": "Balance: {{amount}}"
+    },
+    "payment": {
+      "dialogTitle": "Record payment",
+      "amount": "Amount",
+      "method": "Payment method",
+      "date": "Payment date",
+      "note": "Note",
+      "noteHelper": "Optional.",
+      "submit": "Record payment",
+      "success": "Payment recorded",
+      "balanceDue": "Balance due: {{amount}}",
+      "paidFull": "Fully paid",
+      "historyTitle": "Payment history",
+      "noHistory": "No payments recorded yet.",
+      "overpay": "Amount exceeds the remaining balance.",
+      "col": {
+        "date": "Date",
+        "amount": "Amount",
+        "method": "Method",
+        "note": "Note"
+      }
     }
   },
   "home": {
     "todaySales": "Today's sales",
     "todayExpenses": "Today's expenses",
-    "profit": "Profit",
+    "profit": "Est. net profit",
+    "netProfitHint": "Revenue minus cost of goods sold and operating expenses",
     "newSale": "New sale",
     "quickExpense": "Add expense",
     "quickSales": "Sales history",
@@ -782,7 +852,19 @@
     "viewFullReport": "View full report",
     "recentServices": "Recent sales",
     "newServiceSale": "Record sale",
-    "quickActions": "Quick actions"
+    "quickActions": "Quick actions",
+    "inventorySection": "Inventory value",
+    "inventoryCostValue": "Stock cost value",
+    "inventoryCostHint": "Stock on hand × last purchase cost",
+    "inventoryRetailValue": "Potential retail value",
+    "inventoryRetailHint": "Stock on hand × current selling price",
+    "inventoryPartial": "Some products have no cost price",
+    "receivablesSection": "Money in / out",
+    "customersOwe": "Customers owe you",
+    "customersOweHint": "Total outstanding customer balances",
+    "youOweSuppliers": "You owe suppliers",
+    "youOweSuppliersHint": "Total outstanding supplier balances",
+    "noneOutstanding": "None outstanding"
   },
   "stock": {
     "title": "Stock",

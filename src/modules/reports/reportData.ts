@@ -4,11 +4,18 @@
  * All aggregations are performed client-side from data already fetched via RLS
  * (sales, sale_items, expenses). No new DB queries or migrations are required.
  *
- * Honesty rules carried forward from financials.ts:
+ * Honesty rules carried forward from financials.ts (see F1 — correct daily profit):
  *  - Only PAID sales contribute to revenue, COGS, and product rankings.
- *  - PENDING sales are tallied separately.
- *  - CANCELLED sales are excluded entirely.
- *  - unit_cost is used for COGS; NULL rows are counted as missing cost data.
+ *  - PENDING sales are tallied separately; CANCELLED sales are excluded entirely.
+ *  - Revenue = Σ sale.total (today total === subtotal; discount-correct by
+ *    construction, refund/cancellation excluded). Scoped by sold_at so debt
+ *    repayments are never counted as new revenue on the repayment day.
+ *  - COGS = Σ sale_items.unit_cost * quantity using the unit_cost snapshot only;
+ *    NULL rows are counted as missing cost data. Current product cost is never
+ *    substituted in, and inventory purchases (separate `purchases` table) are
+ *    never counted as COGS or as operating expenses.
+ *  - Net profit = gross profit − operating expenses (revenue − expenses when no
+ *    COGS exists); costs are never invented for service businesses.
  *  - Product rankings use historical product_name and unit_price snapshots.
  *  - No current product prices or catalogue data is consulted.
  */
@@ -136,10 +143,13 @@ export async function getReportData(range: DateRange): Result<ReportData> {
   const allExpenses = (expensesRes.data as Expense[])      ?? []
 
   const paidSales    = allSales.filter(s => s.payment_status === 'paid')
-  const pendingSales = allSales.filter(s => s.payment_status === 'pending')
+  const pendingSales = allSales.filter(s => s.payment_status === 'pending' || s.payment_status === 'partial')
 
   const paidRevenue    = paidSales.reduce((a, s) => a + s.total, 0)
-  const pendingRevenue = pendingSales.reduce((a, s) => a + s.total, 0)
+  // Outstanding = sum of remaining balances across unpaid + partial sales.
+  const pendingRevenue = pendingSales.reduce((a, s) => {
+    return a + (s.total - (s.amount_paid ?? 0))
+  }, 0)
   const totalExpenses  = allExpenses.reduce((a, e) => a + e.amount, 0)
 
   // ── COGS ──────────────────────────────────────────────────────────────────
@@ -153,7 +163,9 @@ export async function getReportData(range: DateRange): Result<ReportData> {
   }
   const cogs        = hasAnyCost ? cogsKnown : null
   const grossProfit = cogs !== null ? paidRevenue - cogs : null
-  const netProfit   = paidRevenue - totalExpenses
+  // Subtract COGS when known so net profit reflects true earnings for product
+  // businesses; fall back to revenue − expenses when no cost data exists.
+  const netProfit   = (grossProfit !== null ? grossProfit : paidRevenue) - totalExpenses
 
   // ── Daily sales summary ───────────────────────────────────────────────────
   const dailyMap = new Map<string, DailySalesSummary>()

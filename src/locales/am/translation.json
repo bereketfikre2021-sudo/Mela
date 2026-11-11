@@ -296,7 +296,8 @@
     },
     "status": {
       "paid": "ተከፍሏል",
-      "pending": "ይጠብቃል",
+      "partial": "ከፊል ተከፍሏል",
+      "pending": "ያልተከፈለ",
       "cancelled": "ተሰርዟል"
     },
     "detail": {
@@ -320,7 +321,28 @@
       "desc": "ለመጀመር የመጀመሪያ ሽያጭዎን ይመዝግቡ።"
     },
     "markPaid": "እንደከፈለ ምልክት አድርግ",
-    "markedPaid": "ሽያጭ እንደከፈለ ተምልክቷል"
+    "markedPaid": "ሽያጭ እንደከፈለ ተምልክቷል",
+    "recordPayment": "ክፍያ ምዝግብ",
+    "paymentRecorded": "ክፍያ ተመዝግቧል",
+    "balanceDue": "ቀሪ ሂሳብ: {{amount}}",
+    "amountPaid": "እስካሁን ተከፍሏል: {{amount}}",
+    "paymentHistory": "የክፍያ ታሪክ",
+    "noPayments": "እስካሁን ምንም ክፍያ አልተመዘገበም።",
+    "payment": {
+      "amount": "መጠን",
+      "method": "የክፍያ ዘዴ",
+      "date": "የክፍያ ቀን",
+      "note": "ማስታወሻ",
+      "noteHelper": "አማራጭ።",
+      "submit": "ክፍያ ምዝግብ",
+      "overpay": "መጠኑ ቀሪ ሂሳቡን ያልፋል።",
+      "col": {
+        "date": "ቀን",
+        "amount": "መጠን",
+        "method": "ዘዴ",
+        "note": "ማስታወሻ"
+      }
+    }
   },
   "validation": {
     "required": "ይህ መስክ አስፈላጊ ነው።",
@@ -628,7 +650,13 @@
     "historyTitleService": "የአገልግሎት ታሪክ",
     "viewHistory": "ታሪክ ለ {{name}}",
     "noHistory": "እስካሁን ምንም ግብይት የለም።",
-    "pendingBalance": "{{amount}} ይጠይቃል"
+    "pendingBalance": "{{amount}} ይጠይቃል",
+    "outstanding": {
+      "totalLabel": "ጠቅላላ ዕዳ",
+      "owesYou": "{{count}} ደንበኛ ይጠይቃል",
+      "owesYou_other": "{{count}} ደንበኞች ይጠይቃሉ",
+      "filterOwed": "የይጠይቁ ደንበኞችን ብቻ አሳይ"
+    }
   },
   "suppliers": {
     "title": "አቅራቢዎች",
@@ -636,6 +664,13 @@
     "count": "{{count}} አቅራቢ",
     "count_other": "{{count}} አቅራቢዎች",
     "add": "አቅራቢ ጨምር",
+    "outstanding": {
+      "totalLabel": "ለአቅራቢዎች የሚጠበቅ ጠቅላላ",
+      "owesCount": "{{count}} አቅራቢ ይጠበቃል",
+      "owesCount_other": "{{count}} አቅራቢዎች ይጠበቃሉ",
+      "filterOwed": "የሚጠበቁ አቅራቢዎችን ብቻ አሳይ",
+      "balance": "ቀሪ {{amount}}"
+    },
     "empty": {
       "title": "አቅራቢ አልተጨመረም",
       "desc": "የመጀመሪያ አቅራቢዎን ያክሉ።"
@@ -741,6 +776,7 @@
       "date": "የግዢ ቀን",
       "items": "የተቀቡ ምርቶች",
       "product": "ምርት",
+      "selectProduct": "ምርት ይምረጡ…",
       "qty": "መጠን",
       "qtyPlaceholder": "መጠን",
       "unitCost": "የምርት ወጪ",
@@ -766,12 +802,46 @@
     },
     "notifications": {
       "received": "ክምችት ተቀብሏል እና ተዘምኗል"
+    },
+    "paymentStatus": {
+      "unpaid": "ያልተከፈለ",
+      "partial": "ከፊል ተከፍሏል",
+      "paid": "ተከፍሏል"
+    },
+    "outstanding": {
+      "totalLabel": "ለአቅራቢዎች የሚጠበቅ ጠቅላላ",
+      "owesCount": "{{count}} አቅራቢ ይጠበቃል",
+      "owesCount_other": "{{count}} አቅራቢዎች ይጠበቃሉ",
+      "filterOwed": "የሚጠበቁ አቅራቢዎችን ብቻ አሳይ",
+      "balance": "ቀሪ: {{amount}}"
+    },
+    "payment": {
+      "dialogTitle": "ክፍያ ይመዝግቡ",
+      "amount": "መጠን",
+      "method": "የክፍያ ዘዴ",
+      "date": "የክፍያ ቀን",
+      "note": "ማስታወሻ",
+      "noteHelper": "አማራጭ።",
+      "submit": "ክፍያ ይመዝግቡ",
+      "success": "ክፍያ ተመዝግቧል",
+      "balanceDue": "ቀሪ ሂሳብ: {{amount}}",
+      "paidFull": "ሙሉ ተከፍሏል",
+      "historyTitle": "የክፍያ ታሪክ",
+      "noHistory": "እስካሁን ምንም ክፍያ አልተመዘገበም።",
+      "overpay": "መጠኑ ቀሪ ሂሳቡን ያልፋል።",
+      "col": {
+        "date": "ቀን",
+        "amount": "መጠን",
+        "method": "ዘዴ",
+        "note": "ማስታወሻ"
+      }
     }
   },
   "home": {
     "todaySales": "የዛሬ ሽያጭ",
     "todayExpenses": "የዛሬ ወጪ",
-    "profit": "ትርፍ",
+    "profit": "ግምታዊ ትርፍ",
+    "netProfitHint": "ገቢ ሲቀነስ የምርት ወጪ እና ሥራ ወጪ",
     "newSale": "አዲስ ሽያጭ",
     "quickExpense": "ወጪ ጨምር",
     "quickSales": "የሽያጭ ታሪክ",
@@ -782,7 +852,19 @@
     "viewFullReport": "ሙሉ ሪፖርት ይመልከቱ",
     "recentServices": "የቅርብ ጊዜ ሽያጮች",
     "newServiceSale": "ሽያጭ ይመዝግቡ",
-    "quickActions": "ፈጣን እርምጃዎች"
+    "quickActions": "ፈጣን እርምጃዎች",
+    "inventorySection": "የክምችት ዋጋ",
+    "inventoryCostValue": "የክምችት ወጪ ዋጋ",
+    "inventoryCostHint": "አሁን ያለ ክምችት × የመጨረሻ ግዢ ወጪ",
+    "inventoryRetailValue": "ሊሸጥ የሚችለው ዋጋ",
+    "inventoryRetailHint": "አሁን ያለ ክምችት × አሁን ያለ የሽያጭ ዋጋ",
+    "inventoryPartial": "አንዳንድ ምርቶች ወጪ ዋጋ የላቸውም",
+    "receivablesSection": "ተቀቢ / ተከፋይ",
+    "customersOwe": "ደንበኞች ይጠይቁዎታል",
+    "customersOweHint": "ጠቅላላ ያልተከፈለ የደንበኛ ሂሳብ",
+    "youOweSuppliers": "ለአቅራቢዎች ይጠይቃሉ",
+    "youOweSuppliersHint": "ጠቅላላ ያልተከፈለ የአቅራቢ ሂሳብ",
+    "noneOutstanding": "ምንም ያልተከፈለ የለም"
   },
   "stock": {
     "title": "ክምችት",

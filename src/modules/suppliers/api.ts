@@ -51,3 +51,32 @@ export async function deleteSupplier(id: string, ownerId: string): Promise<{ err
     .eq('owner_id', ownerId)
   return { error: error ? { message: error.message } : null }
 }
+
+// ── Supplier outstanding balances (F2) ─────────────────────────────────────────
+// One query over purchases; outstanding = Σ (total_cost − amount_paid) for each
+// supplier's not-fully-paid purchases. Purchases are inventory acquisitions, not
+// expenses, so this never touches the expenses table.
+
+export interface SupplierOutstanding {
+  supplierId: string
+  amount: number
+}
+
+export async function getSupplierOutstanding(): Result<SupplierOutstanding[]> {
+  if (!supabase) return noClient()
+  const { data, error } = await supabase
+    .from('purchases')
+    .select('supplier_id, total_cost, amount_paid')
+    .not('supplier_id', 'is', null)
+    .limit(10000)
+  if (error) return { data: null, error: { message: error.message } }
+  const rows = (data as { supplier_id: string; total_cost: number; amount_paid: number }[]) ?? []
+  const map = new Map<string, number>()
+  for (const r of rows) {
+    const balance = (r.total_cost ?? 0) - (r.amount_paid ?? 0)
+    if (balance > 0) {
+      map.set(r.supplier_id, (map.get(r.supplier_id) ?? 0) + balance)
+    }
+  }
+  return { data: [...map.entries()].map(([supplierId, amount]) => ({ supplierId, amount })), error: null }
+}

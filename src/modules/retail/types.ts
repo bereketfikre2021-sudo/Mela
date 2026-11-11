@@ -35,7 +35,7 @@ export interface ProductInput {
 // ── Sales ─────────────────────────────────────────────────────────────────────
 
 export type PaymentMethod = 'cash' | 'telebirr' | 'cbe_birr' | 'bank_transfer'
-export type PaymentStatus = 'paid' | 'pending' | 'cancelled'
+export type PaymentStatus = 'paid' | 'partial' | 'pending' | 'cancelled'
 
 export interface Sale {
   id: string
@@ -43,6 +43,7 @@ export interface Sale {
   sale_number: string
   subtotal: number
   total: number
+  amount_paid: number      // F3: cumulative payments received (0 for unpaid)
   payment_method: PaymentMethod
   payment_status: PaymentStatus
   customer_name: string | null
@@ -85,4 +86,49 @@ export interface CheckoutPayload {
   customer_name?: string | null
   customer_id?: string | null
   notes?: string | null
+}
+
+// ── Sale payments (F3) ────────────────────────────────────────────────────────
+
+/** A single payment record in the sale_payments ledger. */
+export interface SalePayment {
+  id: string
+  owner_id: string
+  sale_id: string
+  customer_id: string | null
+  customer_name: string | null
+  amount: number
+  payment_method: PaymentMethod
+  payment_date: string   // YYYY-MM-DD
+  note: string | null
+  idempotency_key: string
+  created_at: string
+}
+
+export interface RecordSalePaymentPayload {
+  owner_id: string
+  sale_id: string
+  amount: number
+  payment_method: PaymentMethod
+  payment_date: string
+  note: string | null
+  idempotency_key: string
+}
+
+export interface RecordSalePaymentResult {
+  payment_id: string
+  sale_id: string
+  amount_paid: number | null
+  balance_due: number | null
+  payment_status: PaymentStatus | null
+  already_exists: boolean
+}
+
+/** Derive payment status from totals. Used when the DB field is unavailable
+ *  (e.g. pre-migration rows). Falls back to 'pending' for zero-paid. */
+export function salePaymentStatus(total: number, amountPaid: number): PaymentStatus {
+  const paid = amountPaid ?? 0
+  if (paid >= total) return 'paid'
+  if (paid > 0)      return 'partial'
+  return 'pending'
 }

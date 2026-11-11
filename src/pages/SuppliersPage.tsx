@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react'
-import { Mail, Pencil, Phone, Plus, Trash2, Truck } from 'lucide-react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Mail, Pencil, Phone, Plus, Trash2, Truck, Wallet } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import { Button } from '../design-system/Button'
@@ -10,7 +10,7 @@ import { Skeleton } from '../design-system/LoadingState'
 import { useNotification } from '../design-system/Notification'
 import { useAuth } from '../modules/auth/AuthContext'
 import { SupplierForm } from '../modules/suppliers/SupplierForm'
-import { createSupplier, deleteSupplier, updateSupplier } from '../modules/suppliers/api'
+import { createSupplier, deleteSupplier, getSupplierOutstanding, updateSupplier } from '../modules/suppliers/api'
 import { useSuppliers } from '../modules/suppliers/useSuppliers'
 import type { Supplier, SupplierInput } from '../modules/suppliers/types'
 import { useSubscription } from '../modules/subscriptions/SubscriptionContext'
@@ -29,6 +29,29 @@ export function SuppliersPage() {
   const [submitting, setSubmitting] = useState(false)
   const [search,     setSearch]     = useState('')
 
+  // ── Outstanding supplier balances (F2) ────────────────────────────────────
+  const [outstanding,    setOutstanding]    = useState<Map<string, number>>(new Map())
+  const [showOnlyOwed,   setShowOnlyOwed]   = useState(false)
+
+  const loadOutstanding = useCallback(async () => {
+    const { data } = await getSupplierOutstanding()
+    const map = new Map<string, number>()
+    for (const row of data ?? []) map.set(row.supplierId, row.amount)
+    setOutstanding(map)
+  }, [])
+
+  useEffect(() => { void loadOutstanding() }, [loadOutstanding])
+
+  const totalOutstanding = useMemo(
+    () => [...outstanding.values()].reduce((s, n) => s + n, 0),
+    [outstanding]
+  )
+  const owedCount = useMemo(
+    () => [...outstanding.values()].filter(n => n > 0).length,
+    [outstanding]
+  )
+  useEffect(() => { if (owedCount === 0) setShowOnlyOwed(false) }, [owedCount])
+
   function openAdd()              { setSelected(null); setDialogMode('add') }
   function openEdit(s: Supplier)  { setSelected(s);    setDialogMode('edit') }
   function openDel(s: Supplier)   { setSelected(s);    setDialogMode('delete') }
@@ -36,12 +59,14 @@ export function SuppliersPage() {
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
-    if (!q) return suppliers
-    return suppliers.filter(s =>
+    let list = suppliers
+    if (q) list = list.filter(s =>
       s.name.toLowerCase().includes(q) ||
       (s.phone && s.phone.includes(q))
     )
-  }, [suppliers, search])
+    if (showOnlyOwed) list = list.filter(s => (outstanding.get(s.id) ?? 0) > 0)
+    return list
+  }, [suppliers, search, showOnlyOwed, outstanding])
 
   async function handleAdd(input: SupplierInput) {
     if (!user) return
@@ -126,6 +151,33 @@ export function SuppliersPage() {
           </div>
         )}
 
+        {/* Outstanding supplier balances */}
+        {totalOutstanding > 0 && (
+          <div className="mb-4 rounded-xl border border-warning-soft bg-warning-soft px-4 py-3">
+            <div className="flex items-center gap-2">
+              <Wallet className="h-4 w-4 text-warning shrink-0" aria-hidden="true" />
+              <span className="text-sm font-semibold text-text">
+                {t('suppliers.outstanding.totalLabel')}: ETB {totalOutstanding.toLocaleString('en-ET', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </span>
+            </div>
+            <p className="mt-0.5 text-xs text-secondary">
+              {t('suppliers.outstanding.owesCount', { count: owedCount })}
+            </p>
+          </div>
+        )}
+
+        {owedCount > 0 && (
+          <label className="mb-4 flex items-center gap-2 text-sm text-secondary select-none cursor-pointer">
+            <input
+              type="checkbox"
+              checked={showOnlyOwed}
+              onChange={e => setShowOnlyOwed(e.target.checked)}
+              className="h-4 w-4 rounded border-border"
+            />
+            {t('suppliers.outstanding.filterOwed')}
+          </label>
+        )}
+
         {/* Content */}
         {suppliers.length === 0 ? (
           <EmptyState icon={Truck} title={t('suppliers.empty.title')} description={t('suppliers.empty.desc')}
@@ -140,6 +192,11 @@ export function SuppliersPage() {
               <div key={s.id} className="flex items-start justify-between gap-3 bg-surface px-4 py-3">
                 <div className="min-w-0 flex-1">
                   <p className="font-medium text-text truncate">{s.name}</p>
+                  {(outstanding.get(s.id) ?? 0) > 0 && (
+                    <span className="mt-1 inline-flex w-fit items-center gap-1 rounded-full bg-warning-soft px-2 py-0.5 text-xs font-medium text-warning">
+                      {t('suppliers.outstanding.balance', { amount: `ETB ${(outstanding.get(s.id) ?? 0).toLocaleString('en-ET', { minimumFractionDigits: 2 })}` })}
+                    </span>
+                  )}
                   <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-secondary">
                     {s.phone && (
                       <span className="flex items-center gap-1">

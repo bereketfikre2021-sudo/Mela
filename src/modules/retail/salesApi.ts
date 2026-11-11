@@ -105,3 +105,75 @@ export async function getSalesByCustomer(
   if (error) return { data: null, error: { message: error.message } }
   return { data: (data as SaleWithItems[]) ?? [], error: null }
 }
+
+export interface CustomerOutstanding {
+  customerId: string
+  amount: number
+}
+
+/**
+ * Fetch the outstanding (pending) balance for every customer linked to at
+ * least one pending sale — one row per customer with their total pending
+ * amount. Powers "who owes me money?" on the Customers page without
+ * per-customer queries. RLS restricts to the owner's sales.
+ *
+ * F3: now also counts 'partial' status rows using amount_paid.
+ */
+export async function getOutstandingBalances(): Result<CustomerOutstanding[]> {
+  if (!supabase) return noClient()
+  const { data, error } = await supabase
+    .from('sales')
+    .select('customer_id, total, amount_paid')
+    .in('payment_status', ['pending', 'partial'])
+    .not('customer_id', 'is', null)
+    .limit(10000)
+  if (error) return { data: null, error: { message: error.message } }
+  const rows = (data as { customer_id: string; total: number; amount_paid: number }[]) ?? []
+  const map = new Map<string, number>()
+  for (const row of rows) {
+    const balance = (row.total ?? 0) - (row.amount_paid ?? 0)
+    if (balance > 0) {
+      map.set(row.customer_id, (map.get(row.customer_id) ?? 0) + balance)
+    }
+  }
+  return { data: [...map.entries()].map(([customerId, amount]) => ({ customerId, amount })), error: null }
+}
+
+// ── Sale payments (F3) ────────────────────────────────────────────────────────
+
+import type { RecordSalePaymentPayload, RecordSalePaymentResult, SalePayment } from './types'
+
+/**
+ * Atomically record a full or partial payment against a sale.
+ * The server derives the new payment_status — the frontend never controls it.
+ */
+export async function recordSalePayment(
+  payload: RecordSalePaymentPayload
+): Result<RecordSalePaymentResult> {
+  if (!supabase) return noClient()
+  const { data, error } = await supabase.rpc('record_sale_payment', {
+    p_owner_id:        payload.owner_id,
+    p_sale_id:         payload.sale_id,
+    p_amount:          payload.amount,
+    p_payment_method:  payload.payment_method,
+    p_payment_date:    payload.payment_date,
+    p_note:            payload.note,
+    p_idempotency_key: payload.idempotency_key,
+  })
+  if (error) return { data: null, error: { message: error.message } }
+  return { data: data as RecordSalePaymentResult, error: null }
+}
+
+/** Fetch the full payment history for a single sale, newest first. */
+export async function getSalePayments(saleId: string): Result<SalePayment[]> {
+  if (!supabase) return noClient()
+  const { data, error } = await supabase
+    .from('sale_payments')
+    .select('*')
+    .eq('sale_id', saleId)
+    .order('payment_date', { ascending: false })
+    .order('created_at',   { ascending: false })
+    .limit(500)
+  if (error) return { data: null, error: { message: error.message } }
+  return { data: (data as SalePayment[]) ?? [], error: null }
+}
