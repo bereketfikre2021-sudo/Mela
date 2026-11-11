@@ -1,33 +1,34 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://mela.pro.et/</loc>
+    <loc>https://solution.pro.et/</loc>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://mela.pro.et/login</loc>
+    <loc>https://solution.pro.et/login</loc>
     <changefreq>yearly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://mela.pro.et/register</loc>
+    <loc>https://solution.pro.et/register</loc>
     <changefreq>yearly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://mela.pro.et/privacy</loc>
+    <loc>https://solution.pro.et/privacy</loc>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://mela.pro.et/terms</loc>
+    <loc>https://solution.pro.et/terms</loc>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://mela.pro.et/contact</loc>
+    <loc>https://solution.pro.et/contact</loc>
     <changefreq>yearly</changefreq>
     <priority>0.4</priority>
   </url>
 </urlset>
+

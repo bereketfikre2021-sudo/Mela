@@ -84,9 +84,10 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
 
   const signInWithGoogle = useCallback(async () => {
     if (!supabase) return
+    const base = import.meta.env.VITE_APP_URL || window.location.origin
     await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${window.location.origin}/admin/auth/callback` },
+      options: { redirectTo: `${base}/admin/auth/callback` },
     })
   }, [])
 

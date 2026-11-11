@@ -1,10 +1,10 @@
-# MELA
+﻿# MELA
 
-Ethiopian-first small business management PWA — sales, inventory, expenses and insights for retail, food & beverage, bakery and service businesses.
+Ethiopian-first small business management PWA â€” sales, inventory, expenses and insights for retail, food & beverage, bakery and service businesses.
 
-**Production:** https://mela.pro.et  
-**Stack:** React 19 · Vite 8 · TypeScript (strict) · Tailwind CSS v3 · Supabase · i18next · vite-plugin-pwa  
-**Languages:** English + Amharic (አማርኛ)
+**Production:** https://solution.pro.et  
+**Stack:** React 19 Â· Vite 8 Â· TypeScript (strict) Â· Tailwind CSS v3 Â· Supabase Â· i18next Â· vite-plugin-pwa  
+**Languages:** English + Amharic (áŠ áˆ›áˆ­áŠ›)
 
 ---
 
@@ -30,7 +30,7 @@ npm run dev            # http://localhost:5173
 | Command | Description |
 |---|---|
 | `npm run dev` | Start Vite dev server |
-| `npm run build` | Type-check + production build → `dist/` |
+| `npm run build` | Type-check + production build â†’ `dist/` |
 | `npm run preview` | Serve the production build locally |
 | `npm run typecheck` | Run `tsc --noEmit` only |
 
@@ -44,28 +44,28 @@ Create `.env` from `.env.example`. Never commit `.env`.
 |---|---|
 | `VITE_SUPABASE_URL` | Supabase project URL |
 | `VITE_SUPABASE_ANON_KEY` | Supabase anon/public key (safe to expose) |
-| `VITE_APP_URL` | Production URL (`https://mela.pro.et`) |
+| `VITE_APP_URL` | Production URL (`https://solution.pro.et`) |
 
 ---
 
-## Deployment — Vercel
+## Deployment â€” Vercel
 
 1. Connect the repository in the [Vercel dashboard](https://vercel.com).
 2. Framework preset: **Vite**.
 3. Build command: `npm run build`  
    Output directory: `dist`
-4. Add the three environment variables above in **Project → Settings → Environment Variables**.
-5. Set the **Production Domain** to `mela.pro.et` under **Project → Settings → Domains**.
+4. Add the three environment variables above in **Project â†’ Settings â†’ Environment Variables**.
+5. Set the **Production Domain** to `solution.pro.et` under **Project â†’ Settings â†’ Domains**.
 
 SPA routing on direct page refresh is handled by `vercel.json` (already in the repo).
 
 ### Google OAuth redirect URLs to allow-list in Supabase
 
-Go to **Supabase → Authentication → URL Configuration → Redirect URLs** and add:
+Go to **Supabase â†’ Authentication â†’ URL Configuration â†’ Redirect URLs** and add:
 
 ```
 http://localhost:5173/auth/callback
-https://mela.pro.et/auth/callback
+https://solution.pro.et/auth/callback
 ```
 
 ---
@@ -83,7 +83,7 @@ SQL files live in `supabase/migrations/`. Apply them in order in the **Supabase 
 | `0005_expenses.sql` | Expenses + RLS |
 | `0006_sale_items_unit_cost.sql` | Unit-cost snapshot for COGS |
 
-**Run 0001 first** — later migrations depend on the `set_updated_at()` function it creates.
+**Run 0001 first** â€” later migrations depend on the `set_updated_at()` function it creates.
 
 ---
 
@@ -128,4 +128,5 @@ Defined as CSS variables in `src/index.css`, mapped to Tailwind in `tailwind.con
 | Text | `#252A27` | Body text |
 | Text secondary | `#58685F` | Secondary copy (WCAG AA) |
 
-Fonts: **Outfit** (Latin/EN, self-hosted TTF) · **Noto Sans Ethiopic** (Amharic, via @fontsource)
+Fonts: **Outfit** (Latin/EN, self-hosted TTF) Â· **Noto Sans Ethiopic** (Amharic, via @fontsource)
+

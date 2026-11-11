@@ -1,4 +1,4 @@
-import { useTranslation } from 'react-i18next'
+﻿import { useTranslation } from 'react-i18next'
 
 export function ContactPage() {
   const { t } = useTranslation()
@@ -8,7 +8,7 @@ export function ContactPage() {
       <p className="mt-2 text-sm text-secondary">{t('legal.contact.subtitle')}</p>
       <div className="mt-8 space-y-4">
         {[
-          { label: t('legal.contact.email'),   value: 'support@mela.pro.et', href: 'mailto:support@mela.pro.et' },
+          { label: t('legal.contact.email'),   value: 'support@solution.pro.et', href: 'mailto:support@solution.pro.et' },
           { label: t('legal.contact.hours'),   value: t('legal.contact.hoursValue'),   href: null },
           { label: t('legal.contact.address'), value: t('legal.contact.addressValue'), href: null },
         ].map(item => (
@@ -25,3 +25,4 @@ export function ContactPage() {
     </div>
   )
 }
+

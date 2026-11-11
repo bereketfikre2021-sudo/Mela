@@ -1,4 +1,4 @@
-import { useTranslation } from 'react-i18next'
+﻿import { useTranslation } from 'react-i18next'
 
 export function TermsPage() {
   const { t } = useTranslation()
@@ -23,7 +23,7 @@ export function TermsPage() {
             ) : (
               <p className="mt-2">
                 Questions? Email{' '}
-                <a href="mailto:support@mela.pro.et" className="text-primary hover:underline">support@mela.pro.et</a>.
+                <a href="mailto:support@solution.pro.et" className="text-primary hover:underline">support@solution.pro.et</a>.
               </p>
             )}
           </section>
@@ -32,3 +32,4 @@ export function TermsPage() {
     </div>
   )
 }
+

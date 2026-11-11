@@ -1,4 +1,4 @@
-import { useTranslation } from 'react-i18next'
+﻿import { useTranslation } from 'react-i18next'
 
 export function PrivacyPage() {
   const { t } = useTranslation()
@@ -12,7 +12,7 @@ export function PrivacyPage() {
           { h: '2. How We Use Your Information', b: 'Your data is used solely to operate and improve MELA. We do not sell, rent, or share your personal information with third parties for marketing purposes.' },
           { h: '3. Google Sign-In', b: 'MELA offers sign-in via Google OAuth. When you use Google Sign-In, we receive your Google account email address. We do not request access to your Gmail, Drive, Contacts, or any other Google service. The scopes requested are limited to basic profile identification only.' },
           { h: '4. Data Storage', b: 'Your data is stored securely on Supabase-hosted PostgreSQL infrastructure. Access is protected by row-level security policies ensuring you can only access your own business data.' },
-          { h: '5. Data Retention', b: 'Your data is retained for as long as your account is active. You may request deletion of your account and all associated data by contacting us at support@mela.pro.et.' },
+          { h: '5. Data Retention', b: 'Your data is retained for as long as your account is active. You may request deletion of your account and all associated data by contacting us at support@solution.pro.et.' },
           { h: '6. Contact', b: null },
         ].map(s => (
           <section key={s.h}>
@@ -22,7 +22,7 @@ export function PrivacyPage() {
             ) : (
               <p className="mt-2">
                 For privacy questions, email us at{' '}
-                <a href="mailto:support@mela.pro.et" className="text-primary hover:underline">support@mela.pro.et</a>.
+                <a href="mailto:support@solution.pro.et" className="text-primary hover:underline">support@solution.pro.et</a>.
               </p>
             )}
           </section>
@@ -31,3 +31,4 @@ export function PrivacyPage() {
     </div>
   )
 }
+

@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom'
+﻿import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ShoppingBag, Boxes, Wallet, LineChart, ArrowRight, CheckCircle2 } from 'lucide-react'
 
@@ -18,13 +18,13 @@ export function WelcomePage() {
   return (
     <div className="overflow-x-hidden">
 
-      {/* ── HERO ────────────────────────────────────────────────────────── */}
-      {/* Full-width dark green hero — no max-width constraint because the shell
+      {/* â”€â”€ HERO â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* Full-width dark green hero â€” no max-width constraint because the shell
           renders this page without px-4/max-w-5xl (fullWidth prop). */}
       <section className="relative bg-primary">
         <div className="mx-auto grid max-w-6xl grid-cols-1 gap-8 px-6 py-16 md:grid-cols-2 md:items-center md:py-24 lg:px-8">
 
-          {/* Left — copy */}
+          {/* Left â€” copy */}
           <div className="relative z-10">
             {/* Eyebrow pill */}
             <span className="inline-flex items-center rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-white">
@@ -69,7 +69,7 @@ export function WelcomePage() {
             </ul>
           </div>
 
-          {/* Right — app preview mockup */}
+          {/* Right â€” app preview mockup */}
           <div className="relative flex justify-center md:justify-end">
             {/* Glow */}
             <div className="pointer-events-none absolute -inset-10 rounded-full bg-white/5 blur-3xl" aria-hidden="true" />
@@ -77,7 +77,7 @@ export function WelcomePage() {
             {/* Phone shell */}
             <div className="relative w-[260px] overflow-hidden rounded-[2rem] border-4 border-white/20 bg-background shadow-layer md:w-[280px]">
 
-              {/* Phone status bar — uses real Logo.svg */}
+              {/* Phone status bar â€” uses real Logo.svg */}
               <div className="flex items-center justify-between bg-primary px-4 py-2.5">
                 <div className="flex items-center gap-2">
                   <img src="/Logo.svg" alt="MELA" className="h-6 w-6 rounded-md" />
@@ -147,7 +147,7 @@ export function WelcomePage() {
         </div>
       </section>
 
-      {/* ── FEATURES ──────────────────────────────────────────────────────── */}
+      {/* â”€â”€ FEATURES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <section className="mx-auto max-w-6xl px-6 py-16 md:py-24 lg:px-8">
         <div className="mb-12">
           <p className="text-xs font-bold uppercase tracking-widest text-primary">
@@ -189,7 +189,7 @@ export function WelcomePage() {
         </div>
       </section>
 
-      {/* ── CTA STRIP ─────────────────────────────────────────────────────── */}
+      {/* â”€â”€ CTA STRIP â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <section className="bg-primary">
         <div className="mx-auto flex max-w-6xl flex-col items-center gap-6 px-6 py-16 text-center md:flex-row md:justify-between md:text-left lg:px-8">
           <div>
@@ -211,7 +211,7 @@ export function WelcomePage() {
         </div>
       </section>
 
-      {/* ── FOOTER ────────────────────────────────────────────────────────── */}
+      {/* â”€â”€ FOOTER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <footer className="border-t border-border bg-surface">
         <div className="mx-auto max-w-6xl px-6 py-10 lg:px-8">
 
@@ -251,7 +251,7 @@ export function WelcomePage() {
                     @Believeandforward
                   </a>
                 </li>
-                <li><a href="mailto:support@mela.pro.et" className="hover:text-primary">support@mela.pro.et</a></li>
+                <li><a href="mailto:support@solution.pro.et" className="hover:text-primary">support@solution.pro.et</a></li>
               </ul>
             </div>
           </div>
@@ -283,3 +283,4 @@ export function WelcomePage() {
     </div>
   )
 }
+

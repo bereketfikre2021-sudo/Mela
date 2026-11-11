@@ -42,9 +42,12 @@ export async function signOut(): Promise<{ error: { message: string } | null }> 
 /** Begin Google OAuth. Supabase redirects to Google; the app resumes at /auth/callback. */
 export async function signInWithGoogle(): Promise<{ error: { message: string } | null }> {
   if (!supabase) return { error: { message: 'Supabase is not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.' } }
+  // Use VITE_APP_URL in production so the redirect goes to the real domain,
+  // not localhost. Falls back to window.location.origin in local dev.
+  const base = import.meta.env.VITE_APP_URL || window.location.origin
   const { error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
-    options: { redirectTo: `${window.location.origin}/auth/callback` }
+    options: { redirectTo: `${base}/auth/callback` }
   })
   return { error: error ? { message: error.message } : null }
 }
@@ -104,9 +107,10 @@ export async function sendMagicLink(
   email: string
 ): Promise<{ error: { message: string } | null }> {
   if (!supabase) return { error: { message: clientUnavailableError().error.message } }
+  const base = import.meta.env.VITE_APP_URL || window.location.origin
   const { error } = await supabase.auth.signInWithOtp({
     email,
-    options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+    options: { emailRedirectTo: `${base}/auth/callback` },
   })
   return { error: error ? { message: error.message } : null }
 }
