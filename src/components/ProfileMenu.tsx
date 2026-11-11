@@ -11,7 +11,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { ChevronDown, CreditCard, LogOut, Settings, UserCog } from 'lucide-react'
+import { ChevronDown, CreditCard, LogOut, Settings, UserCog, Users2 } from 'lucide-react'
 
 import { useAuth } from '../modules/auth/AuthContext'
 import { useSubscription } from '../modules/subscriptions/SubscriptionContext'
@@ -133,7 +133,7 @@ export function ProfileMenu() {
               <MenuItem icon={<CreditCard className="h-4 w-4" />} label={t('profileMenu.subscription')}
                 onClick={() => go('/app/subscription')} />
               {isActive && (
-                <MenuItem icon={<UserCog className="h-4 w-4" />} label={t('profileMenu.staff')}
+                <MenuItem icon={<Users2 className="h-4 w-4" />} label={t('profileMenu.staff')}
                   onClick={() => go('/app/staff')} />
               )}
               {isActive && staffList.length > 0 && (

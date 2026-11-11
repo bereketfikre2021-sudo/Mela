@@ -44,7 +44,6 @@ const SuppliersPage           = lazy(() => import('./pages/SuppliersPage').then(
 const TermsPage               = lazy(() => import('./pages/TermsPage').then(m => ({ default: m.TermsPage })))
 const WelcomePage             = lazy(() => import('./pages/WelcomePage').then(m => ({ default: m.WelcomePage })))
 const SubscriptionPage        = lazy(() => import('./pages/SubscriptionPage').then(m => ({ default: m.SubscriptionPage })))
-const MorePage                = lazy(() => import('./pages/MorePage').then(m => ({ default: m.MorePage })))
 const StaffPage               = lazy(() => import('./pages/StaffPage').then(m => ({ default: m.StaffPage })))
 
 function PageLoader() {
@@ -167,9 +166,9 @@ function AppRoutes() {
       <Route path="/app/reports"
         element={appShell(<RequireBusiness><ReportsPage /></RequireBusiness>, isService ? '/app/reports' : '/app')} />
 
-      {/* ── Secondary routes (via account Advanced menu) ──────────────────── */}
+      {/* ── /app/more — redirect to home (no longer in nav) ────────────── */}
       <Route path="/app/more"
-        element={appShell(<RequireBusiness><MorePage /></RequireBusiness>, '/app/more')} />
+        element={<Navigate to="/app" replace />} />
       <Route path="/app/products"
         element={isService
           ? appShell(<RequireBusiness><StockPage /></RequireBusiness>, '/app/products')
