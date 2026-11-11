@@ -135,12 +135,10 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
   const signInWithSSO = useCallback(async (): Promise<{ error: string | null }> => {
     if (!supabase) return { error: 'Supabase client is not configured.' }
 
-    try {
-      storeSSODestination('/admin/')
-    } catch { /* ignore */ }
-
-    // Per spec: window.location.origin + /auth/callback, no extra query params
-    const redirectTo = `${window.location.origin}/auth/callback`
+    // Encode destination in redirectTo so it survives the multi-hop redirect
+    // chain through bk.pro.et. sessionStorage is wiped across origins.
+    // The `next` param is read back in AuthCallbackPage after PKCE exchange.
+    const redirectTo = `${window.location.origin}/auth/callback?next=/admin/`
 
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'custom:central-admin' as Parameters<typeof supabase.auth.signInWithOAuth>[0]['provider'],

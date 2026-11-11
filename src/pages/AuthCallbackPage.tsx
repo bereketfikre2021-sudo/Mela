@@ -4,20 +4,21 @@ import { useTranslation } from 'react-i18next'
 
 import { Spinner } from '../design-system/LoadingState'
 import { supabase } from '../lib/supabase'
-import { consumeSSODestination } from '../admin/lib/AdminAuthContext'
+
+/** Internal-path allowlist — prevents open redirect attacks. */
+const ALLOWED_NEXT_PATHS = ['/admin', '/admin/', '/admin/dashboard', '/app']
 
 /**
  * AuthCallbackPage — handles OAuth / PKCE callback for both customer and
  * admin SSO flows.
  *
- * Strategy:
- *  Supabase JS v2 automatically detects the `code` param (or hash fragment)
- *  in the URL and exchanges it via PKCE on `getSession()`. We do NOT call
- *  `exchangeCodeForSession` manually — doing so loses the code verifier that
- *  Supabase stored before the redirect.
+ * Destination is encoded in the `?next=` query param of the redirectTo URL,
+ * which Supabase preserves through the OAuth flow and returns to us here.
+ * sessionStorage is NOT used — it is wiped by the cross-origin redirect
+ * chain through bk.pro.et.
  *
- *  We poll `getSession()` briefly to let the SDK complete the exchange, then
- *  read the SSO destination from sessionStorage to decide where to navigate.
+ * Admin authorization: `checkIsAdmin()` in AdminAuthContext still runs after
+ * navigation to /admin. The `next` param only controls routing, not access.
  */
 export function AuthCallbackPage() {
   const { t }    = useTranslation()
@@ -30,11 +31,14 @@ export function AuthCallbackPage() {
       return
     }
 
-    // Read (and immediately clear) the SSO destination before any async work.
-    const ssoDestination = consumeSSODestination()
+    // Read ?next= from URL — this survives all redirects unlike sessionStorage.
+    // Validate against allowlist before using.
+    const params = new URLSearchParams(window.location.search)
+    const rawNext = params.get('next') ?? ''
+    const destination = ALLOWED_NEXT_PATHS.includes(rawNext) ? rawNext : '/app'
 
-    // Let Supabase JS v2 handle PKCE exchange automatically via getSession().
-    // It detects the `code` in the URL hash/query and exchanges it internally.
+    // Supabase JS v2 handles PKCE exchange automatically on getSession()
+    // when it detects the code in the URL — no need to call exchangeCodeForSession.
     supabase.auth.getSession()
       .then(({ data, error }) => {
         if (error) {
@@ -44,26 +48,24 @@ export function AuthCallbackPage() {
         }
 
         if (!data.session) {
-          // No session yet — Supabase may still be processing the hash.
-          // Wait a tick and retry once.
+          // Retry once after a brief delay — Supabase may still be processing
           setTimeout(() => {
             supabase!.auth.getSession().then(({ data: d2, error: e2 }) => {
               if (e2 || !d2.session) {
-                setErrorMsg(e2?.message ?? 'No session returned. Please try signing in again.')
+                setErrorMsg(e2?.message ?? 'No session returned. Please try again.')
                 return
               }
-              navigate(ssoDestination ?? '/app', { replace: true })
+              navigate(destination, { replace: true })
             })
           }, 800)
           return
         }
 
-        // Session established — go to admin or customer app
-        navigate(ssoDestination ?? '/app', { replace: true })
+        navigate(destination, { replace: true })
       })
       .catch((e: unknown) => {
-        const msg = e instanceof Error ? e.message : 'Unexpected error during authentication.'
-        console.error('[AuthCallback] Unexpected error:', msg)
+        const msg = e instanceof Error ? e.message : 'Unexpected authentication error.'
+        console.error('[AuthCallback] error:', msg)
         setErrorMsg(msg)
       })
   }, [navigate])
@@ -75,11 +77,8 @@ export function AuthCallbackPage() {
           <p className="font-semibold">Authentication error</p>
           <p className="mt-1 font-mono text-xs break-all">{errorMsg}</p>
         </div>
-        <button
-          type="button"
-          onClick={() => navigate('/login', { replace: true })}
-          className="text-sm text-primary hover:underline"
-        >
+        <button type="button" onClick={() => navigate('/login', { replace: true })}
+          className="text-sm text-primary hover:underline">
           Return to login
         </button>
       </div>
