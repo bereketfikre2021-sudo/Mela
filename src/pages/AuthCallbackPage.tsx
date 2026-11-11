@@ -5,69 +5,48 @@ import { useTranslation } from 'react-i18next'
 import { Spinner } from '../design-system/LoadingState'
 import { supabase } from '../lib/supabase'
 
-/** Internal-path allowlist — prevents open redirect attacks. */
-const ALLOWED_NEXT_PATHS = ['/admin', '/admin/', '/admin/dashboard', '/app']
+const ALLOWED_DEST = ['/admin', '/admin/', '/admin/dashboard']
+const DEST_KEY     = 'mela_sso_dest'
 
-/**
- * AuthCallbackPage — handles OAuth / PKCE callback for both customer and
- * admin SSO flows.
- *
- * Destination is encoded in the `?next=` query param of the redirectTo URL,
- * which Supabase preserves through the OAuth flow and returns to us here.
- * sessionStorage is NOT used — it is wiped by the cross-origin redirect
- * chain through bk.pro.et.
- *
- * Admin authorization: `checkIsAdmin()` in AdminAuthContext still runs after
- * navigation to /admin. The `next` param only controls routing, not access.
- */
+function consumeDest(): string | null {
+  try {
+    const v = localStorage.getItem(DEST_KEY)
+    localStorage.removeItem(DEST_KEY)
+    return v && ALLOWED_DEST.includes(v) ? v : null
+  } catch { return null }
+}
+
 export function AuthCallbackPage() {
   const { t }    = useTranslation()
   const navigate = useNavigate()
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!supabase) {
-      navigate('/login', { replace: true })
-      return
-    }
+    if (!supabase) { navigate('/login', { replace: true }); return }
 
-    // Read ?next= from URL — this survives all redirects unlike sessionStorage.
-    // Validate against allowlist before using.
-    const params = new URLSearchParams(window.location.search)
-    const rawNext = params.get('next') ?? ''
-    const destination = ALLOWED_NEXT_PATHS.includes(rawNext) ? rawNext : '/app'
+    // Read and clear destination BEFORE async work
+    const dest = consumeDest()
 
-    // Supabase JS v2 handles PKCE exchange automatically on getSession()
-    // when it detects the code in the URL — no need to call exchangeCodeForSession.
-    supabase.auth.getSession()
-      .then(({ data, error }) => {
-        if (error) {
-          console.error('[AuthCallback] getSession error:', error.message)
-          setErrorMsg(error.message)
-          return
-        }
+    supabase.auth.getSession().then(({ data, error }) => {
+      if (error) { setErrorMsg(error.message); return }
 
-        if (!data.session) {
-          // Retry once after a brief delay — Supabase may still be processing
-          setTimeout(() => {
-            supabase!.auth.getSession().then(({ data: d2, error: e2 }) => {
-              if (e2 || !d2.session) {
-                setErrorMsg(e2?.message ?? 'No session returned. Please try again.')
-                return
-              }
-              navigate(destination, { replace: true })
-            })
-          }, 800)
-          return
-        }
+      if (!data.session) {
+        setTimeout(() => {
+          supabase!.auth.getSession().then(({ data: d2, error: e2 }) => {
+            if (e2 || !d2.session) {
+              setErrorMsg(e2?.message ?? 'No session returned. Please try again.')
+              return
+            }
+            navigate(dest ?? '/app', { replace: true })
+          })
+        }, 800)
+        return
+      }
 
-        navigate(destination, { replace: true })
-      })
-      .catch((e: unknown) => {
-        const msg = e instanceof Error ? e.message : 'Unexpected authentication error.'
-        console.error('[AuthCallback] error:', msg)
-        setErrorMsg(msg)
-      })
+      navigate(dest ?? '/app', { replace: true })
+    }).catch((e: unknown) => {
+      setErrorMsg(e instanceof Error ? e.message : 'Unexpected authentication error.')
+    })
   }, [navigate])
 
   if (errorMsg) {

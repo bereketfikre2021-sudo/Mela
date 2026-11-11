@@ -135,10 +135,10 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
   const signInWithSSO = useCallback(async (): Promise<{ error: string | null }> => {
     if (!supabase) return { error: 'Supabase client is not configured.' }
 
-    // Encode destination in redirectTo so it survives the multi-hop redirect
-    // chain through bk.pro.et. sessionStorage is wiped across origins.
-    // The `next` param is read back in AuthCallbackPage after PKCE exchange.
-    const redirectTo = `${window.location.origin}/auth/callback?next=/admin/`
+    // Use localStorage — survives cross-origin redirect chain unlike sessionStorage
+    try { localStorage.setItem('mela_sso_dest', '/admin/') } catch { /* ignore */ }
+
+    const redirectTo = `${window.location.origin}/auth/callback`
 
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'custom:central-admin' as Parameters<typeof supabase.auth.signInWithOAuth>[0]['provider'],
