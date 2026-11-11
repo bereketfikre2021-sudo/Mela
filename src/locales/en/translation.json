@@ -1074,5 +1074,13 @@
     "installTitle": "Install MELA",
     "installDesc": "Add to your home screen for the best experience.",
     "install": "Install"
+  },
+  "trial": {
+    "bannerDays": "{{count}} day left in your free trial - upgrade to keep access",
+    "bannerDays_other": "{{count}} days left in your free trial - upgrade to keep access",
+    "graceWarning": "Your trial has ended. You have 3 days to subscribe before access is blocked.",
+    "expiredTitle": "Your free trial has ended",
+    "expiredDesc": "Subscribe to Premium to continue using MELA for your business.",
+    "subscribeNow": "Subscribe to Premium"
   }
 }

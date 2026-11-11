@@ -13,6 +13,8 @@ import { ProfileMenu } from './components/ProfileMenu'
 import { SyncBadge } from './components/SyncBadge'
 import { NotificationBell } from './components/NotificationBell'
 import { PWAInstallBanner } from './components/PWAInstallBanner'
+import { PaywallGate } from './components/PaywallGate'
+import { TrialBanner } from './components/TrialBanner'
 import { SyncProvider } from './context/SyncContext'
 import { SubscriptionProvider } from './modules/subscriptions/SubscriptionContext'
 import { StaffProvider } from './modules/staff/StaffContext'
@@ -77,9 +79,12 @@ export function App() {
             <SubscriptionProvider>
               <StaffProvider>
                 <AppNotificationProvider>
-                  <Suspense fallback={<PageLoader />}>
-                    <AppRoutes />
-                  </Suspense>
+                  <TrialBanner />
+                  <PaywallGate>
+                    <Suspense fallback={<PageLoader />}>
+                      <AppRoutes />
+                    </Suspense>
+                  </PaywallGate>
                   <PWAInstallBanner />
                 </AppNotificationProvider>
               </StaffProvider>

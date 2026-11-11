@@ -52,8 +52,12 @@ export interface SubscriptionContextValue {
   canAddSaleThisMonth: () => boolean
   canAddPurchaseThisMonth: () => boolean
   hasAdvancedReports: boolean
-  /** Raw usage counts for display purposes (e.g. progress bars). */
   usageCounts: UsageCounts
+  // ── Trial ────────────────────────────────────────────────────────────────
+  isInTrial: boolean        // trial running and not yet expired
+  trialDaysLeft: number     // 0 when expired
+  trialExpired: boolean     // trial ended AND no paid subscription
+  isBlocked: boolean        // trial+grace both expired, no paid plan → hard block
 }
 
 const SAFE_DEFAULTS: SubscriptionContextValue = {
@@ -70,6 +74,10 @@ const SAFE_DEFAULTS: SubscriptionContextValue = {
   canAddPurchaseThisMonth: () => true,
   hasAdvancedReports: false,
   usageCounts: DEFAULT_USAGE,
+  isInTrial: false,
+  trialDaysLeft: 0,
+  trialExpired: false,
+  isBlocked: false,
 }
 
 const SubscriptionContext = createContext<SubscriptionContextValue>(SAFE_DEFAULTS)
@@ -129,6 +137,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
   const [limits, setLimits] = useState<PlanLimits | null>(null)
   const [usage, setUsage] = useState<UsageCounts>(DEFAULT_USAGE)
   const [loading, setLoading] = useState(false)
+  const [trialEndsAt, setTrialEndsAt] = useState<string | null>(null)
 
   // If supabase is not configured, bail out with safe defaults immediately.
   if (!supabase) {
@@ -158,6 +167,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
 
       setPlan(resolvedPlan)
       setStatus(resolvedStatus)
+      setTrialEndsAt(sub?.trial_ends_at ?? null)
 
       // 2. Fetch plan limits
       const { data: planData } = await getPlanLimits(resolvedPlan)
@@ -192,6 +202,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
       setStatus(null)
       setLimits(null)
       setUsage(DEFAULT_USAGE)
+      setTrialEndsAt(null)
       setLoading(false)
     }
   }, [authStatus, user, load])
@@ -231,6 +242,17 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
 
   const hasAdvancedReports = limits?.advanced_reports ?? false
 
+  // ── Trial calculations ────────────────────────────────────────────────────
+  const now = Date.now()
+  const trialEnd = trialEndsAt ? new Date(trialEndsAt).getTime() : 0
+  const graceEnd = trialEnd + 3 * 24 * 60 * 60 * 1000  // 3 days after trial
+
+  const isInTrial     = trialEnd > 0 && now < trialEnd
+  const trialDaysLeft = isInTrial ? Math.ceil((trialEnd - now) / (24 * 60 * 60 * 1000)) : 0
+  const trialExpired  = trialEnd > 0 && now >= trialEnd && !isActive
+  // Hard block: trial expired + grace period also done + no paid plan
+  const isBlocked     = trialExpired && now >= graceEnd
+
   const value = useMemo<SubscriptionContextValue>(
     () => ({
       plan,
@@ -246,21 +268,17 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
       canAddPurchaseThisMonth,
       hasAdvancedReports,
       usageCounts: usage,
+      isInTrial,
+      trialDaysLeft,
+      trialExpired,
+      isBlocked,
     }),
     [
-      plan,
-      status,
-      isActive,
-      limits,
-      loading,
-      refresh,
-      canAddProduct,
-      canAddCustomer,
-      canAddSupplier,
-      canAddSaleThisMonth,
-      canAddPurchaseThisMonth,
-      hasAdvancedReports,
-      usage,
+      plan, status, isActive, limits, loading, refresh,
+      canAddProduct, canAddCustomer, canAddSupplier,
+      canAddSaleThisMonth, canAddPurchaseThisMonth,
+      hasAdvancedReports, usage,
+      isInTrial, trialDaysLeft, trialExpired, isBlocked,
     ]
   )
 

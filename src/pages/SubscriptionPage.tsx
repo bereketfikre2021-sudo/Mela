@@ -303,15 +303,7 @@ export function SubscriptionPage() {
     return t(`subscription.status.${s}`)
   }
 
-  const freeFeatures = [
-    t('subscription.features.products50'),
-    t('subscription.features.sales100'),
-    t('subscription.features.customers50'),
-    t('subscription.features.suppliers5'),
-    t('subscription.features.purchases10'),
-    t('subscription.features.basicReports'),
-    t('subscription.features.history30'),
-  ]
+  // freeFeatures removed — Free plan removed (trial methodology)
 
   const premiumFeatures = [
     t('subscription.features.unlimitedProducts'),
@@ -422,19 +414,7 @@ export function SubscriptionPage() {
         </div>
 
         <div className="flex flex-col gap-4 sm:flex-row">
-          {/* Free plan card */}
-          <PlanCard
-            name={t('subscription.plan.free')}
-            price="ETB 0"
-            priceLabel={t('subscription.pricing.freeForever')}
-            features={freeFeatures}
-            isCurrent={isCurrentFree}
-            currentPlanLabel={t('subscription.pricing.currentPlanLabel')}
-            isHighlighted={false}
-            selectLabel={t('subscription.pricing.currentPlanLabel')}
-          />
-
-          {/* Premium plan card */}
+          {/* Premium plan card only — Free plan removed (trial methodology) */}
           <PlanCard
             name={t('subscription.plan.premium')}
             price={`ETB ${billingCycle === 'monthly' ? MONTHLY_PRICE : YEARLY_PRICE}`}

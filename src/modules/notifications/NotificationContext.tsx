@@ -105,25 +105,30 @@ export function AppNotificationProvider({ children }: { children: ReactNode }) {
     await refresh()
   }, [refresh])
 
-  // Generate daily summary if closing time matches current time (within 1 min)
+  // Generate daily summary — always at end of day (22:00) regardless of closing time,
+  // OR at the user's closing time if set. Summary is generated once per day.
   const checkDailySummary = useCallback(async () => {
-    if (!profile?.closing_time) return
-
-    const [hh, mm] = profile.closing_time.split(':').map(Number)
     const now = new Date()
-    if (now.getHours() !== hh || now.getMinutes() !== mm) return
+    const hh  = now.getHours()
+    const mm  = now.getMinutes()
+
+    // Determine trigger time: use closing_time if set, otherwise 22:00
+    let triggerH = 22, triggerM = 0
+    if (profile?.closing_time) {
+      const parts = profile.closing_time.split(':').map(Number)
+      triggerH = parts[0]; triggerM = parts[1]
+    }
+
+    if (hh !== triggerH || mm !== triggerM) return
 
     const key = todayKey()
-    // Don't duplicate — check if already created today
     const existing = await notifGetAll()
     if (existing.some(n => n.id === key)) return
 
-    // Fetch today's summary
     const { data, error } = await getFinancialSummary(periodRange('today'))
     if (error || !data) return
 
     const { paidRevenue, totalExpenses, netProfit, sales } = data
-
     const fmtETB = (n: number) =>
       `ETB ${n.toLocaleString('en-ET', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
 
@@ -150,11 +155,11 @@ export function AppNotificationProvider({ children }: { children: ReactNode }) {
     }
   }, [status, refresh])
 
-  // Poll every minute to check if closing time matches
+  // Poll every minute to check if it's time for the daily summary
   useEffect(() => {
-    if (status !== 'authenticated' || !profile?.closing_time) return
+    if (status !== 'authenticated') return
     intervalRef.current = setInterval(() => { void checkDailySummary() }, 60_000)
-    void checkDailySummary() // check immediately on mount too
+    void checkDailySummary()
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current)
     }

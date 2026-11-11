@@ -20,6 +20,7 @@ export interface Subscription {
   current_period_end: string | null
   grace_ends_at: string | null
   cancelled_at: string | null
+  trial_ends_at: string | null
   created_at: string
   updated_at: string
 }

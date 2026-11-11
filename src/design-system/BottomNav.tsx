@@ -7,9 +7,6 @@ export interface NavItem {
   id: string
   label: string
   icon: ComponentType<LucideProps>
-  /** Desktop dropdown children — if present, clicking this item on desktop
-   *  opens a menu instead of navigating directly. Mobile always navigates
-   *  to the first child's id (or `id` if no children). */
   children?: { id: string; label: string }[]
 }
 
@@ -30,10 +27,9 @@ export function BottomNav({ items, activeId, onSelect, className }: BottomNavPro
         className
       )}
     >
-      <ul className="mx-auto flex max-w-md items-stretch justify-around">
+      <ul className="mx-auto flex max-w-md items-stretch justify-around px-1">
         {items.map((item) => {
           const Icon = item.icon
-          // On mobile, a group item navigates to its first child
           const targetId = item.children ? item.children[0].id : item.id
           const active =
             activeId === item.id ||
@@ -45,13 +41,24 @@ export function BottomNav({ items, activeId, onSelect, className }: BottomNavPro
                 type="button"
                 onClick={() => onSelect(targetId)}
                 aria-current={active ? 'page' : undefined}
-                className={cn(
-                  'flex w-full flex-col items-center gap-1 py-2.5 text-xs transition-colors',
-                  active ? 'text-primary' : 'text-secondary hover:text-text'
-                )}
+                className="flex w-full flex-col items-center gap-0.5 py-2 transition-colors"
               >
-                <Icon className="h-5 w-5" aria-hidden="true" />
-                <span>{item.label}</span>
+                {/* Icon with pill indicator */}
+                <span className={cn(
+                  'flex items-center justify-center rounded-full px-4 py-1 transition-all duration-200',
+                  active
+                    ? 'bg-primary/10 text-primary'
+                    : 'text-secondary hover:text-text'
+                )}>
+                  <Icon className="h-5 w-5" aria-hidden="true" />
+                </span>
+                {/* Label */}
+                <span className={cn(
+                  'text-[10px] font-medium leading-tight transition-colors',
+                  active ? 'text-primary font-semibold' : 'text-secondary'
+                )}>
+                  {item.label}
+                </span>
               </button>
             </li>
           )

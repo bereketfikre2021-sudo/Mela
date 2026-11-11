@@ -4,7 +4,7 @@
  */
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { ClipboardList, History, Package, PackageSearch, Truck, UserCog, Users } from 'lucide-react'
+import { ClipboardList, History, Package, Truck, UserCog } from 'lucide-react'
 
 import { useAuth } from '../modules/auth/AuthContext'
 import { getBusinessConfig } from '../modules/auth/businessConfig'
@@ -44,20 +44,7 @@ export function MorePage() {
   const isService   = bizConfig.isServiceBased
 
   const tiles = [
-    {
-      icon:  <Users className="h-5 w-5" aria-hidden="true" />,
-      label: isService ? t('nav.clients') : t('nav.customers'),
-      desc:  isService ? t('more.desc.clients') : t('more.desc.customers'),
-      route: '/app/customers',
-      show:  true,
-    },
-    {
-      icon:  <PackageSearch className="h-5 w-5" aria-hidden="true" />,
-      label: t('nav.products'),
-      desc:  t('more.desc.products'),
-      route: '/app/products',
-      show:  !isService,
-    },
+    // Product businesses only — stock/purchases/suppliers/inventory
     {
       icon:  <Package className="h-5 w-5" aria-hidden="true" />,
       label: t('nav.stock'),

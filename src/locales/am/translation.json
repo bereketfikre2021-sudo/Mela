@@ -1074,5 +1074,13 @@
     "installTitle": "MELA ጫን",
     "installDesc": "ለተሻለ ልምድ ወደ ቤት ማያ ቁልፍ ያክሉ።",
     "install": "ጫን"
+  },
+  "trial": {
+    "bannerDays": "ነጻ ሙከራዎ {{count}} ቀን ቀርቷል - ለቀጣይ አዘምኑ",
+    "bannerDays_other": "ነጻ ሙከራዎ {{count}} ቀናት ቀርቷቸዋል - ለቀጣይ አዘምኑ",
+    "graceWarning": "ሙከራዎ ጊዜው አልፏል። ከ3 ቀናት በኋላ ይዘጋጃል።",
+    "expiredTitle": "ነጻ ሙከራዎ አብቅቷል",
+    "expiredDesc": "MELA ለንግድዎ መጠቀም ለመቀጠል ፕሪሚየም ይደንቡ።",
+    "subscribeNow": "ወደ ፕሪሚየም ይደንቡ"
   }
 }
