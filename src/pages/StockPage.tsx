@@ -489,7 +489,7 @@ export function StockPage() {
             <Select label={t('purchases.form.supplier')} options={supplierOptions}
               value={rstSupplier} onChange={e => setRstSupplier(e.target.value)} />
             <div className="-mt-2">
-              <button type="button" onClick={() => navigate('/app/suppliers')}
+              <button type="button" onClick={() => window.open('/app/suppliers', '_blank', 'noopener')}
                 className="text-xs font-medium text-primary hover:underline">
                 {t('stock.manageSuppliers')}
               </button>

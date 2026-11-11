@@ -165,7 +165,7 @@ function AppRoutes() {
         element={appShell(<RequireBusiness><ExpensesPage /></RequireBusiness>, '/app/expenses')} />
 
       <Route path="/app/reports"
-        element={appShell(<RequireBusiness><ReportsPage /></RequireBusiness>, isService ? '/app/reports' : '/app/more')} />
+        element={appShell(<RequireBusiness><ReportsPage /></RequireBusiness>, isService ? '/app/reports' : '/app')} />
 
       {/* ── Secondary routes (via account Advanced menu) ──────────────────── */}
       <Route path="/app/more"
