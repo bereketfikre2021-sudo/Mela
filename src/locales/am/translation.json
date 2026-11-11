@@ -1082,10 +1082,10 @@
     "install": "ጫን"
   },
   "trial": {
-    "bannerDays": "ነጻ ሙከራዎ {{count}} ቀን ቀርቷል - ለቀጣይ አዘምኑ",
-    "bannerDays_other": "ነጻ ሙከራዎ {{count}} ቀናት ቀርቷቸዋል - ለቀጣይ አዘምኑ",
+    "bannerDays": "በ30 ቀን ሙከራዎ {{count}} ቀን ቀርቷል — ለቀጣይ አዘምኑ",
+    "bannerDays_other": "በ30 ቀን ሙከራዎ {{count}} ቀናት ቀርቷቸዋል — ለቀጣይ አዘምኑ",
     "graceWarning": "ሙከራዎ ጊዜው አልፏል። ከ3 ቀናት በኋላ ይዘጋጃል።",
-    "expiredTitle": "ነጻ ሙከራዎ አብቅቷል",
+    "expiredTitle": "30 ቀን ነጻ ሙከራዎ አብቅቷል",
     "expiredDesc": "MELA ለንግድዎ መጠቀም ለመቀጠል ፕሪሚየም ይደንቡ።",
     "subscribeNow": "ወደ ፕሪሚየም ይደንቡ"
   }

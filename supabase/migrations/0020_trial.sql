@@ -1,22 +1,25 @@
--- MELA 0020: 7-day free trial for all users.
+-- MELA 0020: 30-day free trial for all users.
 --
--- Every business gets a 7-day full-Premium trial on signup.
--- After 7 days: 3-day grace period, then full block.
+-- Every business gets a 30-day full-Premium trial on signup.
+-- After 30 days: 3-day grace period, then full block.
 -- During trial: get_effective_plan() returns 'premium'.
--- Existing users: get 7 days from the time this migration runs.
+-- Existing users who already have trial_ends_at set: NOT modified (requirement 7).
+-- New rows where trial_ends_at is null: get 30 days from now.
 
 -- ── 1. Add trial_ends_at to subscriptions ────────────────────────────────────
 
 alter table public.subscriptions
   add column if not exists trial_ends_at timestamptz;
 
--- ── 2. Set trial for all existing users (7 days from now) ────────────────────
+-- ── 2. Set trial for users who have no trial yet (30 days from now) ───────────
+-- Only updates rows where trial_ends_at IS NULL.
+-- Existing trial dates are preserved (requirement 7).
 
 update public.subscriptions
-set trial_ends_at = now() + interval '7 days'
+set trial_ends_at = now() + interval '30 days'
 where trial_ends_at is null;
 
--- ── 3. Update trigger: new businesses get 7-day trial ────────────────────────
+-- ── 3. Update trigger: new businesses get 30-day trial ───────────────────────
 
 create or replace function public.create_subscription_on_business_insert()
 returns trigger
@@ -26,7 +29,7 @@ set search_path = public
 as $$
 begin
   insert into public.subscriptions (owner_id, plan, status, trial_ends_at)
-  values (NEW.owner_id, 'free', 'active', now() + interval '7 days')
+  values (NEW.owner_id, 'free', 'active', now() + interval '30 days')
   on conflict (owner_id) do nothing;
   return NEW;
 end;
@@ -77,3 +80,9 @@ end;
 $$;
 
 grant execute on function public.get_effective_plan(uuid) to authenticated;
+
+-- ── 5. Update check_*_limit functions to respect trial ────────────────────────
+-- During an active trial, get_effective_plan() returns 'premium' so the
+-- check_*_limit functions already use premium limits. No change needed here
+-- as long as plan_limits has max_products = 2147483647 for premium.
+-- This comment documents that the fix is in get_effective_plan() above.

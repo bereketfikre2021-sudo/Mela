@@ -104,28 +104,25 @@ function AppRoutes() {
   const isService = bizConfig.isServiceBased
 
   /**
-   * Product businesses:  Home | Sales | Expenses | Products | Customers | More
+   * Product businesses:  Home | Sales | Expenses | Products | More
    * Service businesses:  Home | Services | Expenses | Products(=Services) | Clients | Reports
    */
   const appNav: NavItem[] = [
-    { id: '/app',       label: t('nav.home'),     icon: Home },
-    { id: '/app/sales', label: t('nav.sales'),    icon: Receipt },
+    { id: '/app',          label: t('nav.home'),     icon: Home },
+    { id: '/app/sales',    label: t('nav.sales'),    icon: Receipt },
     { id: '/app/expenses', label: t('nav.expenses'), icon: Wallet },
     {
       id:    '/app/products',
       label: isService ? t('nav.services') : t('nav.products'),
       icon:  PackageSearch,
     },
-    {
-      id:    '/app/customers',
-      label: isService ? t('nav.clients') : t('nav.customers'),
-      icon:  Users,
-    },
-    // Product businesses: More hub (Reports + Stock + Purchases + etc.)
-    // Service businesses: Reports directly
-    isService
-      ? { id: '/app/reports', label: t('nav.reports'), icon: BarChart2 }
-      : { id: '/app/more',    label: t('nav.more'),    icon: MoreHorizontal },
+    // Service businesses keep Clients in nav; product businesses use More
+    ...(isService ? [
+      { id: '/app/customers', label: t('nav.clients'),  icon: Users },
+      { id: '/app/reports',   label: t('nav.reports'),  icon: BarChart2 },
+    ] : [
+      { id: '/app/more', label: t('nav.more'), icon: MoreHorizontal },
+    ]),
   ]
 
   const publicShell = (children: React.ReactNode) => (
@@ -188,7 +185,7 @@ function AppRoutes() {
       <Route path="/app/purchases"
         element={appShell(<RequireBusiness><PurchasesPage /></RequireBusiness>, '/app')} />
       <Route path="/app/customers"
-        element={appShell(<RequireBusiness><CustomersPage /></RequireBusiness>, '/app/customers')} />
+        element={appShell(<RequireBusiness><CustomersPage /></RequireBusiness>, isService ? '/app/customers' : '/app/more')} />
       <Route path="/app/suppliers"
         element={appShell(<RequireBusiness><SuppliersPage /></RequireBusiness>, '/app')} />
       <Route path="/app/staff"

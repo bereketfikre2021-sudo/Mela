@@ -214,44 +214,48 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
   // isActive: premium AND in an access-granting status
   const isActive = plan === 'premium' && (status === 'active' || status === 'grace')
 
-  // can* helpers: optimistic (return true) when limits not yet loaded
-  const canAddProduct = useCallback((): boolean => {
-    if (!limits) return true
-    return usage.products < limits.max_products
-  }, [limits, usage.products])
-
-  const canAddCustomer = useCallback((): boolean => {
-    if (!limits) return true
-    return usage.customers < limits.max_customers
-  }, [limits, usage.customers])
-
-  const canAddSupplier = useCallback((): boolean => {
-    if (!limits) return true
-    return usage.suppliers < limits.max_suppliers
-  }, [limits, usage.suppliers])
-
-  const canAddSaleThisMonth = useCallback((): boolean => {
-    if (!limits) return true
-    return usage.salesThisMonth < limits.max_sales_per_month
-  }, [limits, usage.salesThisMonth])
-
-  const canAddPurchaseThisMonth = useCallback((): boolean => {
-    if (!limits) return true
-    return usage.purchasesThisMonth < limits.max_purchases_per_month
-  }, [limits, usage.purchasesThisMonth])
-
-  const hasAdvancedReports = limits?.advanced_reports ?? false
-
-  // ── Trial calculations ────────────────────────────────────────────────────
-  const now = Date.now()
-  const trialEnd = trialEndsAt ? new Date(trialEndsAt).getTime() : 0
-  const graceEnd = trialEnd + 3 * 24 * 60 * 60 * 1000  // 3 days after trial
-
+  // ── Trial calculations (must come before can* helpers) ───────────────────
+  const now       = Date.now()
+  const trialEnd  = trialEndsAt ? new Date(trialEndsAt).getTime() : 0
+  const graceEnd  = trialEnd + 3 * 24 * 60 * 60 * 1000  // 3 days after trial
   const isInTrial     = trialEnd > 0 && now < trialEnd
   const trialDaysLeft = isInTrial ? Math.ceil((trialEnd - now) / (24 * 60 * 60 * 1000)) : 0
   const trialExpired  = trialEnd > 0 && now >= trialEnd && !isActive
-  // Hard block: trial expired + grace period also done + no paid plan
   const isBlocked     = trialExpired && now >= graceEnd
+
+  // can* helpers — bypass ALL limits during trial or on paid premium
+  // The DB enforces atomically; these are UI-only pre-checks
+  const canAddProduct = useCallback((): boolean => {
+    if (isInTrial || isActive) return true   // trial/premium = unlimited
+    if (!limits) return true
+    return usage.products < limits.max_products
+  }, [isInTrial, isActive, limits, usage.products])
+
+  const canAddCustomer = useCallback((): boolean => {
+    if (isInTrial || isActive) return true
+    if (!limits) return true
+    return usage.customers < limits.max_customers
+  }, [isInTrial, isActive, limits, usage.customers])
+
+  const canAddSupplier = useCallback((): boolean => {
+    if (isInTrial || isActive) return true
+    if (!limits) return true
+    return usage.suppliers < limits.max_suppliers
+  }, [isInTrial, isActive, limits, usage.suppliers])
+
+  const canAddSaleThisMonth = useCallback((): boolean => {
+    if (isInTrial || isActive) return true
+    if (!limits) return true
+    return usage.salesThisMonth < limits.max_sales_per_month
+  }, [isInTrial, isActive, limits, usage.salesThisMonth])
+
+  const canAddPurchaseThisMonth = useCallback((): boolean => {
+    if (isInTrial || isActive) return true
+    if (!limits) return true
+    return usage.purchasesThisMonth < limits.max_purchases_per_month
+  }, [isInTrial, isActive, limits, usage.purchasesThisMonth])
+
+  const hasAdvancedReports = (isInTrial || isActive) ? true : (limits?.advanced_reports ?? false)
 
   const value = useMemo<SubscriptionContextValue>(
     () => ({
