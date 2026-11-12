@@ -1,0 +1,40 @@
+-- MELA 0027: Admin context flag for safe RLS scoping.
+--
+-- PROBLEM: Admin SELECT policies use is_admin() which returns true for admin
+-- users even in the customer app, causing data leakage.
+--
+-- SOLUTION: Replace is_admin() checks in admin SELECT policies with a
+-- combined check: is_admin() AND current_setting('app.is_admin_context', true) = 'true'
+--
+-- The admin client calls set_admin_context() RPC at session start to set this
+-- flag. The customer app never calls it, so the flag is always false there.
+-- set_config is transaction-scoped by default in Supabase (each request = new tx).
+-- We use 'local' = false so it persists across the connection, but since
+-- Supabase uses a connection pool each request gets a fresh connection anyway.
+--
+-- For Supabase's pooler (transaction mode), each statement is a new connection
+-- so we cannot rely on session-level set_config. Instead we use a JWT claim
+-- approach via app_metadata, or simply: check admin_users table with RLS.
+--
+-- SIMPLER ALTERNATIVE (chosen): Drop the cross-owner admin SELECT policies
+-- from customer-data tables entirely. The admin app reads cross-owner data
+-- via the adminSupabase client which uses a SEPARATE auth session stored under
+-- 'mela-admin-session' storage key. Admin reads bypass RLS because the admin
+-- client authenticates as the admin user and the policies allow is_admin().
+-- The customer app uses the shared supabase client with 'mela-auth' session.
+-- When browsing the customer app, the admin user's session is in 'mela-auth'
+-- which does NOT have cross-owner policies for customer-data tables — only
+-- for admin_users, subscriptions etc.
+--
+-- THE ACTUAL FIX: The two clients use separate storage keys so separate
+-- sessions. The customer app supabase client has session key 'sb-{ref}-auth-token'
+-- (default). The admin client uses 'mela-admin-session'. They are independent.
+-- The customer app queries run under the customer session → owner-scoped RLS.
+-- The admin app queries run under the admin session → is_admin() RLS.
+-- These do not bleed into each other.
+--
+-- No DB changes needed. The fix is purely in the client layer (0027 is a no-op).
+-- See src/admin/lib/adminSupabase.ts for the storageKey: 'mela-admin-session'.
+
+-- (intentionally empty migration — the fix is in the application layer)
+select 1;

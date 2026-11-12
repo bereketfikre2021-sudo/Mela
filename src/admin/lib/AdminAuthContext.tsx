@@ -19,7 +19,9 @@ import {
   type ReactNode,
 } from 'react'
 import type { User } from '@supabase/supabase-js'
-import { supabase } from '../../lib/supabase'
+import { adminSupabase } from './adminSupabase'
+
+const db = adminSupabase
 
 type AdminAuthStatus = 'loading' | 'admin' | 'denied' | 'unauthenticated'
 
@@ -76,8 +78,8 @@ export function consumeSSODestination(): string | null {
 }
 
 async function checkIsAdmin(userId: string): Promise<boolean> {
-  if (!supabase) return false
-  const { data, error } = await supabase
+  if (!db) return false
+  const { data, error } = await db
     .from('admin_users')
     .select('id')
     .eq('user_id', userId)
@@ -94,14 +96,14 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
     setUser(u)
     setStatus(ok ? 'admin' : 'denied')
     if (!ok) {
-      await supabase?.auth.signOut()
+      await db?.auth.signOut()
     }
   }, [])
 
   useEffect(() => {
-    if (!supabase) { setStatus('unauthenticated'); return }
+    if (!db) { setStatus('unauthenticated'); return }
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    db.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         void verify(session.user)
       } else {
@@ -109,7 +111,7 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
       }
     })
 
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: sub } = db.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
         void verify(session.user)
       } else {
@@ -121,32 +123,28 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
     return () => sub.subscription.unsubscribe()
   }, [verify])
 
-  // ── Existing Google sign-in (unchanged) ───────────────────────────────────
   const signInWithGoogle = useCallback(async () => {
-    if (!supabase) return
+    if (!db) return
     const base = import.meta.env.VITE_APP_URL || window.location.origin
-    await supabase.auth.signInWithOAuth({
+    await db.auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo: `${base}/admin/auth/callback` },
     })
   }, [])
 
-  // ── Central Admin SSO via custom OIDC provider ────────────────────────────
   const signInWithSSO = useCallback(async (): Promise<{ error: string | null }> => {
-    if (!supabase) return { error: 'Supabase client is not configured.' }
+    if (!db) return { error: 'Supabase client is not configured.' }
 
-    // Use localStorage — survives cross-origin redirect chain unlike sessionStorage
     try { localStorage.setItem('mela_sso_dest', '/admin/') } catch { /* ignore */ }
 
     const redirectTo = `${window.location.origin}/auth/callback`
 
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'custom:central-admin' as Parameters<typeof supabase.auth.signInWithOAuth>[0]['provider'],
+    const { error } = await db.auth.signInWithOAuth({
+      provider: 'custom:central-admin' as Parameters<typeof db.auth.signInWithOAuth>[0]['provider'],
       options: {
         redirectTo,
         scopes: 'openid email',
         skipBrowserRedirect: false,
-        // No queryParams — PKCE is handled automatically by Supabase JS v2
       },
     })
 
@@ -155,8 +153,8 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const signOut = useCallback(async () => {
-    if (!supabase) return
-    await supabase.auth.signOut()
+    if (!db) return
+    await db.auth.signOut()
     setUser(null)
     setStatus('unauthenticated')
   }, [])
