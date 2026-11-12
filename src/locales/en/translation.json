@@ -208,7 +208,9 @@
       "barcodeHelper": "Optional. Scan or type barcode.",
       "scanBarcode": "Scan barcode",
       "barcodeNotFound": "No barcode found in image. Try again with better lighting.",
-      "barcodeError": "Could not scan barcode. Please type it manually."
+      "barcodeManual": "Scanner not supported on this browser. Please type the barcode.",
+      "barcodeError": "Could not scan barcode. Please type it manually.",
+      "barcodeHelperManual": "Type barcode manually."
     },
     "delete": {
       "title": "Delete product",

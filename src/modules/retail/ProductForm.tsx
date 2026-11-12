@@ -40,28 +40,32 @@ function BarcodeField({ value, onChange }: { value: string; onChange: (v: string
   const [scanning, setScanning] = useState(false)
   const [scanError, setScanError] = useState('')
 
-  const canScan = typeof window !== 'undefined' && !!window.BarcodeDetector
+  // BarcodeDetector Web API — Chrome 83+, Android, Edge. Hidden on unsupported browsers.
+  const canDetect = typeof window !== 'undefined' && !!window.BarcodeDetector
 
   async function handleScanCapture(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
-    if (!file || !window.BarcodeDetector) return
+    if (!file) return
     setScanError('')
     setScanning(true)
     try {
-      const bitmap = await createImageBitmap(file)
-      const detector = new window.BarcodeDetector({ formats: BARCODE_FORMATS })
-      const results = await detector.detect(bitmap)
-      if (results.length > 0) {
-        onChange(results[0].rawValue)
-        setScanError('')
+      if (window.BarcodeDetector) {
+        const bitmap = await createImageBitmap(file)
+        const detector = new window.BarcodeDetector({ formats: BARCODE_FORMATS })
+        const results = await detector.detect(bitmap)
+        if (results.length > 0) {
+          onChange(results[0].rawValue)
+        } else {
+          setScanError(t('products.form.barcodeNotFound'))
+        }
       } else {
-        setScanError(t('products.form.barcodeNotFound'))
+        // Fallback: file selected but no detector — prompt manual entry
+        setScanError(t('products.form.barcodeManual'))
       }
     } catch {
       setScanError(t('products.form.barcodeError'))
     } finally {
       setScanning(false)
-      // Reset so the same file can be re-scanned
       if (scanRef.current) scanRef.current.value = ''
     }
   }
@@ -72,36 +76,35 @@ function BarcodeField({ value, onChange }: { value: string; onChange: (v: string
         <div className="flex-1">
           <Input
             label={t('products.form.barcode')}
-            helperText={t('products.form.barcodeHelper')}
+            helperText={canDetect ? t('products.form.barcodeHelper') : t('products.form.barcodeHelperManual')}
             value={value}
             onChange={e => { onChange(e.target.value); setScanError('') }}
             autoComplete="off"
+            inputMode="text"
             maxLength={100}
           />
         </div>
-        {canScan && (
-          <>
-            <input
-              ref={scanRef}
-              type="file"
-              accept="image/*"
-              capture="environment"
-              className="hidden"
-              onChange={e => void handleScanCapture(e)}
-            />
-            <Button
-              type="button"
-              variant="secondary"
-              size="sm"
-              className="mb-0.5 shrink-0"
-              loading={scanning}
-              onClick={() => scanRef.current?.click()}
-              title={t('products.form.scanBarcode')}
-            >
-              <ScanLine className="h-4 w-4" />
-            </Button>
-          </>
-        )}
+        {/* Scan button — always shown on mobile, hidden on desktop where there's no camera */}
+        <input
+          ref={scanRef}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          className="hidden"
+          onChange={e => void handleScanCapture(e)}
+        />
+        <Button
+          type="button"
+          variant="secondary"
+          size="sm"
+          className="mb-0.5 shrink-0"
+          loading={scanning}
+          onClick={() => scanRef.current?.click()}
+          title={t('products.form.scanBarcode')}
+        >
+          <ScanLine className="h-4 w-4" />
+          <span className="ml-1.5 hidden sm:inline text-xs">{t('products.form.scanBarcode')}</span>
+        </Button>
       </div>
       {scanError && <p className="mt-1 text-xs text-danger">{scanError}</p>}
     </div>

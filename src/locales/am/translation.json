@@ -208,7 +208,9 @@
       "barcodeHelper": "አማራጭ። ባርኮድ ያስገቡ።",
       "scanBarcode": "ባርኮድ ቃኝ",
       "barcodeNotFound": "ባርኮድ አልተገኘም። ዳግም ሞክር።",
-      "barcodeError": "ቃኝት አልተሳካም። ባርኮዱን በእጅ ያስገቡ።"
+      "barcodeManual": "ቃኝት አይደገፍም። ባርኮዱን በእጅ ያስገቡ።",
+      "barcodeError": "ቃኝት አልተሳካም። ባርኮዱን በእጅ ያስገቡ።",
+      "barcodeHelperManual": "ባርኮዱን በእጅ ያስገቡ።"
     },
     "delete": {
       "title": "ምርት ሰርዝ",
