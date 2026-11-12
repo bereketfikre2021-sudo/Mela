@@ -442,8 +442,15 @@ export function StockPage() {
 
       {/* ── Add product dialog ─────────────────────────────────────────────── */}
       <Dialog open={addOpen} onOpenChange={o => { if (!o) setAddOpen(false) }}
-        title={t('products.form.titleAdd')} closeLabel={t('common.close')}>
-        <ProductForm mode="add" onSubmit={handleAdd} onCancel={() => setAddOpen(false)} submitting={addSubmit} />
+        title={bizConfig.isServiceBased ? t('products.form.titleAddService') : t('products.form.titleAdd')}
+        closeLabel={t('common.close')}>
+        <ProductForm
+          mode="add"
+          isServiceBased={bizConfig.isServiceBased}
+          onSubmit={handleAdd}
+          onCancel={() => setAddOpen(false)}
+          submitting={addSubmit}
+        />
       </Dialog>
 
       {/* ── Adjust stock dialog ────────────────────────────────────────────── */}

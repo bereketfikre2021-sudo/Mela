@@ -18,11 +18,14 @@ function noClient(): { data: null; error: { message: string } } {
 /** Fetch all products for the authenticated owner, newest first. */
 export async function getProducts(): Result<Product[]> {
   if (!supabase) return noClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { data: [], error: null }
   const { data, error } = await supabase
     .from('products')
     .select('*')
+    .eq('owner_id', user.id)          // explicit filter — defence-in-depth on top of RLS
     .order('created_at', { ascending: false })
-    .limit(10000)  // guard against PostgREST default 1000-row cap
+    .limit(10000)
   if (error) return { data: null, error: { message: error.message } }
   return { data: (data as Product[]) ?? [], error: null }
 }

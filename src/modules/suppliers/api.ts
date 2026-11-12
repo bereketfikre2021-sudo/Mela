@@ -9,9 +9,12 @@ function noClient(): { data: null; error: { message: string } } {
 
 export async function getSuppliers(): Result<Supplier[]> {
   if (!supabase) return noClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { data: [], error: null }
   const { data, error } = await supabase
     .from('suppliers')
     .select('*')
+    .eq('owner_id', user.id)
     .order('name', { ascending: true })
     .limit(10000)
   if (error) return { data: null, error: { message: error.message } }

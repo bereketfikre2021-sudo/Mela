@@ -16,12 +16,15 @@ function noClient(): { data: null; error: { message: string } } {
 /** Fetch all expenses for the authenticated owner, newest-date first. */
 export async function getExpenses(): Result<Expense[]> {
   if (!supabase) return noClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { data: [], error: null }
   const { data, error } = await supabase
     .from('expenses')
     .select('*')
+    .eq('owner_id', user.id)
     .order('expense_date', { ascending: false })
     .order('created_at', { ascending: false })
-    .limit(10000)  // guard against PostgREST default 1000-row cap
+    .limit(10000)
   if (error) return { data: null, error: { message: error.message } }
   return { data: (data as Expense[]) ?? [], error: null }
 }

@@ -46,9 +46,12 @@ export async function getSales(
   offset = 0
 ): Result<SaleWithItems[]> {
   if (!supabase) return noClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { data: [], error: null }
   const { data, error } = await supabase
     .from('sales')
     .select('*, sale_items(*)')
+    .eq('owner_id', user.id)
     .order('sold_at', { ascending: false })
     .range(offset, offset + limit - 1)
   if (error) return { data: null, error: { message: error.message } }

@@ -179,6 +179,8 @@
     "form": {
       "titleAdd": "Add product",
       "titleEdit": "Edit product",
+      "titleAddService": "Add service",
+      "titleEditService": "Edit service",
       "name": "Product name",
       "sku": "SKU",
       "skuHelper": "Optional — leave blank if not used.",

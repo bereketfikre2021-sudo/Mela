@@ -179,6 +179,8 @@
     "form": {
       "titleAdd": "ምርት ጨምር",
       "titleEdit": "ምርት አርትዕ",
+      "titleAddService": "አገልግሎት ጨምር",
+      "titleEditService": "አገልግሎት አርትዕ",
       "name": "የምርት ስም",
       "sku": "SKU",
       "skuHelper": "አማራጭ ነው።",
