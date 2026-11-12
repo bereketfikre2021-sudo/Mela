@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { CheckCircle2, CreditCard, Plus, ShoppingBag, X } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { CheckCircle2, CreditCard, Plus, ShoppingBag, Truck, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import { Button } from '../design-system/Button'
@@ -48,6 +49,7 @@ function todayISO() { return new Date().toISOString().slice(0, 10) }
 export function PurchasesPage() {
   const { t }    = useTranslation()
   const { user } = useAuth()
+  const navigate = useNavigate()
   const { isOnline, refreshCount } = useSyncContext()
   const { purchases, status, errorMessage, reload } = usePurchases()
   const { products } = useProducts()
@@ -311,6 +313,12 @@ export function PurchasesPage() {
                 ? t('purchases.subtitle')
                 : t('purchases.count', { count: purchases.length })}
             </p>
+            {/* Supplier management link — prominent and always visible */}
+            <button type="button" onClick={() => navigate('/app/suppliers')}
+              className="mt-1.5 flex items-center gap-1.5 text-xs font-medium text-secondary hover:text-primary">
+              <Truck className="h-3.5 w-3.5" aria-hidden="true" />
+              {t('suppliers.title')}
+            </button>
           </div>
           <Button size="sm" leadingIcon={<Plus className="h-4 w-4" aria-hidden="true" />}
             onClick={() => { resetForm(); setCreateOpen(true) }}
@@ -386,12 +394,6 @@ export function PurchasesPage() {
               value={supplierId} onChange={e => setSupplierId(e.target.value)} />
             <Input label={t('purchases.form.date')} type="date"
               value={purchDate} onChange={e => setPurchDate(e.target.value)} />
-          </div>
-          <div className="-mt-2">
-            <button type="button" onClick={() => window.open('/app/suppliers', '_blank', 'noopener')}
-              className="text-xs font-medium text-primary hover:underline">
-              {t('stock.manageSuppliers')}
-            </button>
           </div>
 
           <div>
