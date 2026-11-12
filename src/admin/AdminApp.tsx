@@ -1,7 +1,5 @@
 /**
  * AdminApp — completely separate React tree for the admin panel.
- * Mounted only when window.location.pathname starts with /admin.
- * Zero imports from the customer-facing app except supabase + env.
  */
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { AdminAuthProvider, useAdminAuth } from './lib/AdminAuthContext'
@@ -14,7 +12,6 @@ import { UserDetailPage }    from './pages/UserDetailPage'
 import { PaymentsPage }      from './pages/PaymentsPage'
 import { PaymentDetailPage } from './pages/PaymentDetailPage'
 import { SubscriptionsPage } from './pages/SubscriptionsPage'
-import { PlanLimitsPage }    from './pages/PlanLimitsPage'
 import { StaffAdminPage }    from './pages/StaffAdminPage'
 import { ActivityPage }      from './pages/ActivityPage'
 
@@ -55,7 +52,6 @@ export function AdminApp() {
         <Route path="/admin/payments"       element={<AdminGuard><PaymentsPage /></AdminGuard>} />
         <Route path="/admin/payments/:id"   element={<AdminGuard><PaymentDetailPage /></AdminGuard>} />
         <Route path="/admin/subscriptions"  element={<AdminGuard><SubscriptionsPage /></AdminGuard>} />
-        <Route path="/admin/plan-limits"    element={<AdminGuard><PlanLimitsPage /></AdminGuard>} />
         <Route path="/admin/staff"          element={<AdminGuard><StaffAdminPage /></AdminGuard>} />
         <Route path="/admin/activity"       element={<AdminGuard><ActivityPage /></AdminGuard>} />
 
