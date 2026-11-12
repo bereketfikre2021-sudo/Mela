@@ -77,8 +77,8 @@ export function UsersPage() {
         <div className="py-8 text-center text-sm text-gray-400">Loading…</div>
       ) : businesses.length === 0 ? (
         <div className="rounded-xl border border-yellow-200 bg-yellow-50 p-5 text-sm text-yellow-800">
-          <p className="font-semibold">No users found</p>
-          <p className="mt-1">Make sure <code className="bg-yellow-100 px-1 rounded">VITE_SUPABASE_SERVICE_ROLE_KEY</code> is set in your Vercel environment variables. The admin panel requires the service-role key to read cross-owner data.</p>
+          <p className="font-semibold">No businesses found</p>
+          <p className="mt-1">Make sure migration 0021 has been applied in Supabase SQL Editor to restore admin read access.</p>
         </div>
       ) : (
         <Card>
