@@ -857,6 +857,7 @@
     "quickSales": "Sales history",
     "quickReport": "Reports",
     "quickSuppliers": "Suppliers",
+    "quickReceiveStock": "Receive stock",
     "pendingBanner": "{{amount}} in pending payments",
     "lowStockBanner": "{{count}} product(s) running low",
     "moreDetails": "Detailed analytics in",

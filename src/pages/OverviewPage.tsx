@@ -24,6 +24,7 @@ import {
   HelpCircle,
   PackageSearch,
   Receipt,
+  ShoppingBag,
   ShoppingCart,
   TrendingDown,
   TrendingUp,
@@ -416,7 +417,10 @@ export function OverviewPage() {
         <h2 className="text-xs font-semibold uppercase tracking-wide text-secondary">{t('home.quickActions')}</h2>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           {[
-            { icon: <Wallet className="h-5 w-5" aria-hidden="true" />,    label: t('home.quickExpense'),   route: '/app/expenses',  primary: false },
+            ...(!bizConfig.isServiceBased
+              ? [{ icon: <ShoppingBag className="h-5 w-5" aria-hidden="true" />, label: t('home.quickReceiveStock'), route: '/app/purchases', primary: false }]
+              : [{ icon: <Wallet className="h-5 w-5" aria-hidden="true" />, label: t('home.quickExpense'), route: '/app/expenses', primary: false }]
+            ),
             { icon: <Receipt className="h-5 w-5" aria-hidden="true" />,   label: t('home.quickSales'),     route: '/app/sales',     primary: false },
             { icon: <BarChart2 className="h-5 w-5" aria-hidden="true" />, label: t('home.quickReport'),    route: '/app/reports',   primary: false },
             ...(!bizConfig.isServiceBased
