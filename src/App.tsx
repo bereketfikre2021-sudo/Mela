@@ -111,11 +111,11 @@ function AppRoutes() {
     { id: '/app/customers', label: t('nav.clients'), icon: Users },
     { id: '/app/reports',   label: t('nav.reports'), icon: BarChart2 },
   ] : [
-    { id: '/app',           label: t('nav.home'),      icon: Home },
-    { id: '/app/sales',     label: t('nav.sales'),     icon: Receipt },
-    { id: '/app/stock',     label: t('nav.stock'),     icon: Package },
-    { id: '/app/customers', label: t('nav.customers'), icon: Users },
-    { id: '/app/expenses',  label: t('nav.expenses'),  icon: Wallet },
+    { id: '/app',           label: t('nav.home'),              icon: Home },
+    { id: '/app/sales',     label: t('nav.sales'),             icon: Receipt },
+    { id: '/app/stock',     label: bizConfig.stockLabel,       icon: Package },
+    { id: '/app/customers', label: t('nav.customers'),         icon: Users },
+    { id: '/app/expenses',  label: t('nav.expenses'),          icon: Wallet },
   ]
 
   const publicShell = (children: React.ReactNode) => (
