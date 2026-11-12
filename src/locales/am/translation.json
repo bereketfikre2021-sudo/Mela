@@ -1013,6 +1013,8 @@
       "txRefError": "የግብይት ማጣቀሻ ከ4 እስከ 100 ቁምፊዎች መሆን አለበት።",
       "submit": "ክፍያ ያስገቡ",
       "submitSuccess": "ክፍያ ቀርቧል — ለፍተሻ ጠብቁ",
+      "submitError": "ክፍያ ማስገባት አልተቻለም",
+      "submitErrorDesc": "ችግር ተፈጥሯል። እባክዎ እንደገና ይሞክሩ።",
       "payTo": "ክፍያ ወደዚህ ይላኩ",
       "accountName": "የሂሳብ ስም",
       "accountNum": "የሂሳብ ቁጥር",

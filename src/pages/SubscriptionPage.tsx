@@ -212,8 +212,8 @@ export function SubscriptionPage() {
     if (error) {
       notify({
         tone: 'danger',
-        title: t('notification.error.title'),
-        description: error.message,
+        title: t('subscription.form.submitError'),
+        description: t('subscription.form.submitErrorDesc'),
       })
       return
     }

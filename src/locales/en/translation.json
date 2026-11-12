@@ -1013,6 +1013,8 @@
       "txRefError": "Transaction reference must be between 4 and 100 characters.",
       "submit": "Submit payment",
       "submitSuccess": "Payment submitted — pending review",
+      "submitError": "Could not submit payment",
+      "submitErrorDesc": "Something went wrong. Please try again or contact support.",
       "payTo": "Send payment to",
       "accountName": "Account name",
       "accountNum": "Account number",
