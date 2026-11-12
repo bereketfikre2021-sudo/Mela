@@ -205,7 +205,10 @@
       "changeImage": "ፎቶ ቀይር",
       "imageHelper": "አማራጭ። PNG, JPG።",
       "barcode": "ባርኮድ",
-      "barcodeHelper": "አማራጭ። ባርኮድ ያስገቡ።"
+      "barcodeHelper": "አማራጭ። ባርኮድ ያስገቡ።",
+      "scanBarcode": "ባርኮድ ቃኝ",
+      "barcodeNotFound": "ባርኮድ አልተገኘም። ዳግም ሞክር።",
+      "barcodeError": "ቃኝት አልተሳካም። ባርኮዱን በእጅ ያስገቡ።"
     },
     "delete": {
       "title": "ምርት ሰርዝ",

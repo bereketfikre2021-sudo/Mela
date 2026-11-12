@@ -1,10 +1,112 @@
 import { useRef, useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Camera, X } from 'lucide-react'
+import { Camera, ScanLine, X } from 'lucide-react'
 
 import { Button } from '../../design-system/Button'
 import { Input } from '../../design-system/Input'
 import type { Product, ProductInput } from './types'
+
+// ── Barcode scanner component ─────────────────────────────────────────────────
+
+/**
+ * BarcodeField — text input with optional scan-from-camera button.
+ *
+ * Uses the BarcodeDetector Web API (Chrome 83+, Android WebView, Edge).
+ * On unsupported browsers (iOS Safari < 17, Firefox) the scan button is hidden
+ * and the user types the barcode manually — no library needed.
+ *
+ * Flow: tap Scan → native camera opens (capture="environment") → user photos
+ * the barcode → JS decodes it and fills the input automatically.
+ */
+declare global {
+  interface Window {
+    BarcodeDetector?: {
+      new(opts: { formats: string[] }): {
+        detect(img: ImageBitmap): Promise<Array<{ rawValue: string }>>
+      }
+      getSupportedFormats?(): Promise<string[]>
+    }
+  }
+}
+
+const BARCODE_FORMATS = [
+  'ean_13', 'ean_8', 'code_128', 'code_39', 'qr_code',
+  'upc_a', 'upc_e', 'itf', 'data_matrix',
+]
+
+function BarcodeField({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const { t } = useTranslation()
+  const scanRef = useRef<HTMLInputElement>(null)
+  const [scanning, setScanning] = useState(false)
+  const [scanError, setScanError] = useState('')
+
+  const canScan = typeof window !== 'undefined' && !!window.BarcodeDetector
+
+  async function handleScanCapture(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file || !window.BarcodeDetector) return
+    setScanError('')
+    setScanning(true)
+    try {
+      const bitmap = await createImageBitmap(file)
+      const detector = new window.BarcodeDetector({ formats: BARCODE_FORMATS })
+      const results = await detector.detect(bitmap)
+      if (results.length > 0) {
+        onChange(results[0].rawValue)
+        setScanError('')
+      } else {
+        setScanError(t('products.form.barcodeNotFound'))
+      }
+    } catch {
+      setScanError(t('products.form.barcodeError'))
+    } finally {
+      setScanning(false)
+      // Reset so the same file can be re-scanned
+      if (scanRef.current) scanRef.current.value = ''
+    }
+  }
+
+  return (
+    <div>
+      <div className="flex items-end gap-2">
+        <div className="flex-1">
+          <Input
+            label={t('products.form.barcode')}
+            helperText={t('products.form.barcodeHelper')}
+            value={value}
+            onChange={e => { onChange(e.target.value); setScanError('') }}
+            autoComplete="off"
+            maxLength={100}
+          />
+        </div>
+        {canScan && (
+          <>
+            <input
+              ref={scanRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              className="hidden"
+              onChange={e => void handleScanCapture(e)}
+            />
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              className="mb-0.5 shrink-0"
+              loading={scanning}
+              onClick={() => scanRef.current?.click()}
+              title={t('products.form.scanBarcode')}
+            >
+              <ScanLine className="h-4 w-4" />
+            </Button>
+          </>
+        )}
+      </div>
+      {scanError && <p className="mt-1 text-xs text-danger">{scanError}</p>}
+    </div>
+  )
+}
 
 interface ProductFormProps {
   mode: 'add' | 'edit'
@@ -207,14 +309,7 @@ export function ProductForm({ mode, initial, isServiceBased = false, onSubmit, o
 
       {/* Barcode — optional, product businesses only */}
       {!isServiceBased && (
-        <Input
-          label={t('products.form.barcode')}
-          helperText={t('products.form.barcodeHelper')}
-          value={barcode}
-          onChange={e => setBarcode(e.target.value)}
-          autoComplete="off"
-          maxLength={100}
-        />
+        <BarcodeField value={barcode} onChange={setBarcode} />
       )}
 
       <div className="flex justify-end gap-2 pt-2">

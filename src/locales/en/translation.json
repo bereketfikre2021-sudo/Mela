@@ -205,7 +205,10 @@
       "changeImage": "Change image",
       "imageHelper": "Optional. PNG, JPG up to 5MB.",
       "barcode": "Barcode",
-      "barcodeHelper": "Optional. Scan or type barcode."
+      "barcodeHelper": "Optional. Scan or type barcode.",
+      "scanBarcode": "Scan barcode",
+      "barcodeNotFound": "No barcode found in image. Try again with better lighting.",
+      "barcodeError": "Could not scan barcode. Please type it manually."
     },
     "delete": {
       "title": "Delete product",
