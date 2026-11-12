@@ -27,6 +27,7 @@ import {
   ShoppingCart,
   TrendingDown,
   TrendingUp,
+  Truck,
   Users,
   Wallet,
 } from 'lucide-react'
@@ -415,10 +416,13 @@ export function OverviewPage() {
         <h2 className="text-xs font-semibold uppercase tracking-wide text-secondary">{t('home.quickActions')}</h2>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           {[
-            { icon: <ShoppingCart className="h-5 w-5" aria-hidden="true" />, label: bizConfig.newSaleLabel, route: '/app/pos',      primary: true },
-            { icon: <Wallet className="h-5 w-5" aria-hidden="true" />,       label: t('home.quickExpense'), route: '/app/expenses',  primary: false },
-            { icon: <Receipt className="h-5 w-5" aria-hidden="true" />,      label: t('home.quickSales'),   route: '/app/sales',     primary: false },
-            { icon: <BarChart2 className="h-5 w-5" aria-hidden="true" />,    label: t('home.quickReport'),  route: '/app/reports',   primary: false },
+            { icon: <Wallet className="h-5 w-5" aria-hidden="true" />,    label: t('home.quickExpense'),   route: '/app/expenses',  primary: false },
+            { icon: <Receipt className="h-5 w-5" aria-hidden="true" />,   label: t('home.quickSales'),     route: '/app/sales',     primary: false },
+            { icon: <BarChart2 className="h-5 w-5" aria-hidden="true" />, label: t('home.quickReport'),    route: '/app/reports',   primary: false },
+            ...(!bizConfig.isServiceBased
+              ? [{ icon: <Truck className="h-5 w-5" aria-hidden="true" />, label: t('home.quickSuppliers'), route: '/app/suppliers', primary: false }]
+              : [{ icon: <ShoppingCart className="h-5 w-5" aria-hidden="true" />, label: bizConfig.newSaleLabel, route: '/app/pos', primary: false }]
+            ),
           ].map(a => (
             <button key={a.route} type="button" onClick={() => navigate(a.route)}
               className={[

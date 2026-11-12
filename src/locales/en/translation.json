@@ -856,6 +856,7 @@
     "quickExpense": "Add expense",
     "quickSales": "Sales history",
     "quickReport": "Reports",
+    "quickSuppliers": "Suppliers",
     "pendingBanner": "{{amount}} in pending payments",
     "lowStockBanner": "{{count}} product(s) running low",
     "moreDetails": "Detailed analytics in",
