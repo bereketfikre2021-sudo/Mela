@@ -11,10 +11,19 @@
 --   2. Ensure payment_methods_json row exists with an empty default.
 
 -- 1. Admin INSERT policy on site_settings
-create policy if not exists "admin insert site settings"
-  on public.site_settings for insert
-  to authenticated
-  with check (public.is_admin());
+do $$
+begin
+  if not exists (
+    select 1 from pg_policies
+    where tablename = 'site_settings'
+    and policyname = 'admin insert site settings'
+  ) then
+    execute 'create policy "admin insert site settings"
+      on public.site_settings for insert
+      to authenticated
+      with check (public.is_admin())';
+  end if;
+end$$;
 
 -- 2. Ensure the payment_methods_json row exists (idempotent)
 insert into public.site_settings (key, value, updated_at)
