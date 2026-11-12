@@ -100,22 +100,33 @@ function AppRoutes() {
   const isService = bizConfig.isServiceBased
 
   /**
-   * Product businesses:  Home | Sales | Stock | Customers | Expenses
-   * Service businesses:  Home | Sales | Expenses | Services | Clients | Reports
+   * Product businesses:
+   *   retail/cosmetics: Home | Sales | Stock | Customers | Expenses
+   *   fnb/bakery:       Home | Sales | Menu/Stock | Expenses | Reports
+   *     (fnb/bakery customers are mostly walk-in; stock/menu is checked daily)
+   * Service businesses: Home | Sales | Expenses | Services | Clients | Reports
    */
+  const isFnbOrBakery = profile?.type === 'fnb' || profile?.type === 'bakery'
+
   const appNav: NavItem[] = isService ? [
-    { id: '/app',          label: t('nav.home'),     icon: Home },
-    { id: '/app/sales',    label: t('nav.sales'),    icon: Receipt },
-    { id: '/app/expenses', label: t('nav.expenses'), icon: Wallet },
-    { id: '/app/products', label: t('nav.services'), icon: PackageSearch },
-    { id: '/app/customers', label: t('nav.clients'), icon: Users },
-    { id: '/app/reports',   label: t('nav.reports'), icon: BarChart2 },
+    { id: '/app',           label: t('nav.home'),     icon: Home },
+    { id: '/app/sales',     label: t('nav.sales'),    icon: Receipt },
+    { id: '/app/expenses',  label: t('nav.expenses'), icon: Wallet },
+    { id: '/app/products',  label: t('nav.services'), icon: PackageSearch },
+    { id: '/app/customers', label: t('nav.clients'),  icon: Users },
+    { id: '/app/reports',   label: t('nav.reports'),  icon: BarChart2 },
+  ] : isFnbOrBakery ? [
+    { id: '/app',           label: t('nav.home'),        icon: Home },
+    { id: '/app/sales',     label: t('nav.sales'),       icon: Receipt },
+    { id: '/app/stock',     label: bizConfig.stockLabel, icon: Package },
+    { id: '/app/expenses',  label: t('nav.expenses'),    icon: Wallet },
+    { id: '/app/reports',   label: t('nav.reports'),     icon: BarChart2 },
   ] : [
-    { id: '/app',           label: t('nav.home'),              icon: Home },
-    { id: '/app/sales',     label: t('nav.sales'),             icon: Receipt },
-    { id: '/app/stock',     label: bizConfig.stockLabel,       icon: Package },
-    { id: '/app/customers', label: t('nav.customers'),         icon: Users },
-    { id: '/app/expenses',  label: t('nav.expenses'),          icon: Wallet },
+    { id: '/app',           label: t('nav.home'),        icon: Home },
+    { id: '/app/sales',     label: t('nav.sales'),       icon: Receipt },
+    { id: '/app/stock',     label: bizConfig.stockLabel, icon: Package },
+    { id: '/app/customers', label: t('nav.customers'),   icon: Users },
+    { id: '/app/expenses',  label: t('nav.expenses'),    icon: Wallet },
   ]
 
   const publicShell = (children: React.ReactNode) => (
