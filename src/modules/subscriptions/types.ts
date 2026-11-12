@@ -43,8 +43,9 @@ export interface PaymentSubmission {
   plan: 'premium'
   billing_cycle: 'monthly' | 'yearly'
   amount_etb: number
-  payment_method: 'telebirr' | 'cbe_birr' | 'bank_transfer'
+  payment_method: string
   transaction_reference: string
+  screenshot_url: string | null
   status: 'pending' | 'approved' | 'rejected'
   submitted_at: string
   reviewed_at: string | null
@@ -58,6 +59,7 @@ export interface PaymentSubmissionInput {
   plan: 'premium'
   billing_cycle: 'monthly' | 'yearly'
   amount_etb: number
-  payment_method: 'telebirr' | 'cbe_birr' | 'bank_transfer'
+  payment_method: string
   transaction_reference: string
+  screenshot_url?: string | null
 }

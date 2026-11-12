@@ -12,7 +12,6 @@
  * This keeps the service-role key out of the browser bundle for most operations.
  */
 import { supabase } from '../../lib/supabase'
-import { adminSupabase } from './adminSupabase'
 import type {
   AdminBusiness, AdminPaymentSubmission, AdminPlanLimits,
   AdminStaffMember, AdminSubscription, SiteSetting,
@@ -90,10 +89,10 @@ export async function getPaymentSubmission(id: string): Result<AdminPaymentSubmi
   return { data: data as AdminPaymentSubmission, error: null }
 }
 
-/** Approve — calls activate_subscription() which requires service_role */
+/** Approve — calls activate_subscription() with is_admin() guard inside the function */
 export async function approvePayment(submission: AdminPaymentSubmission): Result<void> {
-  if (!adminSupabase) return { data: null, error: { message: 'Service-role key required to activate subscriptions. Set VITE_SUPABASE_SERVICE_ROLE_KEY in Vercel.' } }
-  const { error } = await adminSupabase.rpc('activate_subscription', {
+  if (!supabase) return noClient()
+  const { error } = await supabase.rpc('activate_subscription', {
     p_owner_id:              submission.owner_id,
     p_plan:                  submission.plan,
     p_billing_cycle:         submission.billing_cycle,

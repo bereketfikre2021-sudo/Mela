@@ -6,7 +6,7 @@ import { AdminBtn, Badge } from '../components/AdminTable'
 import type { AdminBusiness, AdminPaymentSubmission } from '../lib/types'
 
 function fmtDate(s: string | null) {
-  if (!s) return 'â€”'
+  if (!s) return '--'
   return new Date(s).toLocaleDateString('en-ET', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
 }
 
@@ -40,7 +40,7 @@ export function PaymentDetailPage() {
     const { error } = await approvePayment(payment)
     setActing(false)
     if (error) { setMsg(`Error: ${error.message}`); return }
-    setMsg('âœ“ Payment approved. Subscription activated.')
+    setMsg('Payment approved. Subscription activated.')
     setPayment(prev => prev ? { ...prev, status: 'approved' } : prev)
   }
 
@@ -52,11 +52,11 @@ export function PaymentDetailPage() {
     const { error } = await rejectPayment(payment.id, notes)
     setActing(false)
     if (error) { setMsg(`Error: ${error.message}`); return }
-    setMsg('âœ“ Payment rejected.')
+    setMsg('Payment rejected.')
     setPayment(prev => prev ? { ...prev, status: 'rejected', reviewer_notes: notes } : prev)
   }
 
-  if (loading)  return <div className="py-8 text-center text-sm text-gray-400">Loadingâ€¦</div>
+  if (loading)  return <div className="py-8 text-center text-sm text-gray-400">Loading...</div>
   if (!payment) return <div className="py-8 text-center text-sm text-red-500">Payment not found.</div>
 
   const isPending = payment.status === 'pending'
@@ -80,7 +80,7 @@ export function PaymentDetailPage() {
         <section className="rounded-xl border border-gray-200 bg-white p-5">
           <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-400">Business</h2>
           <p className="font-semibold text-gray-900">{business.name}</p>
-          <p className="text-sm text-gray-500">{business.owner_name} Â· {business.phone}</p>
+          <p className="text-sm text-gray-500">{business.owner_name} &middot; {business.phone}</p>
           <p className="mt-1 font-mono text-xs text-gray-400">{payment.owner_id}</p>
         </section>
       )}
@@ -91,7 +91,7 @@ export function PaymentDetailPage() {
         <div className="grid grid-cols-2 gap-4 text-sm">
           {[
             ['Amount', `ETB ${payment.amount_etb}`],
-            ['Method', payment.payment_method.replace('_', ' ')],
+            ['Method', payment.payment_method.replace(/_/g, ' ')],
             ['Plan', payment.plan],
             ['Billing cycle', payment.billing_cycle],
             ['Submitted', fmtDate(payment.submitted_at)],
@@ -109,16 +109,30 @@ export function PaymentDetailPage() {
         </div>
       </section>
 
-      {/* Screenshot â€” the transaction_reference currently stores filename_timestamp */}
-      {/* Future: render from Supabase Storage once screenshot_url column is added */}
+      {/* Screenshot */}
       <section className="rounded-xl border border-gray-200 bg-white p-5">
         <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-400">Payment Screenshot</h2>
-        <p className="text-sm text-gray-400 italic">
-          Screenshot upload is stored as filename: {payment.transaction_reference.split('_').slice(0, -1).join('_')}
-        </p>
-        <p className="mt-1 text-xs text-gray-300">
-          To view the actual image, add a <code>screenshot_url</code> column (migration) and upload to Supabase Storage.
-        </p>
+        {payment.screenshot_url ? (
+          <div className="space-y-3">
+            <a href={payment.screenshot_url} target="_blank" rel="noopener noreferrer">
+              <img
+                src={payment.screenshot_url}
+                alt="Payment screenshot"
+                className="w-full max-h-96 rounded-lg border border-gray-200 object-contain bg-gray-50 cursor-zoom-in hover:opacity-90 transition-opacity"
+              />
+            </a>
+            <a
+              href={payment.screenshot_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-xs text-emerald-600 hover:underline"
+            >
+              Open full size &#8599;
+            </a>
+          </div>
+        ) : (
+          <p className="text-sm text-gray-400 italic">No screenshot uploaded for this submission.</p>
+        )}
       </section>
 
       {/* Actions */}
@@ -131,7 +145,7 @@ export function PaymentDetailPage() {
               value={notes}
               onChange={e => setNotes(e.target.value)}
               rows={3}
-              placeholder="Add notes for the userâ€¦"
+              placeholder="Add notes for the user..."
               className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-emerald-500"
             />
           </div>
@@ -158,6 +172,3 @@ export function PaymentDetailPage() {
     </div>
   )
 }
-
-
-

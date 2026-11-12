@@ -41,6 +41,7 @@ export interface AdminPaymentSubmission {
   amount_etb: number
   payment_method: string
   transaction_reference: string
+  screenshot_url: string | null
   status: 'pending' | 'approved' | 'rejected'
   submitted_at: string
   reviewed_at: string | null

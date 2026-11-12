@@ -198,8 +198,27 @@ export function SubscriptionPage() {
     }
     if (!user) return
     setSubmitting(true)
+
+    // 1. Upload screenshot to Supabase Storage
+    let screenshotUrl: string | null = null
+    try {
+      const { supabase } = await import('../lib/supabase')
+      if (supabase) {
+        const ext  = screenshot.name.split('.').pop() ?? 'jpg'
+        const path = `${user.id}/${Date.now()}.${ext}`
+        const { error: uploadError } = await supabase.storage
+          .from('payment-screenshots')
+          .upload(path, screenshot, { upsert: true, contentType: screenshot.type })
+        if (!uploadError) {
+          const { data: urlData } = supabase.storage
+            .from('payment-screenshots')
+            .getPublicUrl(path)
+          screenshotUrl = urlData.publicUrl
+        }
+      }
+    } catch { /* non-fatal — submit without screenshot URL */ }
+
     const amount = billingCycle === 'monthly' ? MONTHLY_PRICE : YEARLY_PRICE
-    // Use screenshot filename + timestamp as the transaction reference
     const txReference = `${screenshot.name}_${Date.now()}`
     const { error } = await submitPayment(user.id, {
       plan: 'premium',
@@ -207,6 +226,7 @@ export function SubscriptionPage() {
       amount_etb: amount,
       payment_method: paymentMethod,
       transaction_reference: txReference,
+      screenshot_url: screenshotUrl,
     })
     setSubmitting(false)
     if (error) {
