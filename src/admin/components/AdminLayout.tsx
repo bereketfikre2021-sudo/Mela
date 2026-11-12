@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import {
   Activity, Bell, Building2, ChevronDown, CreditCard,
-  LayoutDashboard, LogOut, Menu, Search, Settings, Users, X,
+  LayoutDashboard, LogOut, Menu, Search, Users, X,
 } from 'lucide-react'
 import { useAdminAuth } from '../lib/AdminAuthContext'
 import { getAllPaymentSubmissions } from '../lib/api'
@@ -31,6 +31,8 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
 
   const initials  = (user?.email ?? 'A').slice(0, 2).toUpperCase()
   const pageLabel = location.pathname.replace('/admin/', '').replace(/-/g, ' ') || 'dashboard'
+  const [bellOpen, setBellOpen] = useState(false)
+  const bellRef = useRef<HTMLDivElement>(null)
 
   // Load pending payment count for bell badge
   useEffect(() => {
@@ -50,6 +52,18 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
   }, [avatarOpen])
+
+  // Close bell dropdown on outside click
+  useEffect(() => {
+    if (!bellOpen) return
+    function handler(e: MouseEvent) {
+      if (bellRef.current && !bellRef.current.contains(e.target as Node)) {
+        setBellOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [bellOpen])
 
   return (
     <div className="flex h-screen overflow-hidden" style={{ fontFamily: "'Outfit', system-ui, sans-serif", backgroundColor: '#F7F7F2' }}>
@@ -134,18 +148,52 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
 
           <div className="ml-auto flex items-center gap-2">
 
-            {/* Bell — navigates to payments with pending filter */}
-            <button type="button"
-              onClick={() => navigate('/admin/payments?status=pending')}
-              className="relative flex h-9 w-9 items-center justify-center rounded-lg hover:bg-gray-100 transition-colors"
-              title={pendingCount > 0 ? `${pendingCount} pending payment${pendingCount !== 1 ? 's' : ''}` : 'No pending payments'}>
-              <Bell className="h-4 w-4 text-gray-500" aria-hidden="true" />
-              {pendingCount > 0 && (
-                <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white">
-                  {pendingCount > 9 ? '9+' : pendingCount}
-                </span>
+            {/* Bell — dropdown with pending payment summary */}
+            <div ref={bellRef} className="relative">
+              <button type="button"
+                onClick={() => setBellOpen(v => !v)}
+                className="relative flex h-9 w-9 items-center justify-center rounded-lg hover:bg-gray-100 transition-colors"
+                title={pendingCount > 0 ? `${pendingCount} pending payment${pendingCount !== 1 ? 's' : ''}` : 'Notifications'}>
+                <Bell className="h-4 w-4 text-gray-500" aria-hidden="true" />
+                {pendingCount > 0 && (
+                  <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white">
+                    {pendingCount > 9 ? '9+' : pendingCount}
+                  </span>
+                )}
+              </button>
+
+              {bellOpen && (
+                <div className="absolute right-0 top-full z-50 mt-1.5 w-72 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg">
+                  <div className="border-b border-gray-100 px-4 py-3">
+                    <p className="text-sm font-semibold text-gray-900">Notifications</p>
+                  </div>
+                  {pendingCount > 0 ? (
+                    <div className="py-1">
+                      <button type="button"
+                        onClick={() => { setBellOpen(false); navigate('/admin/payments?status=pending') }}
+                        className="flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-gray-50 transition-colors">
+                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-yellow-100">
+                          <CreditCard className="h-4 w-4 text-yellow-600" />
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-medium text-gray-900">
+                            {pendingCount} pending payment{pendingCount !== 1 ? 's' : ''}
+                          </p>
+                          <p className="text-xs text-gray-500">Awaiting review and approval</p>
+                        </div>
+                        <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-yellow-400 px-1 text-[10px] font-bold text-gray-900">
+                          {pendingCount}
+                        </span>
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="px-4 py-6 text-center">
+                      <p className="text-sm text-gray-400">No new notifications</p>
+                    </div>
+                  )}
+                </div>
               )}
-            </button>
+            </div>
 
             {/* Page label */}
             <div className="hidden sm:flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-1.5">
@@ -170,13 +218,6 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
                     <p className="truncate text-sm font-semibold text-gray-900">{user?.email?.split('@')[0]}</p>
                     <p className="truncate text-xs text-gray-400">{user?.email}</p>
                     <p className="mt-0.5 text-xs font-medium" style={{ color: '#1C6B53' }}>Administrator</p>
-                  </div>
-                  <div className="py-1">
-                    <button type="button" onClick={() => { setAvatarOpen(false); navigate('/admin/subscriptions') }}
-                      className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                      <Settings className="h-4 w-4 text-gray-400" />
-                      Subscription Settings
-                    </button>
                   </div>
                   <div className="border-t border-gray-100 py-1">
                     <button type="button" onClick={() => { setAvatarOpen(false); void signOut() }}

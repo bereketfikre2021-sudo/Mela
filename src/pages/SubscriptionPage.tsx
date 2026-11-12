@@ -38,45 +38,6 @@ const YEARLY_PRICE = 2499
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 
-/** A labelled progress bar for usage limits. */
-function UsageBar({
-  label,
-  used,
-  max,
-}: {
-  label: string
-  used: number
-  max: number
-}) {
-  const pct = max > 0 ? Math.min(100, Math.round((used / max) * 100)) : 0
-  const danger = pct >= 90
-  const warning = pct >= 70 && !danger
-
-  return (
-    <div className="flex flex-col gap-1">
-      <div className="flex items-center justify-between text-sm">
-        <span className="text-text">{label}</span>
-        <span className="text-secondary tabular-nums">
-          {used} / {max}
-        </span>
-      </div>
-      <div className="h-2 overflow-hidden rounded-full bg-background border border-border">
-        <div
-          className={`h-full rounded-full transition-all ${
-            danger ? 'bg-danger' : warning ? 'bg-warning' : 'bg-primary'
-          }`}
-          style={{ width: `${pct}%` }}
-          role="progressbar"
-          aria-valuenow={used}
-          aria-valuemin={0}
-          aria-valuemax={max}
-          aria-label={label}
-        />
-      </div>
-    </div>
-  )
-}
-
 /** A single plan card in the pricing table. */
 function PlanCard({
   name,
@@ -148,7 +109,7 @@ function PlanCard({
 export function SubscriptionPage() {
   const { t } = useTranslation()
   const { user } = useAuth()
-  const { plan, status, isActive, limits, loading: subLoading, refresh, usageCounts } =
+  const { plan, status, isActive, loading: subLoading, refresh } =
     useSubscription()
   const { notify } = useNotification()
 
@@ -456,34 +417,30 @@ export function SubscriptionPage() {
               {/* Step 1: Payment method grid */}
               <div>
                 <p className="mb-3 text-sm font-medium text-text">{t('subscription.form.paymentMethod')}</p>
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-3 gap-2">
                   {paymentMethods.filter(m => m.enabled).map(m => (
                     <button
                       key={m.id}
                       type="button"
                       onClick={() => setPaymentMethod(m.id as typeof paymentMethod)}
                       className={[
-                        'flex flex-col items-center gap-2 rounded-xl border-2 p-3 text-center transition-all',
+                        'relative flex flex-col items-center gap-2 rounded-2xl border-2 p-3 text-center transition-all',
                         paymentMethod === m.id
-                          ? 'border-primary bg-mint shadow-sm'
-                          : 'border-border bg-surface hover:border-primary/40',
+                          ? 'border-primary bg-primary-soft shadow-sm'
+                          : 'border-border bg-surface hover:border-primary/40 hover:bg-background',
                       ].join(' ')}
                     >
-                      {/* Logo — image or initials fallback */}
-                      {m.imageUrl ? (
-                        <img
-                          src={m.imageUrl}
-                          alt={m.label}
-                          className="h-12 w-12 rounded-xl object-cover border border-border bg-white"
-                        />
-                      ) : (
-                        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-background border border-border text-lg font-bold text-secondary">
-                          {m.label.slice(0, 1).toUpperCase()}
-                        </div>
-                      )}
-                      <span className="text-xs font-medium text-text leading-tight">{m.label}</span>
+                      {/* Logo — image or letter fallback */}
+                      <div className="flex h-12 w-12 items-center justify-center rounded-xl overflow-hidden border border-border bg-white">
+                        {m.imageUrl ? (
+                          <img src={m.imageUrl} alt={m.label} className="h-full w-full object-contain" />
+                        ) : (
+                          <span className="text-lg font-bold text-secondary">{m.label.slice(0, 1)}</span>
+                        )}
+                      </div>
+                      <span className="text-xs font-semibold text-text leading-tight">{m.label}</span>
                       {paymentMethod === m.id && (
-                        <span className="flex h-4 w-4 items-center justify-center rounded-full bg-primary">
+                        <span className="absolute top-1.5 right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary">
                           <Check className="h-2.5 w-2.5 text-white" />
                         </span>
                       )}
@@ -492,47 +449,74 @@ export function SubscriptionPage() {
                 </div>
               </div>
 
-              {/* Step 2: Reveal account details */}
+              {/* Step 2: Reveal account details — account number only copyable */}
               {(() => {
                 const selected = paymentMethods.find(m => m.id === paymentMethod)
                 if (!selected) return null
-                const rows = [
-                  ...(selected.extra ? [{ label: selected.id === 'bank_transfer' ? t('subscription.form.bankName') : t('subscription.form.accountName'), value: selected.extra, key: 'extra' }] : []),
-                  { label: t('subscription.form.accountName'), value: selected.holder, key: 'holder' },
-                  { label: selected.id === 'bank_transfer' ? t('subscription.form.accountNum') : t('subscription.form.phoneNumber'), value: selected.number, key: 'number' },
-                ]
                 return (
-                  <div className="rounded-xl border-2 border-primary/20 bg-mint p-4 space-y-3">
-                    <div className="flex items-center gap-2">
-                      {selected.imageUrl ? (
-                        <img src={selected.imageUrl} alt={selected.label}
-                          className="h-8 w-8 rounded-xl object-cover border border-primary/20" />
-                      ) : (
-                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-sm font-bold text-primary">
-                          {selected.label.slice(0, 1)}
-                        </div>
-                      )}
-                      <p className="text-xs font-semibold uppercase tracking-wide text-primary">
-                        {t('subscription.form.payTo')} · {selected.label}
-                      </p>
-                    </div>
-                    {rows.map(row => (
-                      <div key={row.key} className="flex items-center justify-between gap-2">
-                        <div>
-                          <p className="text-xs text-secondary">{row.label}</p>
-                          <p className="text-sm font-semibold text-text">{row.value || '—'}</p>
-                        </div>
-                        {row.value && (
-                          <button type="button" onClick={() => void copyToClipboard(row.value, row.key)}
-                            className="rounded-lg p-2 text-primary hover:bg-primary/10 transition-colors"
-                            aria-label={t('subscription.form.copy')}>
-                            {copiedKey === row.key
-                              ? <Check className="h-4 w-4 text-success" />
-                              : <Copy className="h-4 w-4" />}
-                          </button>
+                  <div className="rounded-2xl border border-border bg-background overflow-hidden">
+                    {/* Header */}
+                    <div className="flex items-center gap-3 border-b border-border px-4 py-3"
+                      style={{ background: 'linear-gradient(to right, var(--color-primary-soft), transparent)' }}>
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl overflow-hidden border border-border bg-white">
+                        {selected.imageUrl ? (
+                          <img src={selected.imageUrl} alt={selected.label} className="h-full w-full object-contain" />
+                        ) : (
+                          <span className="text-base font-bold text-secondary">{selected.label.slice(0, 1)}</span>
                         )}
                       </div>
-                    ))}
+                      <div>
+                        <p className="text-xs text-secondary">{t('subscription.form.payTo')}</p>
+                        <p className="text-sm font-bold text-text">{selected.label}</p>
+                      </div>
+                    </div>
+                    {/* Account info */}
+                    <div className="divide-y divide-border px-4">
+                      {/* Account holder — display only, no copy */}
+                      {selected.holder && (
+                        <div className="flex items-center justify-between gap-2 py-3">
+                          <div>
+                            <p className="text-xs text-secondary">{t('subscription.form.accountName')}</p>
+                            <p className="text-sm font-medium text-text">{selected.holder}</p>
+                          </div>
+                        </div>
+                      )}
+                      {/* Extra info (bank name) — display only */}
+                      {selected.extra && (
+                        <div className="flex items-center justify-between gap-2 py-3">
+                          <div>
+                            <p className="text-xs text-secondary">
+                              {selected.id === 'bank_transfer' ? t('subscription.form.bankName') : t('subscription.form.extra')}
+                            </p>
+                            <p className="text-sm font-medium text-text">{selected.extra}</p>
+                          </div>
+                        </div>
+                      )}
+                      {/* Account / phone number — copyable */}
+                      {selected.number && (
+                        <div className="flex items-center justify-between gap-2 py-3">
+                          <div>
+                            <p className="text-xs text-secondary">
+                              {selected.id === 'bank_transfer' ? t('subscription.form.accountNum') : t('subscription.form.phoneNumber')}
+                            </p>
+                            <p className="text-base font-bold text-text tracking-wide">{selected.number}</p>
+                          </div>
+                          <button type="button"
+                            onClick={() => void copyToClipboard(selected.number, 'number')}
+                            className={[
+                              'shrink-0 flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold transition-all',
+                              copiedKey === 'number'
+                                ? 'bg-success text-white'
+                                : 'bg-primary text-white hover:bg-primary-interactive',
+                            ].join(' ')}
+                            aria-label={t('subscription.form.copy')}>
+                            {copiedKey === 'number'
+                              ? <><Check className="h-3.5 w-3.5" /> {t('subscription.form.copied')}</>
+                              : <><Copy className="h-3.5 w-3.5" /> {t('subscription.form.copy')}</>}
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )
               })()}
@@ -591,43 +575,7 @@ export function SubscriptionPage() {
         </section>
       )}
 
-      {/* ── Section 4: Usage display (Free plan) ──────────────────────────── */}
-      {(isCurrentFree || subLoading) && limits && (
-        <section aria-labelledby="usage-heading" className="mb-8">
-          <div className="rounded-xl border border-border bg-surface p-5">
-            <h2 id="usage-heading" className="mb-4 text-lg font-semibold text-text">
-              {t('subscription.usage.heading')}
-            </h2>
-            <div className="flex flex-col gap-4">
-              <UsageBar
-                label={t('subscription.usage.products')}
-                used={usageCounts.products}
-                max={limits.max_products}
-              />
-              <UsageBar
-                label={t('subscription.usage.customers')}
-                used={usageCounts.customers}
-                max={limits.max_customers}
-              />
-              <UsageBar
-                label={t('subscription.usage.suppliers')}
-                used={usageCounts.suppliers}
-                max={limits.max_suppliers}
-              />
-              <UsageBar
-                label={t('subscription.usage.salesThisMonth')}
-                used={usageCounts.salesThisMonth}
-                max={limits.max_sales_per_month}
-              />
-              <UsageBar
-                label={t('subscription.usage.purchasesThisMonth')}
-                used={usageCounts.purchasesThisMonth}
-                max={limits.max_purchases_per_month}
-              />
-            </div>
-          </div>
-        </section>
-      )}
+      {/* ── Section 4: Usage display (Free plan) ─── REMOVED (trial methodology replaces plan limits) */}
 
       {/* ── Section 5: Payment history ────────────────────────────────────── */}
       <section aria-labelledby="history-heading">

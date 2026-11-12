@@ -144,7 +144,9 @@ export async function getSiteSettings(): Result<SiteSetting[]> {
 
 export async function updateSiteSetting(key: string, value: string): Result<void> {
   if (!supabase) return noClient()
-  const { error } = await supabase.from('site_settings').update({ value, updated_at: new Date().toISOString() }).eq('key', key)
+  const { error } = await supabase
+    .from('site_settings')
+    .upsert({ key, value, updated_at: new Date().toISOString() }, { onConflict: 'key' })
   if (error) return { data: null, error: { message: error.message } }
   return { data: undefined, error: null }
 }

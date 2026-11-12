@@ -1019,6 +1019,8 @@
       "bankName": "Bank",
       "phoneNumber": "Phone number",
       "copy": "Copy",
+      "copied": "Copied!",
+      "extra": "Additional info",
       "screenshot": "Attach payment screenshot",
       "screenshotHelper": "Take a screenshot of your payment confirmation and upload it here.",
       "screenshotRequired": "Please attach a screenshot of your payment.",

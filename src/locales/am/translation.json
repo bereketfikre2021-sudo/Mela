@@ -1019,6 +1019,8 @@
       "bankName": "ባንክ",
       "phoneNumber": "ስልክ ቁጥር",
       "copy": "ቅዳ",
+      "copied": "ተቀድቷል!",
+      "extra": "ተጨማሪ መረጃ",
       "screenshot": "የክፍያ ስክሪንሾት አያይዝ",
       "screenshotHelper": "ስክሪንሾቱን ወስደው እዚህ ይጫኑ።",
       "screenshotRequired": "እባክዎ የክፍያ ስክሪንሾት ያያይዙ።",
