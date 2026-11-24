@@ -3,7 +3,7 @@
  */
 
 /** All supported business types (stored as `businesses.type`). */
-export type BusinessType = 'retail' | 'fnb' | 'bakery' | 'service' | 'cosmetics' | 'salon'
+export type BusinessType = 'retail' | 'fnb' | 'fastfood' | 'bakery' | 'service' | 'cosmetics' | 'salon' | 'baltina' | 'personal'
 
 /** A persisted business profile row. */
 export interface Business {

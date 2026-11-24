@@ -129,15 +129,19 @@
       "businessSectionTitle": "ስለ ንግድዎ",
       "businessName": "የንግድ ስም",
       "businessNameHelper": "ደንበኞችዎ የሚያውቁዎትን ስም።",
+      "accountName": "የመለያ ስም",
+      "accountNameHelper": "ለዚህ መለያ ስም ይስጡ፣ ለምሳሌ ስምዎን።",
       "businessType": "የንግድ አይነት",
       "businessTypeHelper": "ንግድዎን የሚገልጽ አይነት ይምረጡ።",
       "types": {
         "retail": "ችርቻሮ",
         "fnb": "ምግብ እና መጠጥ",
+        "fastfood": "ፈጣን ምግብ / ሬስቶራንት",
         "bakery": "ዳቦ ቤት እና ምርት",
         "service": "አገልግሎት",
         "cosmetics": "ኮስሞቲክስ",
-        "salon": "ሳሎን / ውበት"
+        "salon": "Beauty Salon & Spa",
+        "baltina": "ባልቲና / ቅመም ቤት"
       },
       "ownerSectionTitle": "ስለ እርስዎ",
       "ownerName": "ሙሉ ስም",
@@ -927,18 +931,24 @@
     "cosmetics": "ኮስሞቲክስ",
     "cosmetics_desc": "የቆዳ እንክብካቤ፣ ሜካፕ፣ ውበት",
     "fnb": "ካፌ / ቡናቤት",
-    "fnb_desc": "ቡና፣ መጠጦች፣ ቀላል ምግቦች",
+    "fnb_desc": "ቡና፣ መጠጦች፣ ጭማቂ እና ቀላል መክሰስ",
+    "fastfood": "ፈጣን ምግብ / ሬስቶራንት",
+    "fastfood_desc": "ምግቦች፣ ምርኮ ምግብ፣ ቴክ አዌይ",
     "bakery": "ዳቦ ቤት / ፓስትሪ",
     "bakery_desc": "ዳቦ፣ ፓስትሪ፣ ኬክ",
     "service": "አገልግሎት",
     "service_desc": "ጥገና፣ ሙያዊ አገልግሎቶች",
-    "salon": "ሳሎን / ውበት",
-    "salon_desc": "ፀጉር፣ ጥፍር፣ የውበት ህክምና"
+    "salon": "Beauty Salon & Spa",
+    "salon_desc": "ፀጉር፣ ጥፍር፣ ማሳጅ፣ ስፓ እና የቆዳ ህክምና",
+    "baltina": "ባልቲና / ቅመም ቤት",
+    "baltina_desc": "በርበሬ፣ ሽሮ፣ ሚጥሚጣ እና ዱቄቶች",
+    "personal": "ግል",
+    "personal_desc": "ገቢ፣ ወጪ እና በጀት ይከታተሉ"
   },
   "onboarding": {
     "pickType": {
-      "title": "ምን ዓይነት ንግድ ያካሂዳሉ?",
-      "subtitle": "ሜላን ለንግድዎ ተስማሚ እናደርጋለን።",
+      "title": "ሜላን እንዴት ይጠቀሙበታል?",
+      "subtitle": "ለንግድ ወይም ለግል — ይምረጡ።",
       "continue": "ቀጥል"
     },
     "details": {
@@ -948,13 +958,24 @@
     },
     "step": "ደረጃ {{current}} ከ {{total}}",
     "stepLabel": {
-      "1": "የንግድ አይነት",
+      "1": "አጠቃቀም",
       "2": "ዝርዝሮች",
       "3": "ስለእርስዎ"
     },
     "step2": {
-      "title": "ንግድዎን ይሰይሙ",
-      "subtitle": "ንግድዎን ምን ልንለው?"
+      "title": "መለያዎን ይሰይሙ",
+      "subtitle": "ምን ልንለው?",
+      "titleBusiness": "ንግድዎን ይሰይሙ",
+      "subtitleBusiness": "ንግድዎን ምን ልንለው?"
+    },
+    "subtype": {
+      "subtitle": "ሥራዎን የሚገልጸውን ይምረጡ።",
+      "title": {
+        "service":  "ምን ዓይነት አገልግሎት ይሰጣሉ?",
+        "fnb":      "ምን ዓይነት ቡናቤት ወይም ካፌ ያካሂዳሉ?",
+        "retail":   "ምን ዓይነት ሱቅ ያካሂዳሉ?",
+        "fastfood": "ምን ዓይነት ምግብ ያቀርባሉ?"
+      }
     },
     "step3": {
       "title": "ስለእርስዎ",

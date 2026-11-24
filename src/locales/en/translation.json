@@ -129,15 +129,19 @@
       "businessSectionTitle": "Business",
       "businessName": "Business name",
       "businessNameHelper": "The name your customers know.",
+      "accountName": "Account name",
+      "accountNameHelper": "Give this account a name, e.g. your own name.",
       "businessType": "Business type",
       "businessTypeHelper": "Choose what best describes your business.",
       "types": {
         "retail": "Retail",
         "fnb": "Food & Beverage",
+        "fastfood": "Fast Food / Restaurant",
         "bakery": "Bakery & Production",
         "service": "Services",
         "cosmetics": "Cosmetics",
-        "salon": "Salon / Beauty"
+        "salon": "Beauty Salon & Spa",
+        "baltina": "Baltina / Spice Shop"
       },
       "ownerSectionTitle": "About you",
       "ownerName": "Your name",
@@ -927,18 +931,24 @@
     "cosmetics": "Cosmetics",
     "cosmetics_desc": "Beauty products, skincare, makeup",
     "fnb": "Café / Coffee",
-    "fnb_desc": "Coffee, drinks, light food",
+    "fnb_desc": "Coffee, drinks, juices & light snacks",
+    "fastfood": "Fast Food / Restaurant",
+    "fastfood_desc": "Meals, local food, takeaway & delivery",
     "bakery": "Bakery / Pastry",
     "bakery_desc": "Bread, pastries, cakes",
     "service": "Services",
     "service_desc": "Repairs, professional services",
-    "salon": "Salon / Beauty",
-    "salon_desc": "Hair, nails, beauty treatments"
+    "salon": "Beauty Salon & Spa",
+    "salon_desc": "Hair, nails, massage, spa & skin treatments",
+    "baltina": "Baltina / Spice Shop",
+    "baltina_desc": "Berbere, shiro, mitmita & flour mixes",
+    "personal": "Personal",
+    "personal_desc": "Track income, spending & budgets"
   },
   "onboarding": {
     "pickType": {
-      "title": "What kind of business do you run?",
-      "subtitle": "We will set up MELA to match your business.",
+      "title": "How will you use MELA?",
+      "subtitle": "Pick what fits best — business or personal.",
       "continue": "Continue"
     },
     "details": {
@@ -948,13 +958,24 @@
     },
     "step": "Step {{current}} of {{total}}",
     "stepLabel": {
-      "1": "Business type",
+      "1": "Use case",
       "2": "Details",
       "3": "About you"
     },
     "step2": {
-      "title": "Name your business",
-      "subtitle": "What should we call your business?"
+      "title": "Name your account",
+      "subtitle": "What should we call it?",
+      "titleBusiness": "Name your business",
+      "subtitleBusiness": "What should we call your business?"
+    },
+    "subtype": {
+      "subtitle": "Pick the one that best matches what you do.",
+      "title": {
+        "service":  "What kind of services do you offer?",
+        "fnb":      "What kind of coffee or café do you run?",
+        "retail":   "What kind of shop do you run?",
+        "fastfood": "What kind of food do you serve?"
+      }
     },
     "step3": {
       "title": "About you",
