@@ -98,7 +98,8 @@
       "invalidCredentials": "ኢሜይሉ ወይም የይለፍ ቃሉ ትክክል አይደለም።",
       "emailInUse": "ይህ ኢሜይል ቀደም ሲል ተመዝግቧል።",
       "emailNotConfirmed": "ከመግባትዎ በፊት ኢሜይልዎን ያረጋግጡ።",
-      "generic": "ስህተት ተፈጠረ። እንደገና ይሞክሩ።"
+      "generic": "ስህተት ተፈጠረ። እንደገና ይሞክሩ።",
+      "businessLimitReached": "በአንድ መለያ ከ3 ንግዶች መብለጥ አይቻልም።"
     },
     "google": "በGoogle ይቀጥሉ",
     "or": "ወይም",
@@ -570,7 +571,9 @@
     "staffActive": "ንቁ: {{name}}",
     "subscription": "ደንበኝነት እና ክፍያ",
     "advanced": "የላቀ",
-    "staff": "ሰራተኞች"
+    "staff": "ሰራተኞች",
+    "myBusinesses": "ንግዶቼ",
+    "addBusiness": "ሌላ ንግድ ጨምር"
   },
   "footer": {
     "tagline": "ለኢትዮጵያ ንግዶች የተሰራ ቀላል የቢዝነስ አስተዳደር ስርዓት።",
@@ -1207,5 +1210,14 @@
     "expiredTitle": "30 ቀን ነጻ ሙከራዎ አብቅቷል",
     "expiredDesc": "MELA ለንግድዎ መጠቀም ለመቀጠል ፕሪሚየም ይደንቡ።",
     "subscribeNow": "ወደ ፕሪሚየም ይደንቡ"
+  },
+  "selectBusiness": {
+    "title": "ንግድ ይምረጡ",
+    "subtitle": "ማስተዳደር የሚፈልጉትን ንግድ ይምረጡ።",
+    "addBusiness": "ሌላ ንግድ ይመዝግቡ",
+    "remaining_one": "{{count}} ቦታ ቀርቷል",
+    "remaining_other": "{{count}} ቦታዎች ቀርቷቸዋል",
+    "atLimit": "በዚህ መለያ ከ3 ንግዶች መብለጥ አይቻልም።",
+    "continue": "{{name}} ቀጥሉ"
   }
 }

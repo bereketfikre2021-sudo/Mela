@@ -1,19 +1,15 @@
 import type { AuthResponse } from '@supabase/supabase-js'
-
 import { supabase } from '../../lib/supabase'
-import type { Business, BusinessInput } from './types'
+import type { Business, BusinessInput, UserProfile } from './types'
 
 /**
- * Auth + business-profile data access for MELA Phase 1.
+ * Auth + business-profile data access.
  *
- * Every function is a thin wrapper over the shared Supabase client in
- * `src/lib/supabase.ts`. The client uses the anon key only; no service-role
- * key is ever referenced here. When the client is unavailable (env vars not
- * configured), a clear error is returned in the Supabase-style `{ error }`
- * shape so callers can fall back to their generic error handling.
+ * Every function is a thin wrapper over the shared Supabase client.
+ * When the client is unavailable (env vars not configured), a clear error
+ * is returned in the Supabase-style `{ error }` shape.
  */
 
-/** Returned when the Supabase client is unavailable (env not configured). */
 function clientUnavailableError() {
   return {
     error: { message: 'Supabase is not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.' }
@@ -39,11 +35,9 @@ export async function signOut(): Promise<{ error: { message: string } | null }> 
   return { error: error ? { message: error.message } : null }
 }
 
-/** Begin Google OAuth. Supabase redirects to Google; the app resumes at /auth/callback. */
+/** Begin Google OAuth. */
 export async function signInWithGoogle(): Promise<{ error: { message: string } | null }> {
-  if (!supabase) return { error: { message: 'Supabase is not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.' } }
-  // Use VITE_APP_URL in production so the redirect goes to the real domain,
-  // not localhost. Falls back to window.location.origin in local dev.
+  if (!supabase) return { error: { message: clientUnavailableError().error.message } }
   const base = import.meta.env.VITE_APP_URL || window.location.origin
   const { error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
@@ -52,18 +46,47 @@ export async function signInWithGoogle(): Promise<{ error: { message: string } |
   return { error: error ? { message: error.message } : null }
 }
 
-/** Load the business profile for a user (one per owner in Phase 1). */
-export async function getBusiness(
+/** Load ALL businesses owned by a user. */
+export async function getBusinesses(
   userId: string
-): Promise<{ data: Business | null; error: { message: string } | null }> {
-  if (!supabase) return { data: null, error: { message: clientUnavailableError().error.message } }
+): Promise<{ data: Business[]; error: { message: string } | null }> {
+  if (!supabase) return { data: [], error: { message: clientUnavailableError().error.message } }
   const { data, error } = await supabase
     .from('businesses')
     .select('*')
     .eq('owner_id', userId)
+    .order('created_at', { ascending: true })
+  if (error) return { data: [], error: { message: error.message } }
+  return { data: (data as Business[]) ?? [], error: null }
+}
+
+/** Load the user_profiles row (active_business_id). */
+export async function getUserProfile(
+  userId: string
+): Promise<{ data: UserProfile | null; error: { message: string } | null }> {
+  if (!supabase) return { data: null, error: { message: clientUnavailableError().error.message } }
+  const { data, error } = await supabase
+    .from('user_profiles')
+    .select('*')
+    .eq('user_id', userId)
     .maybeSingle()
   if (error) return { data: null, error: { message: error.message } }
-  return { data: (data as Business | null) ?? null, error: null }
+  return { data: (data as UserProfile | null) ?? null, error: null }
+}
+
+/**
+ * Set the active business in user_profiles (upsert).
+ * This is the cloud-synced equivalent of a "last selected business" preference.
+ */
+export async function setActiveBusiness(
+  userId: string,
+  businessId: string
+): Promise<{ error: { message: string } | null }> {
+  if (!supabase) return { error: { message: clientUnavailableError().error.message } }
+  const { error } = await supabase
+    .from('user_profiles')
+    .upsert({ user_id: userId, active_business_id: businessId }, { onConflict: 'user_id' })
+  return { error: error ? { message: error.message } : null }
 }
 
 /** Create the owner's business profile. RLS requires owner_id = auth.uid(). */
@@ -81,7 +104,7 @@ export async function createBusiness(
   return { data: data as Business, error: null }
 }
 
-/** Update the owner's business profile, scoped to the owner by id + owner_id. */
+/** Update a business profile, scoped by id + owner_id. */
 export async function updateBusiness(
   id: string,
   patch: Partial<BusinessInput>,
@@ -101,7 +124,6 @@ export async function updateBusiness(
 
 /**
  * Send a magic-link (OTP) email so the user can log in without a password.
- * Supabase sends the link to the given email; clicking it redirects to /auth/callback.
  */
 export async function sendMagicLink(
   email: string
@@ -122,5 +144,18 @@ export function mapAuthError(t: (key: string) => string, message: string): strin
   if (msg.includes('already registered') || msg.includes('already in use') || msg.includes('user already'))
     return t('auth.errors.emailInUse')
   if (msg.includes('email not confirmed') || msg.includes('not confirmed')) return t('auth.errors.emailNotConfirmed')
+  if (msg.includes('maximum of 3')) return t('auth.errors.businessLimitReached')
   return t('auth.errors.generic')
+}
+
+// ---------------------------------------------------------------------------
+// Legacy single-business helper kept for backward-compat during transition.
+// Returns the first business in the list (or null). Prefer getBusinesses().
+// ---------------------------------------------------------------------------
+export async function getBusiness(
+  userId: string
+): Promise<{ data: Business | null; error: { message: string } | null }> {
+  const { data, error } = await getBusinesses(userId)
+  if (error) return { data: null, error }
+  return { data: data[0] ?? null, error: null }
 }

@@ -22,15 +22,15 @@ function noClient(): { data: null; error: { message: string } } {
 }
 
 /**
- * Fetch the subscriptions row for the given owner_id.
+ * Fetch the subscriptions row for the given business_id.
  * Returns null data (not error) if no row is found.
  */
-export async function getSubscription(ownerId: string): Result<Subscription | null> {
+export async function getSubscription(businessId: string): Result<Subscription | null> {
   if (!supabase) return noClient()
   const { data, error } = await supabase
     .from('subscriptions')
     .select('*')
-    .eq('owner_id', ownerId)
+    .eq('business_id', businessId)
     .maybeSingle()
   if (error) return { data: null, error: { message: error.message } }
   return { data: (data as Subscription) ?? null, error: null }
@@ -49,30 +49,31 @@ export async function getPlanLimits(plan: SubscriptionPlan): Result<PlanLimits> 
 }
 
 /**
- * Fetch payment_submissions for the given owner_id,
+ * Fetch payment_submissions for the given business_id,
  * ordered by submitted_at DESC, limited to 50 rows.
  */
-export async function getPaymentHistory(ownerId: string): Result<PaymentSubmission[]> {
+export async function getPaymentHistory(businessId: string): Result<PaymentSubmission[]> {
   if (!supabase) return noClient()
   const { data, error } = await supabase
     .from('payment_submissions')
     .select('*')
-    .eq('owner_id', ownerId)
+    .eq('business_id', businessId)
     .order('submitted_at', { ascending: false })
     .limit(50)
   if (error) return { data: null, error: { message: error.message } }
   return { data: (data as PaymentSubmission[]) ?? [], error: null }
 }
 
-/** Insert a new payment_submissions row. Sets owner_id from the parameter. */
+/** Insert a new payment_submissions row. */
 export async function submitPayment(
+  businessId: string,
   ownerId: string,
   input: PaymentSubmissionInput
 ): Result<PaymentSubmission> {
   if (!supabase) return noClient()
   const { data, error } = await supabase
     .from('payment_submissions')
-    .insert({ ...input, owner_id: ownerId })
+    .insert({ ...input, business_id: businessId, owner_id: ownerId })
     .select('*')
     .single()
   if (error) return { data: null, error: { message: error.message } }

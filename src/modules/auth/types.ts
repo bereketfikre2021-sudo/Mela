@@ -1,5 +1,5 @@
 /**
- * Auth + business profile domain types — Phase 9 adds cosmetics and salon.
+ * Auth + business profile domain types.
  */
 
 /** All supported business types (stored as `businesses.type`). */
@@ -27,4 +27,12 @@ export interface BusinessInput {
   phone: string
   language: 'en' | 'am'
   closing_time: string | null
+}
+
+/** Cloud-synced user profile – tracks which business is currently active. */
+export interface UserProfile {
+  user_id: string
+  active_business_id: string | null
+  created_at: string
+  updated_at: string
 }

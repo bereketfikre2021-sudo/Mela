@@ -8,6 +8,7 @@ import { Input } from '../design-system/Input'
 import { useNotification } from '../design-system/Notification'
 import { GoogleIcon } from '../modules/auth/GoogleIcon'
 import { mapAuthError, sendMagicLink, signIn, signInWithGoogle } from '../modules/auth/api'
+import { useAuth } from '../modules/auth/AuthContext'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -24,6 +25,7 @@ export function LoginPage() {
   const { t }      = useTranslation()
   const navigate   = useNavigate()
   const { notify } = useNotification()
+  const { businesses } = useAuth()
 
   // ── Password section ──────────────────────────────────────────────────────
   const [pwOpen,      setPwOpen]      = useState(false)
@@ -75,7 +77,7 @@ export function LoginPage() {
       notify({ tone: 'danger', title: msg })
       return
     }
-    navigate('/app')
+    navigate(businesses.length > 1 ? '/select-business' : '/app')
   }
 
   // ── Forgot password → magic link ──────────────────────────────────────────

@@ -1,23 +1,22 @@
 /**
- * ProfileMenu — top-bar profile avatar + dropdown.
+ * ProfileMenu – top-bar profile avatar + dropdown.
  *
  * Shows owner initials as an avatar. On click opens a dropdown with:
- *  - Owner name + business name (read-only header)
- *  - Edit profile (→ /app/profile)
- *  - Switch staff (→ StaffSwitcher sheet, only when Premium + staff exist)
- *  - Divider
- *  - Sign out / log out
+ *  - Owner name + active business name (read-only header)
+ *  - My Businesses section: lists all owned businesses with a switch action
+ *  - Edit profile / Subscription / Staff links
+ *  - Sign out
  */
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { ChevronDown, CreditCard, LogOut, Settings, UserCog, Users2 } from 'lucide-react'
-
+import { Building2, Check, ChevronDown, CreditCard, LogOut, Plus, Settings, UserCog, Users2 } from 'lucide-react'
 import { useAuth } from '../modules/auth/AuthContext'
 import { useSubscription } from '../modules/subscriptions/SubscriptionContext'
 import { useStaff } from '../modules/staff/StaffContext'
 import { listStaff } from '../modules/staff/api'
 import { StaffSwitcher } from './StaffSwitcher'
+import { getBusinessConfig } from '../modules/auth/businessConfig'
 import type { StaffMember } from '../modules/staff/types'
 
 function initials(name: string): string {
@@ -30,18 +29,19 @@ function initials(name: string): string {
 }
 
 export function ProfileMenu() {
-  const { t }    = useTranslation()
-  const navigate = useNavigate()
-  const { profile, user, signOut } = useAuth()
-  const { isActive } = useSubscription()
+  const { t }      = useTranslation()
+  const navigate   = useNavigate()
+  const { businesses, activeBusiness, user, switchBusiness, signOut } = useAuth()
+  const { isActive }           = useSubscription()
   const { currentStaffMember } = useStaff()
 
-  const [open,          setOpen]          = useState(false)
-  const [switcherOpen,  setSwitcherOpen]  = useState(false)
-  const [staffList,     setStaffList]     = useState<StaffMember[]>([])
+  const [open,         setOpen]         = useState(false)
+  const [switcherOpen, setSwitcherOpen] = useState(false)
+  const [staffList,    setStaffList]    = useState<StaffMember[]>([])
+  const [switching,    setSwitching]    = useState<string | null>(null)
   const rootRef = useRef<HTMLDivElement>(null)
 
-  // Load staff list when Premium is active (for the switcher)
+  // Load staff list when Premium is active
   useEffect(() => {
     if (isActive && user) {
       void listStaff(user.id).then(({ data }) => {
@@ -65,15 +65,24 @@ export function ProfileMenu() {
     }
   }, [open])
 
-  const ownerName    = profile?.owner_name ?? user?.email ?? ''
-  const businessName = profile?.name ?? ''
-  // Show the active staff member name in the avatar if staff is active
+  const ownerName    = activeBusiness?.owner_name ?? user?.email ?? ''
+  const businessName = activeBusiness?.name ?? ''
   const displayName  = currentStaffMember ? currentStaffMember.name : ownerName
   const avatarText   = initials(displayName) || '?'
 
   async function handleSignOut() {
     setOpen(false)
     await signOut()
+  }
+
+  async function handleSwitchBusiness(id: string) {
+    if (id === activeBusiness?.id) return
+    setSwitching(id)
+    await switchBusiness(id)
+    setSwitching(null)
+    setOpen(false)
+    // Stay on current page – the new business context is now active
+    navigate('/app', { replace: true })
   }
 
   function go(path: string) {
@@ -85,6 +94,9 @@ export function ProfileMenu() {
     setOpen(false)
     setSwitcherOpen(true)
   }
+
+  const canAddMore = businesses.length < 3
+  const hasMultiple = businesses.length > 1
 
   return (
     <>
@@ -108,9 +120,9 @@ export function ProfileMenu() {
         {open && (
           <div
             role="menu"
-            className="absolute right-0 top-full z-50 mt-1.5 w-64 overflow-hidden rounded-xl border border-border bg-surface shadow-layer"
+            className="absolute right-0 top-full z-50 mt-1.5 w-72 overflow-hidden rounded-xl border border-border bg-surface shadow-layer"
           >
-            {/* Header — owner + business info */}
+            {/* Header – owner + active business */}
             <div className="border-b border-border px-4 py-3">
               <p className="truncate text-sm font-semibold text-text">{ownerName}</p>
               {businessName && (
@@ -126,25 +138,110 @@ export function ProfileMenu() {
               )}
             </div>
 
-            {/* Actions */}
+            {/* ── My Businesses ───────────────────────────────────────── */}
+            {(hasMultiple || canAddMore) && (
+              <div className="border-b border-border py-2">
+                <p className="px-4 pb-1 pt-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted">
+                  {t('profileMenu.myBusinesses')}
+                </p>
+                {businesses.map(biz => {
+                  const config    = getBusinessConfig(biz.type)
+                  const isActive  = biz.id === activeBusiness?.id
+                  const isLoading = switching === biz.id
+                  return (
+                    <button
+                      key={biz.id}
+                      type="button"
+                      role="menuitem"
+                      onClick={() => void handleSwitchBusiness(biz.id)}
+                      disabled={isActive || isLoading}
+                      className={[
+                        'flex w-full items-center gap-3 px-4 py-2 text-sm text-left transition-colors',
+                        isActive
+                          ? 'bg-primary-soft text-primary cursor-default'
+                          : 'text-text hover:bg-background',
+                      ].join(' ')}
+                    >
+                      <span className={[
+                        'flex h-6 w-6 shrink-0 items-center justify-center rounded-md',
+                        isActive ? 'bg-primary text-white' : 'bg-background text-secondary',
+                      ].join(' ')}>
+                        <config.icon className="h-3.5 w-3.5" aria-hidden="true" />
+                      </span>
+                      <span className="min-w-0 flex-1 truncate font-medium">{biz.name}</span>
+                      {isLoading && (
+                        <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                      )}
+                      {isActive && !isLoading && (
+                        <Check className="h-3.5 w-3.5 shrink-0 text-primary" />
+                      )}
+                    </button>
+                  )
+                })}
+
+                {/* Add another business */}
+                {canAddMore && (
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => go('/onboarding/new')}
+                    className="flex w-full items-center gap-3 px-4 py-2 text-sm text-secondary transition-colors hover:bg-background hover:text-primary text-left"
+                  >
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md border border-dashed border-current">
+                      <Plus className="h-3.5 w-3.5" />
+                    </span>
+                    <span className="font-medium">{t('profileMenu.addBusiness')}</span>
+                    <span className="ml-auto text-xs text-muted">
+                      {t('selectBusiness.remaining', { count: 3 - businesses.length })}
+                    </span>
+                  </button>
+                )}
+              </div>
+            )}
+
+            {/* ── Settings actions ────────────────────────────────────── */}
             <div className="py-1">
-              <MenuItem icon={<Settings className="h-4 w-4" />} label={t('profileMenu.settings')}
-                onClick={() => go('/app/profile')} />
-              <MenuItem icon={<CreditCard className="h-4 w-4" />} label={t('profileMenu.subscription')}
-                onClick={() => go('/app/subscription')} />
+              <MenuItem
+                icon={<Settings className="h-4 w-4" />}
+                label={t('profileMenu.settings')}
+                onClick={() => go('/app/profile')}
+              />
+              <MenuItem
+                icon={<CreditCard className="h-4 w-4" />}
+                label={t('profileMenu.subscription')}
+                onClick={() => go('/app/subscription')}
+              />
               {isActive && (
-                <MenuItem icon={<Users2 className="h-4 w-4" />} label={t('profileMenu.staff')}
-                  onClick={() => go('/app/staff')} />
+                <MenuItem
+                  icon={<Users2 className="h-4 w-4" />}
+                  label={t('profileMenu.staff')}
+                  onClick={() => go('/app/staff')}
+                />
               )}
               {isActive && staffList.length > 0 && (
-                <MenuItem icon={<UserCog className="h-4 w-4" />} label={t('profileMenu.switchStaff')}
-                  onClick={openSwitcher} />
+                <MenuItem
+                  icon={<UserCog className="h-4 w-4" />}
+                  label={t('profileMenu.switchStaff')}
+                  onClick={openSwitcher}
+                />
+              )}
+              {/* Show all-businesses page when user has only 1 (to add more) */}
+              {!hasMultiple && canAddMore && (
+                <MenuItem
+                  icon={<Building2 className="h-4 w-4" />}
+                  label={t('profileMenu.addBusiness')}
+                  onClick={() => go('/onboarding/new')}
+                />
               )}
             </div>
 
             <div className="border-t border-border py-1">
-              <MenuItem icon={<LogOut className="h-4 w-4" />} label={t('profileMenu.signOut')}
-                onClick={() => void handleSignOut()} danger />
+              <MenuItem
+                icon={<LogOut className="h-4 w-4" />}
+                label={t('profileMenu.signOut')}
+                onClick={() => void handleSignOut()}
+                danger
+              />
             </div>
           </div>
         )}

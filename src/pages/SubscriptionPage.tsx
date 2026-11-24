@@ -108,7 +108,7 @@ function PlanCard({
 
 export function SubscriptionPage() {
   const { t } = useTranslation()
-  const { user } = useAuth()
+  const { user, activeBusiness } = useAuth()
   const { plan, status, isActive, loading: subLoading, refresh } =
     useSubscription()
   const { notify } = useNotification()
@@ -172,7 +172,7 @@ export function SubscriptionPage() {
   useEffect(() => {
     if (!user) return
     setHistoryLoading(true)
-    void getPaymentHistory(user.id).then(({ data, error }) => {
+    void getPaymentHistory(activeBusiness?.id ?? '').then(({ data, error }) => {
       setHistoryLoading(false)
       if (error) {
         setHistoryError(error.message)
@@ -180,7 +180,7 @@ export function SubscriptionPage() {
       }
       setHistory(data ?? [])
     })
-  }, [user])
+  }, [activeBusiness])
 
   // Show form when a premium cycle is chosen
   function handleSelectPremium() {
@@ -220,7 +220,7 @@ export function SubscriptionPage() {
 
     const amount = billingCycle === 'monthly' ? MONTHLY_PRICE : YEARLY_PRICE
     const txReference = `${screenshot.name}_${Date.now()}`
-    const { error } = await submitPayment(user.id, {
+    const { error } = await submitPayment(activeBusiness?.id ?? '', user?.id ?? '', {
       plan: 'premium',
       billing_cycle: billingCycle,
       amount_etb: amount,
@@ -244,8 +244,8 @@ export function SubscriptionPage() {
     setShowForm(false)
     setScreenshot(null)
     // Refresh history
-    if (user) {
-      const { data } = await getPaymentHistory(user.id)
+    if (activeBusiness) {
+      const { data } = await getPaymentHistory(activeBusiness.id)
       if (data) setHistory(data)
     }
     await refresh()

@@ -70,11 +70,11 @@ function ProgressBar({ current, total }: { current: Step; total: number }) {
   )
 }
 
-export function OnboardingPage() {
+export function OnboardingPage({ addingNew = false }: { addingNew?: boolean }) {
   const { t, i18n } = useTranslation()
   const navigate    = useNavigate()
   const { notify }  = useNotification()
-  const { user, refreshProfile } = useAuth()
+  const { user, refreshProfile, switchBusiness } = useAuth()
 
   const [step,        setStep]       = useState<Step>(1)
   const [bizType,     setBizType]    = useState<BusinessType>('retail')
@@ -145,12 +145,19 @@ export function OnboardingPage() {
       closing_time: closingTime || null,
     }
 
-    const { error } = await createBusiness(input, user.id)
+    const { data: newBiz, error } = await createBusiness(input, user.id)
 
     if (error && /duplicate|unique|constraint/i.test(error.message)) {
       await refreshProfile()
       setSubmitting(false)
       navigate('/app')
+      return
+    }
+
+    if (error && /maximum of 3/i.test(error.message)) {
+      notify({ tone: 'danger', title: t('auth.errors.businessLimitReached') })
+      setSubmitting(false)
+      navigate('/select-business')
       return
     }
 
@@ -201,8 +208,15 @@ export function OnboardingPage() {
 
     notify({ tone: 'success', title: t('business.createSuccess.title'), description: t('business.createSuccess.desc') })
     await refreshProfile()
-    setSubmitting(false)
-    navigate('/app')
+    // If adding new, switch to it then go to business picker so user confirms
+    if (addingNew && newBiz) {
+      await switchBusiness(newBiz.id)
+      setSubmitting(false)
+      navigate('/select-business', { replace: true })
+    } else {
+      setSubmitting(false)
+      navigate('/app')
+    }
   }
 
   if (!user) {

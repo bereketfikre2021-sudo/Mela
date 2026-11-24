@@ -1,21 +1,42 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react'
 import type { Session, User } from '@supabase/supabase-js'
-
 import i18n from '../../locales/i18n'
 import { supabase } from '../../lib/supabase'
-import { getBusiness, signOut as signOutApi, updateBusiness } from './api'
+import {
+  getBusinesses,
+  getUserProfile,
+  setActiveBusiness,
+  signOut as signOutApi,
+  updateBusiness,
+} from './api'
 import type { Business } from './types'
 
-type AuthStatus = 'loading' | 'authenticated' | 'unauthenticated'
+type AuthStatus    = 'loading' | 'authenticated' | 'unauthenticated'
 type ProfileStatus = 'loading' | 'loaded' | 'error'
 
 interface AuthContextValue {
-  status: AuthStatus
-  user: User | null
-  profile: Business | null
-  profileStatus: ProfileStatus
+  status:         AuthStatus
+  user:           User | null
+  // All businesses owned by this user (up to 3)
+  businesses:     Business[]
+  // The currently active business (selected by the user)
+  activeBusiness: Business | null
+  profileStatus:  ProfileStatus
+  // Switch the active business – persists to cloud via user_profiles
+  switchBusiness: (businessId: string) => Promise<void>
   refreshProfile: () => Promise<void>
-  signOut: () => Promise<void>
+  signOut:        () => Promise<void>
+  // Convenience alias kept for components that only care about one profile
+  profile:        Business | null
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
@@ -27,49 +48,67 @@ export function useAuth(): AuthContextValue {
 }
 
 /**
- * Auth provider for MELA Phase 1.
+ * AuthProvider – multi-business edition.
  *
- * Owns three concerns:
- *  - Session: `status` reflects whether Supabase has a session. The null
- *    client (env not configured) is treated as unauthenticated.
- *  - Profile: the owner's single business row, fetched on sign-in.
- *  - Language: when a profile loads, the profile's `language` is applied to
- *    i18n once. When the user later switches language (and a profile exists),
- *    the new choice is persisted back to the row.
+ * Owns four concerns:
+ *  1. Session    – reflects whether Supabase has a session.
+ *  2. Businesses – the full list of businesses owned by the signed-in user.
+ *  3. Active     – which business is currently selected (synced to cloud).
+ *  4. Language   – applies and persists the active business's language setting.
  */
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [status, setStatus] = useState<AuthStatus>('loading')
-  const [user, setUser] = useState<User | null>(null)
-  const [profile, setProfile] = useState<Business | null>(null)
-  const [profileStatus, setProfileStatus] = useState<ProfileStatus>('loading')
+  const [status,         setStatus]         = useState<AuthStatus>('loading')
+  const [user,           setUser]           = useState<User | null>(null)
+  const [businesses,     setBusinesses]     = useState<Business[]>([])
+  const [activeBusiness, setActiveBusiness_] = useState<Business | null>(null)
+  const [profileStatus,  setProfileStatus]  = useState<ProfileStatus>('loading')
 
-  // Track the user id whose profile we last fetched so getSession() and the
-  // onAuthStateChange INITIAL_SESSION event don't double-fetch.
+  // Track the user id whose data we last fetched to avoid double-fetching.
   const fetchedUserIdRef = useRef<string | null>(null)
-  // Live refs for the language listener (which is registered once).
-  const profileRef = useRef<Business | null>(null)
-  const userRef = useRef<User | null>(null)
-  profileRef.current = profile
-  userRef.current = user
 
-  const fetchProfile = useCallback(async (userId: string) => {
+  // Live refs for the language listener (registered once).
+  const activeBusinessRef = useRef<Business | null>(null)
+  const userRef           = useRef<User | null>(null)
+  activeBusinessRef.current = activeBusiness
+  userRef.current           = user
+
+  // ── Core fetch ────────────────────────────────────────────────────────────
+  const fetchData = useCallback(async (userId: string) => {
     setProfileStatus('loading')
-    const { data, error } = await getBusiness(userId)
-    if (error) {
-      setProfile(null)
+
+    const [bizResult, profileResult] = await Promise.all([
+      getBusinesses(userId),
+      getUserProfile(userId),
+    ])
+
+    if (bizResult.error) {
+      setBusinesses([])
+      setActiveBusiness_(null)
       setProfileStatus('error')
       return
     }
-    setProfile(data)
+
+    const bizList = bizResult.data
+    setBusinesses(bizList)
+
+    if (bizList.length === 0) {
+      setActiveBusiness_(null)
+      setProfileStatus('loaded')
+      return
+    }
+
+    // Resolve active business: use cloud preference, else first in list.
+    const savedId = profileResult.data?.active_business_id
+    const active  = bizList.find(b => b.id === savedId) ?? bizList[0]
+    setActiveBusiness_(active)
     setProfileStatus('loaded')
   }, [])
 
   const refreshProfile = useCallback(async () => {
-    if (userRef.current) await fetchProfile(userRef.current.id)
-  }, [fetchProfile])
+    if (userRef.current) await fetchData(userRef.current.id)
+  }, [fetchData])
 
-  // Establish the session: getSession() for the initial value, then
-  // onAuthStateChange to react to sign-in / sign-out / refresh.
+  // ── Session ───────────────────────────────────────────────────────────────
   useEffect(() => {
     if (!supabase) {
       setStatus('unauthenticated')
@@ -86,7 +125,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setStatus('authenticated')
         if (fetchedUserIdRef.current !== session.user.id) {
           fetchedUserIdRef.current = session.user.id
-          void fetchProfile(session.user.id)
+          void fetchData(session.user.id)
         }
       } else {
         setStatus('unauthenticated')
@@ -101,13 +140,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setStatus('authenticated')
         if (fetchedUserIdRef.current !== session.user.id) {
           fetchedUserIdRef.current = session.user.id
-          void fetchProfile(session.user.id)
+          void fetchData(session.user.id)
         }
-      // Phase 13 audit: SIGNED_OUT handler clears fetchedUserIdRef, user, profile, status, profileStatus correctly. ✅
       } else if (event === 'SIGNED_OUT') {
         fetchedUserIdRef.current = null
         setUser(null)
-        setProfile(null)
+        setBusinesses([])
+        setActiveBusiness_(null)
         setStatus('unauthenticated')
         setProfileStatus('loaded')
       }
@@ -117,43 +156,61 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       active = false
       sub.subscription.unsubscribe()
     }
-  }, [fetchProfile])
+  }, [fetchData])
 
-  // Apply the profile's language to i18n once after it loads (when it differs
-  // from the current i18n language). Because we set it TO profile.language, the
-  // languageChanged listener below sees no diff and does not re-persist.
+  // ── Language: apply active business language once after load ──────────────
   useEffect(() => {
-    if (profile && profile.language !== i18n.language) {
-      void i18n.changeLanguage(profile.language)
+    if (activeBusiness && activeBusiness.language !== i18n.language) {
+      void i18n.changeLanguage(activeBusiness.language)
     }
-  }, [profile])
+  }, [activeBusiness])
 
-  // Persist language changes back to the business row when a profile exists
-  // and the new language differs from the stored one.
+  // ── Language: persist changes back to the active business row ─────────────
   useEffect(() => {
     const handler = (lng: string) => {
-      const p = profileRef.current
-      const u = userRef.current
-      if (p && u && lng !== p.language) {
-        const next: Business = { ...p, language: lng as Business['language'] }
-        setProfile(next)
-        profileRef.current = next
-        void updateBusiness(p.id, { language: lng as Business['language'] }, u.id)
+      const biz = activeBusinessRef.current
+      const u   = userRef.current
+      if (biz && u && lng !== biz.language) {
+        const next: Business = { ...biz, language: lng as Business['language'] }
+        setActiveBusiness_(next)
+        activeBusinessRef.current = next
+        // Also update in the businesses list
+        setBusinesses(prev => prev.map(b => b.id === next.id ? next : b))
+        void updateBusiness(biz.id, { language: lng as Business['language'] }, u.id)
       }
     }
     i18n.on('languageChanged', handler)
-    return () => {
-      i18n.off('languageChanged', handler)
-    }
+    return () => { i18n.off('languageChanged', handler) }
   }, [])
 
+  // ── switchBusiness ────────────────────────────────────────────────────────
+  const switchBusiness = useCallback(async (businessId: string) => {
+    const target = businesses.find(b => b.id === businessId)
+    if (!target || !userRef.current) return
+    setActiveBusiness_(target)
+    // Persist to cloud (fire and forget – UI is already updated)
+    void setActiveBusiness(userRef.current.id, businessId)
+  }, [businesses])
+
+  // ── signOut ───────────────────────────────────────────────────────────────
   const signOut = useCallback(async () => {
     await signOutApi()
   }, [])
 
   const value = useMemo<AuthContextValue>(
-    () => ({ status, user, profile, profileStatus, refreshProfile, signOut }),
-    [status, user, profile, profileStatus, refreshProfile, signOut]
+    () => ({
+      status,
+      user,
+      businesses,
+      activeBusiness,
+      profileStatus,
+      switchBusiness,
+      refreshProfile,
+      signOut,
+      // Alias for components that haven't been migrated yet
+      profile: activeBusiness,
+    }),
+    [status, user, businesses, activeBusiness, profileStatus, switchBusiness, refreshProfile, signOut]
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

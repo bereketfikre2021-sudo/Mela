@@ -1,14 +1,14 @@
 import { useEffect } from 'react'
 import { BrowserRouter, Navigate, Route, Routes, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { BarChart2, Home, Package, PackageSearch, Receipt, Users, Wallet } from 'lucide-react'
+import { BarChart2, ClipboardList, Home, Package, PackageSearch, Receipt, Users, Wallet } from 'lucide-react'
 
 import { NotificationProvider } from './design-system/Notification'
 import type { NavItem } from './design-system/BottomNav'
 import { AppShell } from './layouts/AppShell'
 import { AuthProvider } from './modules/auth/AuthContext'
 import { useAuth } from './modules/auth/AuthContext'
-import { PublicOnly, RequireBusiness, RequireProfile } from './modules/auth/RouteGuards'
+import { PublicOnly, RequireBusiness, RequireCanAddBusiness, RequireProfile } from './modules/auth/RouteGuards'
 import { ProfileMenu } from './components/ProfileMenu'
 import { SyncBadge } from './components/SyncBadge'
 import { PWAInstallBanner } from './components/PWAInstallBanner'
@@ -45,6 +45,7 @@ const TermsPage               = lazy(() => import('./pages/TermsPage').then(m =>
 const WelcomePage             = lazy(() => import('./pages/WelcomePage').then(m => ({ default: m.WelcomePage })))
 const SubscriptionPage        = lazy(() => import('./pages/SubscriptionPage').then(m => ({ default: m.SubscriptionPage })))
 const StaffPage               = lazy(() => import('./pages/StaffPage').then(m => ({ default: m.StaffPage })))
+const SelectBusinessPage      = lazy(() => import('./pages/SelectBusinessPage').then(m => ({ default: m.SelectBusinessPage })))
 
 function PageLoader() {
   return (
@@ -102,8 +103,8 @@ function AppRoutes() {
   /**
    * Product businesses:
    *   retail/cosmetics: Home | Sales | Stock | Customers | Expenses
-   *   fnb/bakery:       Home | Sales | Menu/Stock | Expenses | Reports
-   *     (fnb/bakery customers are mostly walk-in; stock/menu is checked daily)
+   *   fnb/bakery:       Home | Sales | Menu/Stock | Sales History | Reports
+   *     (stock is crucial; customers are walk-in; expenses via home quick action)
    * Service businesses: Home | Sales | Expenses | Services | Clients | Reports
    */
   const isFnbOrBakery = profile?.type === 'fnb' || profile?.type === 'bakery'
@@ -119,7 +120,7 @@ function AppRoutes() {
     { id: '/app',           label: t('nav.home'),        icon: Home },
     { id: '/app/sales',     label: t('nav.sales'),       icon: Receipt },
     { id: '/app/stock',     label: bizConfig.stockLabel, icon: Package },
-    { id: '/app/expenses',  label: t('nav.expenses'),    icon: Wallet },
+    { id: '/app/purchases', label: t('nav.purchases'),   icon: ClipboardList },
     { id: '/app/reports',   label: t('nav.reports'),     icon: BarChart2 },
   ] : [
     { id: '/app',           label: t('nav.home'),        icon: Home },
@@ -160,6 +161,10 @@ function AppRoutes() {
       <Route path="/login"         element={publicShell(<PublicOnly><LoginPage /></PublicOnly>)} />
       <Route path="/register"      element={publicShell(<PublicOnly><RegisterPage /></PublicOnly>)} />
       <Route path="/onboarding"    element={publicShell(<RequireProfile><OnboardingPage /></RequireProfile>)} />
+      {/* ── Add second / third business ────────────────────────────────── */}
+      <Route path="/onboarding/new" element={publicShell(<RequireCanAddBusiness><OnboardingPage addingNew /></RequireCanAddBusiness>)} />
+      {/* ── Business picker (multi-business) ──────────────────────────── */}
+      <Route path="/select-business" element={publicShell(<SelectBusinessPage />)} />
 
       {/* ── Primary nav destinations ─────────────────────────────────────── */}
       <Route path="/app"

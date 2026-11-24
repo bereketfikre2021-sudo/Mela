@@ -130,7 +130,7 @@ async function fetchMonthlyCount(
 // ── Provider ──────────────────────────────────────────────────────────────────
 
 export function SubscriptionProvider({ children }: { children: ReactNode }) {
-  const { status: authStatus, user } = useAuth()
+  const { status: authStatus, user, activeBusiness } = useAuth()
 
   const [plan, setPlan] = useState<SubscriptionPlan>('free')
   const [status, setStatus] = useState<SubscriptionStatus | null>(null)
@@ -192,10 +192,10 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  // Load on mount and whenever the authenticated user changes
+  // Load on mount and whenever the active business changes
   useEffect(() => {
-    if (authStatus === 'authenticated' && user) {
-      void load(user.id)
+    if (authStatus === 'authenticated' && user && activeBusiness) {
+      void load(activeBusiness.id)
     } else if (authStatus === 'unauthenticated') {
       // Reset to defaults when signed out
       setPlan('free')
@@ -205,11 +205,11 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
       setTrialEndsAt(null)
       setLoading(false)
     }
-  }, [authStatus, user, load])
+  }, [authStatus, user, activeBusiness, load])
 
   const refresh = useCallback(async () => {
-    if (user) await load(user.id)
-  }, [user, load])
+    if (activeBusiness) await load(activeBusiness.id)
+  }, [activeBusiness, load])
 
   // isActive: premium AND in an access-granting status
   const isActive = plan === 'premium' && (status === 'active' || status === 'grace')

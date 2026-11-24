@@ -13,14 +13,15 @@ export type SubscriptionStatus =
 
 export interface Subscription {
   id: string
+  business_id: string
   owner_id: string
   plan: SubscriptionPlan
   status: SubscriptionStatus
+  trial_ends_at: string | null
   current_period_start: string | null
   current_period_end: string | null
   grace_ends_at: string | null
   cancelled_at: string | null
-  trial_ends_at: string | null
   created_at: string
   updated_at: string
 }
@@ -39,6 +40,7 @@ export interface PlanLimits {
 
 export interface PaymentSubmission {
   id: string
+  business_id: string
   owner_id: string
   plan: 'premium'
   billing_cycle: 'monthly' | 'yearly'

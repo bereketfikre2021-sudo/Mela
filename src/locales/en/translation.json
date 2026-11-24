@@ -98,7 +98,8 @@
       "invalidCredentials": "Incorrect email or password.",
       "emailInUse": "An account with this email already exists.",
       "emailNotConfirmed": "Check your email to confirm your account before logging in.",
-      "generic": "Something went wrong. Please try again."
+      "generic": "Something went wrong. Please try again.",
+      "businessLimitReached": "You can only have 3 businesses per account."
     },
     "google": "Continue with Google",
     "or": "or",
@@ -412,7 +413,9 @@
     "staffActive": "Active: {{name}}",
     "subscription": "Subscription & billing",
     "advanced": "Advanced",
-    "staff": "Staff"
+    "staff": "Staff",
+    "myBusinesses": "My Businesses",
+    "addBusiness": "Add another business"
   },
   "overview": {
     "period": {
@@ -1207,5 +1210,14 @@
     "expiredTitle": "Your 30-day free trial has ended",
     "expiredDesc": "Subscribe to Premium to continue using MELA for your business.",
     "subscribeNow": "Subscribe to Premium"
+  },
+  "selectBusiness": {
+    "title": "Choose a business",
+    "subtitle": "Select the business you want to manage.",
+    "addBusiness": "Register another business",
+    "remaining_one": "{{count}} slot left",
+    "remaining_other": "{{count}} slots left",
+    "atLimit": "You have reached the 3-business limit for this account.",
+    "continue": "Continue with {{name}}"
   }
 }
