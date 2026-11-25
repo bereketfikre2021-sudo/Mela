@@ -14,7 +14,8 @@ export interface Business {
   owner_name: string
   phone: string
   language: 'en' | 'am'
-  closing_time: string | null  // HH:MM format, e.g. "18:00"
+  closing_time: string | null
+  avatar_url: string | null
   created_at: string
   updated_at: string
 }
@@ -27,6 +28,7 @@ export interface BusinessInput {
   phone: string
   language: 'en' | 'am'
   closing_time: string | null
+  avatar_url?: string | null
 }
 
 /** Cloud-synced user profile – tracks which business is currently active. */

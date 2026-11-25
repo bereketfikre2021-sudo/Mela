@@ -1,26 +1,28 @@
-import { useState, type FormEvent } from 'react'
+import { useRef, useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Camera, X } from 'lucide-react'
 
 import { Button } from '../../design-system/Button'
 import { Input } from '../../design-system/Input'
 import { Select, type SelectOption } from '../../design-system/Select'
 import { supportedLanguages } from '../../locales/i18n'
 import { ALL_BUSINESS_TYPES, type BusinessType } from './businessConfig'
+import { BusinessAvatar } from '../../components/BusinessAvatar'
 import type { Business, BusinessInput } from './types'
 
 interface BusinessFormProps {
   mode: 'create' | 'edit'
   initial?: Business
-  /** Pre-selected type (from the type picker in onboarding) */
   preselectedType?: BusinessType
-  /** When true (edit mode + owner has existing data), business type is locked */
   hasData?: boolean
-  onSubmit: (input: BusinessInput) => Promise<void>
+  /** Called with the input + an optional avatar File to upload */
+  onSubmit: (input: BusinessInput, avatarFile?: File) => Promise<void>
   submitting: boolean
 }
 
 export function BusinessForm({ mode, initial, preselectedType, hasData = false, onSubmit, submitting }: BusinessFormProps) {
   const { t, i18n } = useTranslation()
+  const imgRef      = useRef<HTMLInputElement>(null)
 
   const [name,         setName]        = useState(initial?.name ?? '')
   const [type,         setType]        = useState<BusinessType>(
@@ -32,9 +34,12 @@ export function BusinessForm({ mode, initial, preselectedType, hasData = false, 
     initial?.language ?? (i18n.resolvedLanguage === 'am' ? 'am' : 'en')
   )
   const [closingTime,  setClosingTime] = useState(initial?.closing_time ?? '')
-  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [errors,       setErrors]      = useState<Record<string, string>>({})
 
-  // Personal accounts have no shop — no closing time needed
+  // Avatar state
+  const [avatarFile,    setAvatarFile]    = useState<File | null>(null)
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(initial?.avatar_url ?? null)
+
   const isPersonal = type === 'personal'
 
   const typeOptions: SelectOption[] = ALL_BUSINESS_TYPES.map(c => ({
@@ -55,30 +60,96 @@ export function BusinessForm({ mode, initial, preselectedType, hasData = false, 
     setErrors(prev => ({ ...prev, [field]: validate(field, value) }))
   }
 
+  function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    // 2 MB limit
+    if (file.size > 2 * 1024 * 1024) {
+      setErrors(prev => ({ ...prev, avatar: t('business.form.avatarSizeError') }))
+      return
+    }
+    setErrors(prev => ({ ...prev, avatar: '' }))
+    setAvatarFile(file)
+    setAvatarPreview(URL.createObjectURL(file))
+  }
+
+  function removeAvatar() {
+    setAvatarFile(null)
+    setAvatarPreview(null)
+    if (imgRef.current) imgRef.current.value = ''
+  }
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
-    // For personal accounts the displayed name IS the owner name
     const effectiveOwnerName = isPersonal ? name : ownerName
     const next = {
       name:      validate('name',      name),
       ownerName: validate('ownerName', effectiveOwnerName),
       phone:     validate('phone',     phone),
     }
-    setErrors(next)
+    setErrors(prev => ({ ...prev, ...next }))
     if (Object.values(next).some(Boolean)) return
-    await onSubmit({
-      name:         name.trim(),
-      type,
-      owner_name:   effectiveOwnerName.trim(),
-      phone:        phone.trim(),
-      language,
-      closing_time: isPersonal ? null : (closingTime || null),
-    })
+    await onSubmit(
+      {
+        name:         name.trim(),
+        type,
+        owner_name:   effectiveOwnerName.trim(),
+        phone:        phone.trim(),
+        language,
+        closing_time: isPersonal ? null : (closingTime || null),
+      },
+      avatarFile ?? undefined
+    )
   }
+
+  // Build a preview Business object for the avatar component
+  const previewBusiness = { name: name || 'B', type, avatar_url: avatarPreview }
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
-      {/* Business / account name */}
+
+      {/* ── Avatar picker ───────────────────────────────────────────────────── */}
+      <div className="flex items-center gap-4">
+        {/* Current avatar / fallback icon */}
+        <div className="relative shrink-0">
+          <BusinessAvatar business={previewBusiness} size="xl" />
+          {/* Remove button */}
+          {avatarPreview && (
+            <button
+              type="button"
+              onClick={removeAvatar}
+              className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-danger text-white shadow-sm hover:bg-danger/90"
+              aria-label={t('business.form.removeAvatar')}
+            >
+              <X className="h-3 w-3" />
+            </button>
+          )}
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <p className="text-sm font-medium text-text">{t('business.form.avatar')}</p>
+          <p className="text-xs text-secondary">{t('business.form.avatarHelper')}</p>
+          <button
+            type="button"
+            onClick={() => imgRef.current?.click()}
+            className="flex w-fit items-center gap-1.5 rounded-lg border border-border bg-background px-3 py-1.5 text-xs font-medium text-text transition-colors hover:bg-surface"
+          >
+            <Camera className="h-3.5 w-3.5" />
+            {avatarPreview ? t('business.form.changeAvatar') : t('business.form.uploadAvatar')}
+          </button>
+          {errors.avatar && <p className="text-xs text-danger">{errors.avatar}</p>}
+        </div>
+
+        <input
+          ref={imgRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          className="hidden"
+          onChange={handleAvatarChange}
+        />
+      </div>
+
+      {/* ── Business / account name ─────────────────────────────────────────── */}
       <Input
         label={isPersonal ? t('business.form.ownerName') : t('business.form.businessName')}
         helperText={isPersonal ? t('business.form.ownerNameHelper') : t('business.form.businessNameHelper')}
@@ -91,7 +162,7 @@ export function BusinessForm({ mode, initial, preselectedType, hasData = false, 
         autoFocus
       />
 
-      {/* Type selector in edit mode only — onboarding uses the visual picker */}
+      {/* ── Type selector (edit only) ───────────────────────────────────────── */}
       {mode === 'edit' && (
         hasData ? (
           <div>
@@ -112,16 +183,14 @@ export function BusinessForm({ mode, initial, preselectedType, hasData = false, 
         )
       )}
 
+      {/* ── Owner / contact details ─────────────────────────────────────────── */}
       <section className="flex flex-col gap-4">
-        {/* Only show the "Owner / Contact" section header for non-personal types */}
         {!isPersonal && (
           <p className="text-xs font-semibold uppercase tracking-wide text-secondary">
             {t('business.form.ownerSectionTitle')}
           </p>
         )}
 
-        {/* For personal accounts the name IS the account name, shown above.
-            For business types show owner name as a separate contact field. */}
         {!isPersonal && (
           <Input
             label={t('business.form.ownerName')}
@@ -135,14 +204,6 @@ export function BusinessForm({ mode, initial, preselectedType, hasData = false, 
           />
         )}
 
-        {/* Personal: owner_name mirrors the account name field */}
-        {isPersonal && (
-          // Hidden — we'll copy `name` into owner_name on submit via the
-          // ownerName state being kept in sync below.
-          // We render a visible phone + language only.
-          null
-        )}
-
         <Input
           label={t('business.form.phone')}
           helperText={t('business.form.phoneHelper')}
@@ -153,6 +214,7 @@ export function BusinessForm({ mode, initial, preselectedType, hasData = false, 
           inputMode="tel"
           autoComplete="tel"
           maxLength={20}
+          autoFocus={isPersonal}
         />
         <Select
           label={t('business.form.language')}
@@ -162,7 +224,6 @@ export function BusinessForm({ mode, initial, preselectedType, hasData = false, 
           onChange={e => setLanguage(e.target.value as 'en' | 'am')}
         />
 
-        {/* Closing time only for shop/service businesses, not personal */}
         {!isPersonal && (
           <Input
             label={t('business.form.closingTime')}

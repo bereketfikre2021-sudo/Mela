@@ -9,7 +9,7 @@ import { Button } from '../design-system/Button'
 import { Dialog } from '../design-system/Dialog'
 import { Input } from '../design-system/Input'
 import { useAuth } from '../modules/auth/AuthContext'
-import { updateBusiness, getBusinessDataSummary } from '../modules/auth/api'
+import { updateBusiness, getBusinessDataSummary, uploadBusinessAvatar } from '../modules/auth/api'
 import { BusinessForm } from '../modules/auth/BusinessForm'
 import { getProducts } from '../modules/retail/api'
 import type { BusinessInput } from '../modules/auth/types'
@@ -59,10 +59,23 @@ export function EditBusinessProfilePage() {
     })
   }, [deleteOpen, user, dataSummary])
 
-  async function handleSubmit(input: BusinessInput) {
+  async function handleSubmit(input: BusinessInput, avatarFile?: File) {
     if (!user || !profile) return
     setSubmitting(true)
-    const { error } = await updateBusiness(profile.id, input, user.id)
+
+    // Upload avatar first if one was selected
+    let avatarUrl = input.avatar_url
+    if (avatarFile) {
+      const { url, error: uploadError } = await uploadBusinessAvatar(avatarFile, user.id, profile.id)
+      if (uploadError) {
+        notify({ tone: 'danger', title: t('auth.errors.generic'), description: uploadError.message })
+        setSubmitting(false)
+        return
+      }
+      avatarUrl = url
+    }
+
+    const { error } = await updateBusiness(profile.id, { ...input, avatar_url: avatarUrl }, user.id)
     setSubmitting(false)
     if (error) {
       notify({ tone: 'danger', title: t('auth.errors.generic'), description: error.message })

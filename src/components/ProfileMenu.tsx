@@ -16,7 +16,7 @@ import { useSubscription } from '../modules/subscriptions/SubscriptionContext'
 import { useStaff } from '../modules/staff/StaffContext'
 import { listStaff } from '../modules/staff/api'
 import { StaffSwitcher } from './StaffSwitcher'
-import { getBusinessConfig } from '../modules/auth/businessConfig'
+import { BusinessAvatar } from './BusinessAvatar'
 import type { StaffMember } from '../modules/staff/types'
 
 function initials(name: string): string {
@@ -145,7 +145,6 @@ export function ProfileMenu() {
                   {t('profileMenu.myBusinesses')}
                 </p>
                 {businesses.map(biz => {
-                  const config    = getBusinessConfig(biz.type)
                   const isActive  = biz.id === activeBusiness?.id
                   const isLoading = switching === biz.id
                   return (
@@ -162,12 +161,7 @@ export function ProfileMenu() {
                           : 'text-text hover:bg-background',
                       ].join(' ')}
                     >
-                      <span className={[
-                        'flex h-6 w-6 shrink-0 items-center justify-center rounded-md',
-                        isActive ? 'bg-primary text-white' : 'bg-background text-secondary',
-                      ].join(' ')}>
-                        <config.icon className="h-3.5 w-3.5" aria-hidden="true" />
-                      </span>
+                      <BusinessAvatar business={biz} size="sm" />
                       <span className="min-w-0 flex-1 truncate font-medium">{biz.name}</span>
                       {isLoading && (
                         <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-primary border-t-transparent" />

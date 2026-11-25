@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Building2, Check, Plus } from 'lucide-react'
+import { Check, Plus, Building2 } from 'lucide-react'
 import { Button } from '../design-system/Button'
 import { useAuth } from '../modules/auth/AuthContext'
-import { getBusinessConfig } from '../modules/auth/businessConfig'
+import { BusinessAvatar } from '../components/BusinessAvatar'
 
 /**
  * SelectBusinessPage
@@ -52,7 +52,6 @@ export function SelectBusinessPage() {
       {/* Business list */}
       <div className="space-y-3">
         {businesses.map(biz => {
-          const config    = getBusinessConfig(biz.type)
           const isActive  = biz.id === activeBusiness?.id
           const isLoading = switching === biz.id
 
@@ -71,15 +70,8 @@ export function SelectBusinessPage() {
               ].join(' ')}
             >
               <div className="flex items-center gap-4">
-                {/* Icon */}
-                <span className={[
-                  'flex h-10 w-10 shrink-0 items-center justify-center rounded-lg',
-                  isActive
-                    ? 'bg-primary text-white'
-                    : 'bg-background text-secondary group-hover:bg-primary/10 group-hover:text-primary',
-                ].join(' ')}>
-                  <config.icon className="h-5 w-5" aria-hidden="true" />
-                </span>
+                {/* Avatar */}
+                <BusinessAvatar business={biz} size="md" />
 
                 {/* Info */}
                 <div className="min-w-0 flex-1">

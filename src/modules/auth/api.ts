@@ -53,7 +53,7 @@ export async function getBusinesses(
   if (!supabase) return { data: [], error: { message: clientUnavailableError().error.message } }
   const { data, error, status, statusText } = await supabase
     .from('businesses')
-    .select('id, owner_id, name, type, owner_name, phone, language, closing_time, created_at, updated_at')
+    .select('id, owner_id, name, type, owner_name, phone, language, closing_time, avatar_url, created_at, updated_at')
     .eq('owner_id', userId)
   if (error) {
     console.error('[getBusinesses] FULL ERROR:', {
@@ -163,6 +163,24 @@ export async function sendMagicLink(
 // Legacy single-business helper kept for backward-compat during transition.
 // Returns the first business in the list (or null). Prefer getBusinesses().
 // ---------------------------------------------------------------------------
+/** Upload a business avatar to Supabase Storage and return the public URL. */
+export async function uploadBusinessAvatar(
+  file: File,
+  userId: string,
+  businessId: string
+): Promise<{ url: string | null; error: { message: string } | null }> {
+  if (!supabase) return { url: null, error: { message: clientUnavailableError().error.message } }
+  const ext  = file.name.split('.').pop()?.toLowerCase() ?? 'jpg'
+  const path = `${userId}/${businessId}.${ext}`
+  const { error: uploadError } = await supabase.storage
+    .from('business-avatars')
+    .upload(path, file, { upsert: true, contentType: file.type })
+  if (uploadError) return { url: null, error: { message: uploadError.message } }
+  const { data } = supabase.storage.from('business-avatars').getPublicUrl(path)
+  // Cache-bust so the new image shows immediately
+  return { url: `${data.publicUrl}?t=${Date.now()}`, error: null }
+}
+
 export function mapAuthError(t: (key: string) => string, message: string): string {
   const msg = message.toLowerCase()
   if (msg.includes('invalid login') || msg.includes('invalid credentials')) return t('auth.errors.invalidCredentials')

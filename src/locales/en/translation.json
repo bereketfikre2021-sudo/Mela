@@ -183,7 +183,13 @@
       "typeLocked": "Locked",
       "typeLockedHelper": "Business type cannot be changed after you have added products or services.",
       "closingTime": "Business closing time",
-      "closingTimeHelper": "We will send you a daily summary at this time."
+      "closingTimeHelper": "We will send you a daily summary at this time.",
+      "avatar": "Business photo",
+      "avatarHelper": "JPG, PNG or WebP · Max 2 MB",
+      "uploadAvatar": "Upload photo",
+      "changeAvatar": "Change photo",
+      "removeAvatar": "Remove photo",
+      "avatarSizeError": "Image must be under 2 MB."
     }
   },
   "products": {
