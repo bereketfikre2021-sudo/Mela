@@ -240,12 +240,15 @@ export function OverviewPage() {
   return (
     <div className="py-6 md:py-10 space-y-5">
 
-      {/* ── Greeting ───────────────────────────────────────────────────────── */}
+      {/* ── Business header ─────────────────────────────────────────────── */}
       <div>
-        <h1 className="heading text-2xl">
-          {t('app.home.greeting', { name: profile?.owner_name ?? '' })}
-        </h1>
-        {profile?.name && <p className="mt-0.5 text-sm text-secondary">{profile.name}</p>}
+        <h1 className="heading text-2xl">{profile?.name ?? ''}</h1>
+        <p className="mt-0.5 text-sm text-secondary">
+          {t('home.todaySummary', {
+            sales: fmtETBCompact(s.paidRevenue),
+            expenses: fmtETBCompact(s.totalExpenses),
+          })}
+        </p>
       </div>
 
       {/* ── 2×2 primary stat cards ─────────────────────────────────────────── */}

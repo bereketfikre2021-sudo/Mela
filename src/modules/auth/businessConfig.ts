@@ -41,6 +41,8 @@ export interface BusinessConfig {
   description:  string
   newSaleLabel:   string
   stockLabel:     string
+  /** i18n key for the stock/services nav label */
+  stockLabelKey:  string
   /** Page heading on the Stock/Services page */
   stockPageTitle: string
   /** Empty-state description on the Stock page */
@@ -67,6 +69,7 @@ const CONFIGS: Record<BusinessType, BusinessConfig> = {
     description:          'General merchandise, grocery, stationery',
     newSaleLabel:         'New sale',
     stockLabel:           'Products',
+    stockLabelKey:        'nav.products',
     stockPageTitle:       'Products & Stock',
     stockEmptyDesc:       'Add products to start tracking your stock.',
     customersLabel:       'Customers',
@@ -121,6 +124,7 @@ const CONFIGS: Record<BusinessType, BusinessConfig> = {
     description:          'Beauty products, skincare, makeup',
     newSaleLabel:         'New sale',
     stockLabel:           'Products',
+    stockLabelKey:        'nav.products',
     stockPageTitle:       'Products & Stock',
     stockEmptyDesc:       'Add beauty products to start tracking your stock.',
     customersLabel:       'Customers',
@@ -174,6 +178,7 @@ const CONFIGS: Record<BusinessType, BusinessConfig> = {
     description:          'Coffee, drinks, juices & light snacks',
     newSaleLabel:         'New order',
     stockLabel:           'Menu items',
+    stockLabelKey:        'nav.stock',
     stockPageTitle:       'Menu',
     stockEmptyDesc:       'Add menu items to start taking orders.',
     customersLabel:       'Regulars',
@@ -234,6 +239,7 @@ const CONFIGS: Record<BusinessType, BusinessConfig> = {
     description:          'Meals, local food, takeaway & delivery',
     newSaleLabel:         'New order',
     stockLabel:           'Menu items',
+    stockLabelKey:        'nav.stock',
     stockPageTitle:       'Menu',
     stockEmptyDesc:       'Add menu items to start taking orders.',
     customersLabel:       'Customers',
@@ -300,6 +306,7 @@ const CONFIGS: Record<BusinessType, BusinessConfig> = {
     description:          'Bread, pastries, cakes & injera',
     newSaleLabel:         'New sale',
     stockLabel:           'Baked goods',
+    stockLabelKey:        'nav.stock',
     stockPageTitle:       'Baked Goods & Stock',
     stockEmptyDesc:       'Add baked goods to start tracking what you sell.',
     customersLabel:       'Customers',
@@ -354,6 +361,7 @@ const CONFIGS: Record<BusinessType, BusinessConfig> = {
     description:          'Repairs, professional & skilled services',
     newSaleLabel:         'Record service',
     stockLabel:           'Services',
+    stockLabelKey:        'nav.services',
     stockPageTitle:       'Services',
     stockEmptyDesc:       'Add your services and prices.',
     customersLabel:       'Clients',
@@ -403,6 +411,7 @@ const CONFIGS: Record<BusinessType, BusinessConfig> = {
     description:          'Hair, nails, skin, massage & spa treatments',
     newSaleLabel:         'Record service',
     stockLabel:           'Services',
+    stockLabelKey:        'nav.services',
     stockPageTitle:       'Services & Pricing',
     stockEmptyDesc:       'Add your services and prices.',
     customersLabel:       'Clients',
@@ -482,6 +491,7 @@ const CONFIGS: Record<BusinessType, BusinessConfig> = {
     description:          'Spice blends, shiro, berbere & flour mixes',
     newSaleLabel:         'New sale',
     stockLabel:           'Products',
+    stockLabelKey:        'nav.products',
     stockPageTitle:       'Products & Stock',
     stockEmptyDesc:       'Add your spice products to start tracking stock.',
     customersLabel:       'Customers',
@@ -594,6 +604,7 @@ const CONFIGS: Record<BusinessType, BusinessConfig> = {
     description:          'Track personal income, spending & budgets',
     newSaleLabel:         'Add income',
     stockLabel:           'Items',
+    stockLabelKey:        'nav.stock',
     stockPageTitle:       'Items',
     stockEmptyDesc:       'Add items to start tracking.',
     customersLabel:       'Contacts',

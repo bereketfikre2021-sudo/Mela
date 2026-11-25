@@ -51,15 +51,21 @@ export async function getBusinesses(
   userId: string
 ): Promise<{ data: Business[]; error: { message: string } | null }> {
   if (!supabase) return { data: [], error: { message: clientUnavailableError().error.message } }
-  const { data, error } = await supabase
+  const { data, error, status, statusText } = await supabase
     .from('businesses')
     .select('id, owner_id, name, type, owner_name, phone, language, closing_time, created_at, updated_at')
     .eq('owner_id', userId)
   if (error) {
-    console.error('[api] getBusinesses error:', error.message, error)
+    console.error('[getBusinesses] FULL ERROR:', {
+      message: error.message,
+      details: error.details,
+      hint:    error.hint,
+      code:    error.code,
+      status,
+      statusText,
+    })
     return { data: [], error: { message: error.message } }
   }
-  // Sort client-side by created_at ascending to avoid PostgREST order issues
   const sorted = ((data as Business[]) ?? []).sort(
     (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
   )
@@ -71,12 +77,22 @@ export async function getUserProfile(
   userId: string
 ): Promise<{ data: UserProfile | null; error: { message: string } | null }> {
   if (!supabase) return { data: null, error: { message: clientUnavailableError().error.message } }
-  const { data, error } = await supabase
+  const { data, error, status, statusText } = await supabase
     .from('user_profiles')
     .select('*')
     .eq('user_id', userId)
     .maybeSingle()
-  if (error) return { data: null, error: { message: error.message } }
+  if (error) {
+    console.error('[getUserProfile] FULL ERROR:', {
+      message: error.message,
+      details: error.details,
+      hint:    error.hint,
+      code:    error.code,
+      status,
+      statusText,
+    })
+    return { data: null, error: { message: error.message } }
+  }
   return { data: (data as UserProfile | null) ?? null, error: null }
 }
 

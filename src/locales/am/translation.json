@@ -1,9 +1,8 @@
 {
   "app": {
     "name": "MELA",
-    "tagline": "ለኢትዮጵያ ንግዶች የተሰራ የቀላል ቢዝነስ አስተዳደር።",
+    "tagline": "ለኢትዮጵያ ንግዶች የተሠራ ቀላል የቢዝነስ አስተዳደር።",
     "home": {
-      "greeting": "እንኳን ደህና መጡ፣ {{name}}",
       "editProfile": "መለያ አርትዕ",
       "logout": "ውጣ",
       "loadingProfile": "መለያዎ እየተጫነ ነው…"
@@ -13,58 +12,61 @@
     "home": "መነሻ",
     "products": "ምርቶች",
     "pos": "ሽያጭ",
-    "sales": "ሽያጭ",
+    "sales": "ሽያጮች",
     "expenses": "ወጪዎች",
     "reports": "ሪፖርቶች",
     "language": "ቋንቋ",
     "customers": "ደንበኞች",
     "suppliers": "አቅራቢዎች",
-    "inventory": "ክምችት ታሪክ",
+    "inventory": "የዕቃ ታሪክ",
     "purchases": "ግዢዎች",
     "stock": "ክምችት",
     "more": "ተጨማሪ",
     "newSale": "አዲስ ሽያጭ",
     "salesHistory": "የሽያጭ ታሪክ",
     "subscription": "ደንበኝነት",
-    "staff": "ሰራተኞች",
+    "staff": "ሠራተኞች",
     "services": "አገልግሎቶች",
     "newService": "አዲስ አገልግሎት",
     "serviceHistory": "የአገልግሎት ታሪክ",
     "clients": "ደንበኞች",
     "serviceCatalogue": "አገልግሎቶች",
-    "jobs": "ስራዎች",
-    "newJob": "አዲስ ስራ",
-    "jobHistory": "የስራ ታሪክ",
-    "catalogue": "ካታሎግ"
+    "jobs": "ሥራዎች",
+    "newJob": "አዲስ ሥራ",
+    "jobHistory": "የሥራ ታሪክ",
+    "catalogue": "ካታሎግ",
+    "income": "ገቢ",
+    "contacts": "አድራሻ ደብተር",
+    "budget": "በጀት"
   },
   "welcome": {
     "eyebrow": "ለኢትዮጵያ ንግዶች",
-    "title": "ንግድዎ። ቁጥጥር ስር።",
-    "subheading": "ንግድዎን ለማስኬድ የሚያስፈልጉ ሁሉም ነገሮች በአንድ ቦታ።",
-    "description": "ሽያጭ ይመዝግቡ፣ ወጪ ይከታተሉ፣ ክምችት ይቆጣጠሩ እና ያለ ውስብስብ ሶፍትዌር የንግድዎን አፈጻጸም ይረዱ።",
+    "title": "ንግድዎ። በቁጥጥርዎ።",
+    "subheading": "ንግድዎን ለማካሄድ የሚያስፈልጉ ሁሉም ነገሮች በአንድ ቦታ።",
+    "description": "ሽያጭ ይመዝግቡ፣ ወጪ ይከታተሉ፣ ክምችት ይቆጣጠሩ — ያለ ውስብስብ ሶፍትዌር የንግድዎን አፈጻጸም ይረዱ።",
     "cta": "ጀምር",
     "checks": [
-      "የሂሳብ ባለሙያ መሆን አያስፈልግም",
-      "ያለ ኢንተርኔት በማንኛውም መሳሪያ ይሰራል",
+      "የሒሳብ ባለሙያ መሆን አያስፈልግም",
+      "ያለ ኢንተርኔት በማንኛውም መሣሪያ ይሠራል",
       "በአማርኛ እና እንግሊዝኛ",
-      "ለኢትዮጵያ ንግዶች ተብሎ የተሰራ"
+      "ለኢትዮጵያ ንግዶች ተብሎ የተሠራ"
     ],
     "featuresEyebrow": "ሁሉም በአንድ ቦታ",
-    "featuresTitle": "ኢትዮጵያዊ ንግዶች እንዴት እንደሚሰሩ ቀርቦ የተሰራ",
-    "ctaTitle": "ዛሬ ቁጥጥሩን ይጀምሩ?",
+    "featuresTitle": "ኢትዮጵያዊ ንግዶች እንዴት እንደሚሠሩ ተረድቶ የተሠራ",
+    "ctaTitle": "ዛሬ ይጀምሩ?",
     "ctaSubtitle": "ከ5 ደቂቃ ባነሰ ጊዜ ይዋቀሩ። ክሬዲት ካርድ አያስፈልግም።",
     "features": {
       "sales": {
         "title": "ሽያጭ እና ክፍያ",
-        "desc": "ሽያጭ ይመዝግቡ፣ የተለያዩ የክፍያ ዘዴዎችን ይቀበሉ፣ ያልተከፈለ የደንበኞች ሂሳብ ይከታተሉ።"
+        "desc": "ሽያጭ ይመዝግቡ፣ የተለያዩ የክፍያ ዓይነቶችን ይቀበሉ፣ ያልተከፈለ የደንበኛ ሒሳብ ይከታተሉ።"
       },
       "inventory": {
         "title": "ምርቶች እና ክምችት",
-        "desc": "ምርቶችን ያስተዳድሩ፣ ክምችት ይቆጣጠሩ፣ መቼ እንደሚዘዙ ይወቁ።"
+        "desc": "ምርቶቻቸውን ያስተዳድሩ፣ ክምችት ይቆጣጠሩ፣ መቼ ዕቃ ማዘዝ እንዳለቦት ይወቁ።"
       },
       "expenses": {
         "title": "ወጪ እና ትርፍ",
-        "desc": "የንግድ ወጪዎችን ይከታተሉ፣ ትርፍዎን ያሰሉ።"
+        "desc": "የንግድ ወጪዎቻቸውን ይከታተሉ፣ ትርፍዎን ያሰሉ።"
       },
       "insights": {
         "title": "የንግድ ትንታኔ",
@@ -74,53 +76,53 @@
   },
   "auth": {
     "login": {
-      "title": "ግባ",
+      "title": "ይግቡ",
       "email": "ኢሜይል",
       "password": "የይለፍ ቃል",
-      "submit": "ግባ",
+      "submit": "ይግቡ",
       "submitting": "እየተገባ ነው…",
       "toRegister": "መለያ የለዎትም? ይመዝገቡ",
-      "usePassword": "በኢሜይልና ይለፍ ቃል ግባ",
-      "showPassword": "ይለፍ ቃልን አሳይ",
-      "hidePassword": "ይለፍ ቃልን ደብቅ"
+      "usePassword": "በኢሜይልና የይለፍ ቃል ይግቡ",
+      "showPassword": "የይለፍ ቃልን አሳይ",
+      "hidePassword": "የይለፍ ቃልን ደብቅ"
     },
     "register": {
-      "title": "መለያ ፍጠር",
+      "title": "መለያ ይፍጠሩ",
       "email": "ኢሜይል",
       "password": "የይለፍ ቃል",
-      "confirmPassword": "የይለፍ ቃል ያረጋግጡ",
+      "confirmPassword": "የይለፍ ቃልን ያረጋግጡ",
       "submit": "መለያ ፍጠር",
       "submitting": "እየተፈጠረ ነው…",
       "toLogin": "መለያ አለዎት? ይግቡ",
-      "usePassword": "በኢሜይልና ይለፍ ቃል ተመዝገብ"
+      "usePassword": "በኢሜይልና የይለፍ ቃል ተመዝገቡ"
     },
     "errors": {
       "invalidCredentials": "ኢሜይሉ ወይም የይለፍ ቃሉ ትክክል አይደለም።",
       "emailInUse": "ይህ ኢሜይል ቀደም ሲል ተመዝግቧል።",
       "emailNotConfirmed": "ከመግባትዎ በፊት ኢሜይልዎን ያረጋግጡ።",
-      "generic": "ስህተት ተፈጠረ። እንደገና ይሞክሩ።",
-      "businessLimitReached": "በአንድ መለያ ከ3 ንግዶች መብለጥ አይቻልም።"
+      "generic": "ስህተት ተፈጥሯል። እንደገና ይሞክሩ።",
+      "businessLimitReached": "በአንድ መለያ ከሦስት ንግዶች መብለጥ አይቻልም።"
     },
     "google": "በGoogle ይቀጥሉ",
     "or": "ወይም",
     "forgotPassword": {
-      "link": "የይለፍ ቃል ረሱ?",
-      "sending": "እየላከ ነው…",
-      "enterEmailFirst": "አስቀድሞ የኢሜይል አድራሻዎን ያስገቡ።",
+      "link": "የይለፍ ቃልዎን ረሱ?",
+      "sending": "እየተላከ ነው…",
+      "enterEmailFirst": "አስቀድሞ ኢሜይልዎን ያስገቡ።",
       "sentTitle": "ኢሜይልዎን ይፈትሹ",
-      "sentDesc": "ወደ {{email}} የመግቢያ ሊንክ ላክናል። ለመግባት ይጫኑት — ይለፍ ቃል አያስፈልግም።"
+      "sentDesc": "ወደ {{email}} የመግቢያ ሊንክ ላክናል። ሊንኩን ጠቅ ያድርጉ — የይለፍ ቃል አያስፈልግም።"
     }
   },
   "business": {
     "create": {
       "title": "ንግድዎን ያቋቁሙ",
-      "subtitle": "ንግድዎን ለማቋቋም ጥቂት ደቂቃዎች ብቻ ይበቃሉ።"
+      "subtitle": "ጥቂት ደቂቃዎች ብቻ ይወስዳሉ።"
     },
     "edit": {
       "title": "የንግድ መረጃ አርትዕ",
       "subtitle": "የንግድዎን መረጃ ያስተካክሉ።",
       "success": "መረጃ ተስተካክሏል",
-      "successDesc": "ተቀምጧል።"
+      "successDesc": "ለውጦቹ ተቀምጠዋል።"
     },
     "createSuccess": {
       "title": "ንግድ ተፈጥሯል",
@@ -131,32 +133,32 @@
       "businessName": "የንግድ ስም",
       "businessNameHelper": "ደንበኞችዎ የሚያውቁዎትን ስም።",
       "accountName": "የመለያ ስም",
-      "accountNameHelper": "ለዚህ መለያ ስም ይስጡ፣ ለምሳሌ ስምዎን።",
-      "businessType": "የንግድ አይነት",
-      "businessTypeHelper": "ንግድዎን የሚገልጽ አይነት ይምረጡ።",
+      "accountNameHelper": "ለዚህ መለያ ስም ይስጡ — ለምሳሌ ስምዎን።",
+      "businessType": "የንግድ ዓይነት",
+      "businessTypeHelper": "ንግድዎን የሚገልጽ ዓይነት ይምረጡ።",
       "types": {
-        "retail": "ችርቻሮ",
+        "retail": "ሱቅ",
         "fnb": "ምግብ እና መጠጥ",
         "fastfood": "ፈጣን ምግብ / ሬስቶራንት",
-        "bakery": "ዳቦ ቤት እና ምርት",
+        "bakery": "ዳቦ ቤት",
         "service": "አገልግሎት",
         "cosmetics": "ኮስሞቲክስ",
-        "salon": "Beauty Salon & Spa",
+        "salon": "የውበት ሳሎን እና ስፓ",
         "baltina": "ባልቲና / ቅመም ቤት"
       },
       "ownerSectionTitle": "ስለ እርስዎ",
       "ownerName": "ሙሉ ስም",
-      "ownerNameHelper": "የባለቤቱ ወይም ዋና ሃላፊ ስም።",
+      "ownerNameHelper": "የባለቤቱ ወይም ዋና ሓላፊ ስም።",
       "phone": "ስልክ ቁጥር",
-      "phoneHelper": "የሃገር ኮድ ያካትቱ። ለምሳሌ +251...",
+      "phoneHelper": "የሀገር ኮድ ያካትቱ። ለምሳሌ +251…",
       "language": "ቋንቋ",
       "languageHelper": "በ MELA ውስጥ ጥቅም ላይ የሚውለው ቋንቋ።",
       "submitCreate": "ንግድ ፍጠር",
       "submitEdit": "ለውጦችን አስቀምጥ",
       "submitting": "እየተቀመጠ ነው…",
       "typeLocked": "ተቆልፏል",
-      "typeLockedHelper": "ምርቶች ወይም አገልግሎቶች ከጨመሩ በኋላ የንግድ አይነቱን መቀየር አይቻልም።",
-      "closingTime": "የንግድ መዘጊያ ሰዓት",
+      "typeLockedHelper": "ምርቶች ወይም አገልግሎቶች ከጨመሩ በኋላ የንግድ ዓይነቱን መቀየር አይቻልም።",
+      "closingTime": "የዕለት መዘጊያ ሰዓት",
       "closingTimeHelper": "በዚህ ሰዓት የዕለት ማጠቃለያ እንልክልዎታለን።"
     }
   },
@@ -168,9 +170,29 @@
     "price": "ETB {{price}}",
     "retry": "እንደገና ሞክር",
     "addProduct": "ምርት ጨምር",
+    "import": {
+      "button": "ከ Excel አስገባ",
+      "title": "ምርቶችን አስመጣ",
+      "subtitle": "ብዙ ምርቶችን አንድ ጊዜ ለመጨምር Excel ወይም CSV ፋይል ስቀል።",
+      "downloadTemplate": "ቅጽ አውርድ (.xlsx)",
+      "dropzone": "ፋይሉን እዚህ ጣል ወይም ጠቅ አድርግ",
+      "browse": "ፋይል ፈልግ",
+      "rows": "ረድፎች ተገኝተዋል",
+      "willImport": "የሚጨምሩ",
+      "willSkip": "የሚዘለሉ",
+      "preview": "ቅድመ-ዕይታ (የመጀመሪያ 5 ረድፎች)",
+      "moreRows": "ተጨማሪ ረድፎች",
+      "noValidRows": "ትክክለኛ ረድፍ አልተገኘም። ፋይሉ 'name' እና 'price' አምዶች ያካትት ። ",
+      "importBtn": "{{count}} ምርቶችን አስገባ",
+      "importing": "ምርቶችን እያስገባ ነው…",
+      "pleaseWait": "ትንሽ ጊዜ ይፈልጋል። እባክዎ ይጠብቁ።",
+      "doneTitle": "ከ{{total}} ምርቶች ውስጥ {{imported}} ተጨምሯል",
+      "skippedTitle": "{{count}} ረድፎች ተዘለሉ",
+      "close": "ተጠናቀቀ"
+    },
     "empty": {
       "title": "ምርት አልተጨመረም",
-      "desc": "የምርት ዝርዝሩ ባዶ ነው። ይጀምሩ።"
+      "desc": "የምርት ዝርዝሩ ባዶ ነው። ለመጀመር ምርት ያክሉ።"
     },
     "col": {
       "name": "ምርት",
@@ -192,9 +214,9 @@
       "sellingPrice": "የሽያጭ ዋጋ",
       "costPrice": "የምርት ወጪ",
       "costPriceHelper": "አማራጭ ነው።",
-      "stock": "የክምችት መጠን",
+      "stock": "ክምችት",
       "unit": "መለኪያ",
-      "unitHelper": "ለምሳሌ ቁርጥ፣ ኪ.ግ፣ ሊትር",
+      "unitHelper": "ለምሳሌ፦ ቁርጥ፣ ኪ.ግ፣ ሊትር",
       "submitAdd": "ምርት ጨምር",
       "submitEdit": "ለውጦችን አስቀምጥ",
       "errors": {
@@ -202,26 +224,24 @@
         "invalidQty": "ትክክለኛ መጠን ያስገቡ።"
       },
       "lowStockThreshold": "ዝቅተኛ ክምችት ማስጠንቀቂያ",
-      "lowStockThresholdHelper": "አማራጭ ነው። ክምችቱ ወደዚህ ደረጃ ሲደርስ ያሳውቃል።",
+      "lowStockThresholdHelper": "አማራጭ። ክምችቱ ወደዚህ ደረጃ ሲደርስ ያሳውቃል።",
       "servicePrice": "የአገልግሎት ዋጋ",
       "serviceName": "የአገልግሎት ስም",
-      "titleAddService": "አገልግሎት ጨምር",
-      "titleEditService": "አገልግሎት አርትዕ",
       "image": "የምርት ፎቶ",
       "uploadImage": "ፎቶ ስቀል",
       "changeImage": "ፎቶ ቀይር",
-      "imageHelper": "አማራጭ። PNG, JPG።",
+      "imageHelper": "አማራጭ። PNG፣ JPG።",
       "barcode": "ባርኮድ",
       "barcodeHelper": "አማራጭ። ባርኮድ ያስገቡ።",
       "scanBarcode": "ባርኮድ ቃኝ",
       "barcodeNotFound": "ባርኮድ አልተገኘም። ዳግም ሞክር።",
-      "barcodeManual": "ቃኝት አይደገፍም። ባርኮዱን በእጅ ያስገቡ።",
+      "barcodeManual": "ቃኝት በዚህ መሣሪያ አይደገፍም። ባርኮዱን በእጅ ያስገቡ።",
       "barcodeError": "ቃኝት አልተሳካም። ባርኮዱን በእጅ ያስገቡ።",
       "barcodeHelperManual": "ባርኮዱን በእጅ ያስገቡ።"
     },
     "delete": {
       "title": "ምርት ሰርዝ",
-      "desc": "\"{{name}}\" ይሰረዝ? ሊቀለበስ አይችልም።"
+      "desc": "\"{{name}}\" ይሰረዝ? ይህ ተግባር ሊቀለበስ አይችልም።"
     },
     "actions": {
       "edit": "{{name}} አርትዕ",
@@ -237,37 +257,37 @@
     "countService": "{{count}} አገልግሎት",
     "countService_other": "{{count}} አገልግሎቶች",
     "emptyService": {
-      "title": "እስካሁን አገልግሎቶች የሉም",
-      "desc": "ክፍያዎችን መመዝገብ ለመጀመር የመጀመሪያ አገልግሎትዎን ያክሉ።"
+      "title": "አገልግሎት አልተጨመረም",
+      "desc": "ሽያጭ ለመመዝገብ የመጀመሪያ አገልግሎትዎን ያክሉ።"
     }
   },
   "pos": {
-    "title": "የሽያጭ ቦታ",
+    "title": "የሽያጭ ነጥብ",
     "search": "ምርቶችን ይፈልጉ…",
     "noResults": "ምርት አልተገኘም።",
     "stock": "{{qty}} {{unit}} አለ",
-    "inCart": "{{qty}} ሰሌዳ ውስጥ",
-    "cart": "ሰሌዳ",
+    "inCart": "{{qty}} ሸቅላ ውስጥ",
+    "cart": "ሸቅላ",
     "cartEmpty": "ሽያጭ ለመጀመር ምርቶችን ያክሉ።",
     "clearCart": "አጽዳ",
     "subtotal": "ንዑስ ድምር",
     "total": "ጠቅላላ",
-    "checkout": "ክፍያ",
-    "confirmSale": "ሽያጭ አረጋግጥ",
+    "checkout": "ክፍያ ፈጽም",
+    "confirmSale": "ሽያጩን አረጋግጥ",
     "orderSummary": "የትዕዛዝ ማጠቃለያ",
-    "paymentMethod": "የክፍያ ዘዴ",
+    "paymentMethod": "የክፍያ ዓይነት",
     "decrease": "ቀንስ",
     "increase": "ጨምር",
     "remove": "{{name}} አስወግድ",
     "payment": {
       "cash": "ጥሬ ገንዘብ",
-      "telebirr": "ቴሌብር",
-      "bank_transfer": "ባንክ ዝውውር",
-      "cbe_birr": "ሲቢኢ ብር"
+      "telebirr": "Telebirr",
+      "bank_transfer": "የባንክ ዝውውር",
+      "cbe_birr": "CBE Birr"
     },
     "checkoutResult": {
       "success": "ሽያጩ ተመዝግቧል",
-      "successPending": "ሽያጩ ተመዝግቧል። ክፍያ ይጠብቃል።",
+      "successPending": "ሽያጩ ተመዝግቧል። ክፍያ ይጠበቃል።",
       "error": "ሽያጩ አልተሳካም"
     },
     "customer": "ደንበኛ",
@@ -303,13 +323,13 @@
     "view": "ይመልከቱ",
     "payment": {
       "cash": "ጥሬ ገንዘብ",
-      "telebirr": "ቴሌብር",
-      "bank_transfer": "ባንክ ዝውውር",
-      "cbe_birr": "ሲቢኢ ብር"
+      "telebirr": "Telebirr",
+      "bank_transfer": "የባንክ ዝውውር",
+      "cbe_birr": "CBE Birr"
     },
     "status": {
       "paid": "ተከፍሏል",
-      "partial": "ከፊል ተከፍሏል",
+      "partial": "በከፊል ተከፍሏል",
       "pending": "ያልተከፈለ",
       "cancelled": "ተሰርዟል"
     },
@@ -326,34 +346,34 @@
       "today": "ዛሬ",
       "week": "ይህ ሳምንት",
       "month": "ይህ ወር",
-      "all": "ሁሉ"
+      "all": "ሁሉም"
     },
     "titleService": "ሽያጮች",
     "emptyService": {
-      "title": "እስካሁን ምንም ሽያጭ አልተመዘገበም",
+      "title": "ምንም ሽያጭ አልተመዘገበም",
       "desc": "ለመጀመር የመጀመሪያ ሽያጭዎን ይመዝግቡ።"
     },
-    "markPaid": "እንደከፈለ ምልክት አድርግ",
-    "markedPaid": "ሽያጭ እንደከፈለ ተምልክቷል",
+    "markPaid": "እንደ ተከፈለ ምልክት አድርግ",
+    "markedPaid": "ሽያጭ እንደ ተከፈለ ተምልክቷል",
     "recordPayment": "ክፍያ ምዝግብ",
     "paymentRecorded": "ክፍያ ተመዝግቧል",
     "viewFullReport": "ሙሉ ሪፖርት ይመልከቱ",
-    "balanceDue": "ቀሪ ሂሳብ: {{amount}}",
-    "amountPaid": "እስካሁን ተከፍሏል: {{amount}}",
+    "balanceDue": "ቀሪ ሒሳብ፦ {{amount}}",
+    "amountPaid": "እስካሁን ተከፍሏል፦ {{amount}}",
     "paymentHistory": "የክፍያ ታሪክ",
     "noPayments": "እስካሁን ምንም ክፍያ አልተመዘገበም።",
     "payment": {
       "amount": "መጠን",
-      "method": "የክፍያ ዘዴ",
+      "method": "የክፍያ ዓይነት",
       "date": "የክፍያ ቀን",
       "note": "ማስታወሻ",
       "noteHelper": "አማራጭ።",
       "submit": "ክፍያ ምዝግብ",
-      "overpay": "መጠኑ ቀሪ ሂሳቡን ያልፋል።",
+      "overpay": "የገቡት መጠን ቀሪ ሒሳቡን ያልፋል።",
       "col": {
         "date": "ቀን",
         "amount": "መጠን",
-        "method": "ዘዴ",
+        "method": "ዓይነት",
         "note": "ማስታወሻ"
       }
     }
@@ -384,13 +404,13 @@
   },
   "status": {
     "paid": "ተከፍሏል",
-    "pending": "ይጠብቃል",
+    "pending": "ይጠበቃል",
     "overdue": "ጊዜው አልፏል",
     "draft": "ረቂቅ"
   },
   "empty": {
     "title": "ምንም የለም",
-    "desc": "ሲጨምሩ እዚህ ይታያል።"
+    "desc": "ሲጨምሩ እዚህ ይታያሉ።"
   },
   "notification": {
     "saved": {
@@ -398,7 +418,7 @@
       "desc": "ለውጦቹ ተቀምጠዋል።"
     },
     "error": {
-      "title": "ስህተት ተፈጠረ",
+      "title": "ስህተት ተፈጥሯል",
       "desc": "እንደገና ይሞክሩ።"
     }
   },
@@ -414,12 +434,12 @@
       "cogs": "የምርት ወጪ",
       "grossProfit": "ጠቅላላ ትርፍ",
       "netProfit": "የተጣራ ትርፍ",
-      "pending": "ያልተከፈለ ሂሳብ",
-      "pendingSub": "እስካሁን አልተረጋገጠም",
+      "pending": "ያልተከፈለ ሒሳብ",
+      "pendingSub": "እስካሁን ያልተቀበለ",
       "unknown": "—",
       "partial": "ከፊል መረጃ"
     },
-    "cogsIncompleteNote": "ለአንዳንድ ምርቶች የምርት ወጪ አልተመዘገበም። የትርፍ ስሌቱ ወጪው ለሚታወቁ ምርቶች ብቻ ነው።",
+    "cogsIncompleteNote": "ለአንዳንድ ምርቶች የምርት ወጪ አልተመዘገበም። የትርፍ ስሌቱ ወጪ ለሚታወቁ ምርቶች ብቻ ነው።",
     "chart": {
       "revenueVsExpenses": "ገቢ እና ወጪ",
       "expenseBreakdown": "ወጪ በምድብ"
@@ -432,11 +452,19 @@
   },
   "expenses": {
     "title": "ወጪዎች",
-    "subtitle": "የንግድ ወጪዎችዎን ይከታተሉ።",
+    "subtitle": "የንግድ ወጪዎቻቸውን ይከታተሉ።",
     "count": "{{count}} ወጪ",
     "count_other": "{{count}} ወጪዎች",
     "filteredCount": "{{count}} ከ{{total}} ወጪዎች",
     "addExpense": "ወጪ ጨምር",
+    "quick": {
+      "pickCategory": "ለምን አወጡ?",
+      "recordedAt": "የተመዘገበበት ሰዓት፦",
+      "note": "ማስታወሻ",
+      "noteHelper": "አማራጭ — ለምሳሌ 'ለአበበ ተከፈለ'",
+      "notePlaceholder": "ማስታወሻ ጨምር…",
+      "add": "ወጪ ጨምር"
+    },
     "empty": {
       "title": "ወጪ አልተጨመረም",
       "desc": "የመጀመሪያ ወጪዎን ያክሉ።",
@@ -451,7 +479,7 @@
     },
     "categories": {
       "rent": "ኪራይ",
-      "utilities": "አገልግሎቶች",
+      "utilities": "የአገልግሎት ክፍያዎች",
       "transport": "ትራንስፖርት",
       "supplies": "ቁሳቁስ",
       "salaries": "ደሞዝ",
@@ -460,9 +488,9 @@
       "other": "ሌላ",
       "food_ingredients": "ምግብ እና ጥሬ ዕቃ",
       "packaging": "ማሸጊያ",
-      "bank_charges": "የባንክ ክፍያ",
-      "taxes_fees": "ታክስ እና ክፍያ",
-      "equipment": "መሳሪያ"
+      "bank_charges": "የባንክ አገልግሎት ክፍያ",
+      "taxes_fees": "ታክስ እና ቀረጥ",
+      "equipment": "መሣሪያ"
     },
     "filter": {
       "search": "ወጪዎችን ይፈልጉ…",
@@ -488,7 +516,7 @@
     },
     "delete": {
       "title": "ወጪ ሰርዝ",
-      "desc": "\"{{title}}\" ይሰረዝ? ሊቀለበስ አይችልም።"
+      "desc": "\"{{title}}\" ይሰረዝ? ይህ ተግባር ሊቀለበስ አይችልም።"
     },
     "actions": {
       "edit": "{{title}} አርትዕ",
@@ -504,18 +532,18 @@
     "title": "ሪፖርቶች",
     "subtitle": "ሽያጭ፣ ወጪ እና ትርፍዎን ይተንትኑ።",
     "period": {
-      "custom": "ሌላ ቀን"
+      "custom": "ልዩ ቀን"
     },
-    "apply": "አስፈጽም",
+    "apply": "ፈጽም",
     "section": {
       "profitSummary": "የትርፍ ማጠቃለያ",
       "salesSummary": "የሽያጭ ማጠቃለያ",
-      "dailySales": "የዕለት ሽያጭ",
-      "monthlySales": "የወር ሽያጭ",
+      "dailySales": "ዕለታዊ ሽያጮች",
+      "monthlySales": "ወርሃዊ ሽያጮች",
       "topProductsByQty": "ምርጥ ምርቶች በብዛት",
       "topProductsByRevenue": "ምርጥ ምርቶች በገቢ",
       "expensesByCategory": "ወጪ በምድብ",
-      "monthlyExpenses": "የወር ወጪ",
+      "monthlyExpenses": "ወርሃዊ ወጪዎች",
       "dailyServices": "ዕለታዊ አገልግሎቶች",
       "monthlyServices": "ወርሃዊ አገልግሎቶች",
       "topServicesByQty": "ምርጥ አገልግሎቶች በብዛት",
@@ -524,7 +552,7 @@
     "sales": {
       "paidTransactions": "የተከፈሉ ግብይቶች",
       "pendingTransactions": "ያልተከፈሉ ግብይቶች",
-      "paymentMethod": "የክፍያ ዘዴ",
+      "paymentMethod": "የክፍያ ዓይነት",
       "transactions": "ግብይቶች",
       "revenue": "ገቢ"
     },
@@ -532,7 +560,7 @@
       "units": "ክፍሎች"
     },
     "expenses": {
-      "entries": "ሂሳቦች"
+      "entries": "ሒሳቦች"
     },
     "col": {
       "date": "ቀን",
@@ -564,24 +592,24 @@
     "openMenu": "የመለያ ምናሌ",
     "editProfile": "መለያ አርትዕ",
     "editBusiness": "የንግድ መረጃ አርትዕ",
-    "settings": "ቅንጅቶች",
+    "settings": "ቅንብሮች",
     "signOut": "ውጣ",
     "switchAccount": "ወደ ሌላ መለያ ቀይር",
-    "switchStaff": "ሰራተኛ ቀይር",
-    "staffActive": "ንቁ: {{name}}",
+    "switchStaff": "ሠራተኛ ቀይር",
+    "staffActive": "ንቁ፦ {{name}}",
     "subscription": "ደንበኝነት እና ክፍያ",
     "advanced": "የላቀ",
-    "staff": "ሰራተኞች",
+    "staff": "ሠራተኞች",
     "myBusinesses": "ንግዶቼ",
     "addBusiness": "ሌላ ንግድ ጨምር"
   },
   "footer": {
-    "tagline": "ለኢትዮጵያ ንግዶች የተሰራ ቀላል የቢዝነስ አስተዳደር ስርዓት።",
+    "tagline": "ለኢትዮጵያ ንግዶች የተሠራ ቀላል የቢዝነስ አስተዳደር ሥርዓት።",
     "product": "ምርት",
     "legal": "ሕጋዊ",
     "support": "ድጋፍ",
     "getStarted": "ጀምር",
-    "signIn": "ግባ",
+    "signIn": "ይግቡ",
     "privacy": "የግለኝነት ፖሊሲ",
     "terms": "የአገልግሎት ውሎች",
     "contact": "ያናግሩን",
@@ -590,21 +618,21 @@
   },
   "legal": {
     "privacy": {
-      "title": "Privacy Policy",
-      "updated": "Last updated: November 2026"
+      "title": "የግለኝነት ፖሊሲ",
+      "updated": "የተዘመነበት ቀን፦ ህዳር 2026"
     },
     "terms": {
-      "title": "Terms of Service",
-      "updated": "Last updated: November 2026"
+      "title": "የአገልግሎት ውሎች",
+      "updated": "የተዘመነበት ቀን፦ ህዳር 2026"
     },
     "contact": {
-      "title": "Contact Us",
-      "subtitle": "We are here to help.",
-      "email": "Email",
-      "hours": "Business hours",
-      "hoursValue": "Monday – Friday, 9:00 AM – 6:00 PM EAT (UTC+3)",
-      "address": "Address",
-      "addressValue": "MELA Business Software, Addis Ababa, Ethiopia"
+      "title": "ያናግሩን",
+      "subtitle": "ለመርዳት ዝግጁ ነን።",
+      "email": "ኢሜይል",
+      "hours": "የሥራ ሰዓት",
+      "hoursValue": "ሰኞ – ዓርብ፣ ከጥዋቱ 3 ሰዓት – ከሰዓቱ 12 ሰዓት (UTC+3)",
+      "address": "አድራሻ",
+      "addressValue": "MELA Business Software፣ አዲስ አበባ፣ ኢትዮጵያ"
     }
   },
   "contacts": {
@@ -613,7 +641,7 @@
     "noResultsDesc": "ሌላ ስም ወይም ስልክ ቁጥር ይሞክሩ።",
     "delete": {
       "title": "ያጥፉ",
-      "desc": "\"{{name}}\" ይጠፋ? ሊቀለበስ አይችልም።"
+      "desc": "\"{{name}}\" ይጠፋ? ይህ ተግባር ሊቀለበስ አይችልም።"
     },
     "actions": {
       "edit": "{{name}} አርትዕ",
@@ -622,7 +650,7 @@
     "form": {
       "name": "ስም",
       "phone": "ስልክ ቁጥር",
-      "phoneHelper": "የሃገር ኮድ ያካትቱ። ለምሳሌ +251...",
+      "phoneHelper": "የሀገር ኮድ ያካትቱ። ለምሳሌ +251…",
       "email": "ኢሜይል",
       "address": "አድራሻ",
       "notes": "ማስታወሻ",
@@ -660,19 +688,19 @@
     "countClient": "{{count}} ደንበኛ",
     "countClient_other": "{{count}} ደንበኞች",
     "emptyClient": {
-      "title": "እስካሁን ደንበኞች የሉም",
+      "title": "ደንበኛ አልተጨመረም",
       "desc": "ለመጀመር የመጀመሪያ ደንበኛዎን ያክሉ።"
     },
     "historyTitle": "የግዢ ታሪክ",
     "historyTitleService": "የአገልግሎት ታሪክ",
-    "viewHistory": "ታሪክ ለ {{name}}",
+    "viewHistory": "የ{{name}} ታሪክ",
     "noHistory": "እስካሁን ምንም ግብይት የለም።",
-    "pendingBalance": "{{amount}} ይጠይቃል",
+    "pendingBalance": "{{amount}} ሒሳብ አለ",
     "outstanding": {
-      "totalLabel": "ጠቅላላ ዕዳ",
-      "owesYou": "{{count}} ደንበኛ ይጠይቃል",
-      "owesYou_other": "{{count}} ደንበኞች ይጠይቃሉ",
-      "filterOwed": "የይጠይቁ ደንበኞችን ብቻ አሳይ"
+      "totalLabel": "ጠቅላላ ያልተከፈለ ሒሳብ",
+      "owesYou": "{{count}} ደንበኛ ሒሳብ አለበት",
+      "owesYou_other": "{{count}} ደንበኞች ሒሳብ አለባቸው",
+      "filterOwed": "ሒሳብ ያለባቸው ደንበኞችን ብቻ አሳይ"
     }
   },
   "suppliers": {
@@ -682,10 +710,10 @@
     "count_other": "{{count}} አቅራቢዎች",
     "add": "አቅራቢ ጨምር",
     "outstanding": {
-      "totalLabel": "ለአቅራቢዎች የሚጠበቅ ጠቅላላ",
-      "owesCount": "{{count}} አቅራቢ ይጠበቃል",
-      "owesCount_other": "{{count}} አቅራቢዎች ይጠበቃሉ",
-      "filterOwed": "የሚጠበቁ አቅራቢዎችን ብቻ አሳይ",
+      "totalLabel": "ለአቅራቢዎች ጠቅላላ ዕዳ",
+      "owesCount": "{{count}} አቅራቢ ሒሳብ ይጠብቃል",
+      "owesCount_other": "{{count}} አቅራቢዎች ሒሳብ ይጠብቃሉ",
+      "filterOwed": "ሒሳብ ያለባቸው አቅራቢዎችን ብቻ አሳይ",
       "balance": "ቀሪ {{amount}}"
     },
     "empty": {
@@ -703,16 +731,16 @@
     }
   },
   "inventory": {
-    "title": "የክምችት ታሪክ",
-    "subtitle": "የምርቶችዎን ሁሉም የክምችት እንቅስቃሴ ይከታተሉ።",
+    "title": "የዕቃ ታሪክ",
+    "subtitle": "ሁሉም የዕቃ እንቅስቃሴዎቸን ይከታተሉ።",
     "count": "{{count}} ከ{{total}} እንቅስቃሴዎች",
     "empty": {
-      "title": "እስካሁን የክምችት እንቅስቃሴ የለም",
-      "desc": "ሽያጭ ሲፈጽሙ ወይም ክምችት ሲያስተካክሉ ራሱ ይመዘገባል።"
+      "title": "የዕቃ እንቅስቃሴ የለም",
+      "desc": "ሽያጭ ሲፈጽሙ ወይም ዕቃ ሲያስተካክሉ ራሱ ይመዘገባል።"
     },
     "col": {
       "product": "ምርት",
-      "type": "አይነት",
+      "type": "ዓይነት",
       "change": "ለውጥ",
       "before": "በፊት",
       "after": "በኋላ",
@@ -724,61 +752,61 @@
       "sale": "ሽያጭ",
       "adjustment": "ማስተካከያ",
       "return": "መመለሻ",
-      "damaged": "ተበላሽቷል"
+      "damaged": "ጉዳት"
     },
     "filter": {
       "allProducts": "ሁሉም ምርቶች",
-      "allTypes": "ሁሉም አይነቶች",
+      "allTypes": "ሁሉም ዓይነቶች",
       "product": "በምርት ይጣሩ",
-      "type": "በአይነት ይጣሩ"
+      "type": "በዓይነት ይጣሩ"
     },
     "adjust": {
-      "title": "ክምችት አስተካክል",
-      "ariaLabel": "የ{{name}} ክምችት አስተካክል",
-      "type": "የማስተካከያ አይነት",
-      "currentStock": "አሁን ያለ ክምችት",
+      "title": "ዕቃ አስተካክል",
+      "ariaLabel": "የ{{name}} ዕቃ አስተካክል",
+      "type": "የማስተካከያ ዓይነት",
+      "currentStock": "አሁን ያለ ዕቃ",
       "quantity": "መጠን",
       "quantityHelper": "የሚጨምሩ ወይም የሚቀንሱ መጠን ያስገቡ።",
-      "preview": "ከማስተካከያ በኋላ ያለ ክምችት:",
+      "preview": "ከማስተካከያ በኋላ ያለ ዕቃ፦",
       "reason": "ምክንያት",
       "reasonHelper": "አማራጭ ማስታወሻ።",
       "confirm": "ለውጥ አስቀምጥ",
-      "success": "ክምችት ተስተካክሏል",
+      "success": "ዕቃ ተስተካክሏል",
       "invalidQty": "ከዜሮ በላይ ትክክለኛ መጠን ያስገቡ።",
-      "negativeStock": "በቂ ክምችት የለም። ያለ: {{available}}"
+      "negativeStock": "በቂ ዕቃ የለም። ያለ፦ {{available}}"
     },
     "alerts": {
-      "title": "የክምችት ማስጠንቀቂያዎች",
-      "outOfStock": "ክምችት ያለቀ",
-      "lowStock": "ዝቅተኛ ክምችት",
-      "healthy": "ጥሩ",
+      "title": "የዕቃ ማስጠንቀቂያዎች",
+      "outOfStock": "ዕቃ አልቋል",
+      "lowStock": "ዕቃ እያነሰ ነው",
+      "healthy": "ዕቃ በቂ ነው",
       "col": {
         "product": "ምርት",
-        "stock": "አሁን ያለ ክምችት",
+        "stock": "አሁን ያለ ዕቃ",
         "threshold": "ወሰን",
         "shortage": "ጉድለት",
         "suggested": "የሚጠቆም ትዕዛዝ"
       }
     },
     "restock": {
-      "button": "ክምችት ሙላ",
-      "title": "ፈጣን ሙያ",
-      "currentStock": "አሁን ያለ ክምችት:",
+      "button": "ዕቃ ሙላ",
+      "title": "ፈጣን ቀቤ",
+      "currentStock": "አሁን ያለ ዕቃ፦",
       "quantity": "የሚቀበለው መጠን",
       "unitCost": "የምርት ወጪ",
-      "confirm": "ክምችት ቀበል",
-      "success": "ክምችት በተሳካ ሁኔታ ተሞልቷል"
+      "confirm": "ዕቃ ቀበል",
+      "success": "ዕቃ ተሞልቷል"
     }
   },
   "purchases": {
     "title": "ግዢዎች",
-    "subtitle": "ከአቅራቢዎች ክምችት ይቀበሉ።",
+    "subtitle": "ከአቅራቢዎች ዕቃ ይቀበሉ።",
     "count": "{{count}} ግዢ",
     "count_other": "{{count}} ግዢዎች",
-    "receive": "ክምችት ቀበል",
+    "receive": "ዕቃ ቀበል",
     "empty": {
-      "title": "ግዢ አልተመዘገበም",
-      "desc": "ክምችት ለመቀበል እና ወጪ ለመከታተል ግዢ ይመዝግቡ።"
+      "title": "ምንም ግዢ አልተመዘገበም",
+      "desc": "ዕቃ ለመቀበልና ወጪ ለመከታተል ግዢ ይመዝግቡ።"
     },
     "col": {
       "date": "ቀን",
@@ -787,7 +815,7 @@
       "total": "ጠቅላላ ወጪ"
     },
     "form": {
-      "title": "ክምችት ቀበል",
+      "title": "ዕቃ ቀበል",
       "supplier": "አቅራቢ",
       "noSupplier": "አቅራቢ የለም (ቀጥታ ግዢ)",
       "date": "የግዢ ቀን",
@@ -801,9 +829,9 @@
       "addLine": "ሌላ ምርት ጨምር",
       "notes": "ማስታወሻ",
       "total": "ጠቅላላ ወጪ",
-      "submit": "ቀበል እና ክምችት አዘምን",
+      "submit": "ቀበል እና ዕቃ አዘምን",
       "errors": {
-        "selectProduct": "ለእያንዳንዱ መስመር ምርት ይምረጡ።",
+        "selectProduct": "ለእያንዳንዱ ረድፍ ምርት ይምረጡ።",
         "invalidQty": "ከዜሮ በላይ ትክክለኛ መጠን ያስገቡ።",
         "invalidCost": "ትክክለኛ ወጪ ያስገቡ (0 ወይም ከዚያ በላይ)።",
         "duplicateProduct": "ተመሳሳይ ምርት ሁለት ጊዜ ተጠቅሟል። መጠኖቹን ጥምሩ።"
@@ -818,38 +846,38 @@
       "total": "ጠቅላላ"
     },
     "notifications": {
-      "received": "ክምችት ተቀብሏል እና ተዘምኗል"
+      "received": "ዕቃ ተቀብሏል እና ክምችት ተዘምኗል"
     },
     "paymentStatus": {
       "unpaid": "ያልተከፈለ",
-      "partial": "ከፊል ተከፍሏል",
+      "partial": "በከፊል ተከፍሏል",
       "paid": "ተከፍሏል"
     },
     "outstanding": {
-      "totalLabel": "ለአቅራቢዎች የሚጠበቅ ጠቅላላ",
-      "owesCount": "{{count}} አቅራቢ ይጠበቃል",
-      "owesCount_other": "{{count}} አቅራቢዎች ይጠበቃሉ",
-      "filterOwed": "የሚጠበቁ አቅራቢዎችን ብቻ አሳይ",
-      "balance": "ቀሪ: {{amount}}"
+      "totalLabel": "ለአቅራቢዎች ጠቅላላ ዕዳ",
+      "owesCount": "{{count}} አቅራቢ ሒሳብ ይጠብቃል",
+      "owesCount_other": "{{count}} አቅራቢዎች ሒሳብ ይጠብቃሉ",
+      "filterOwed": "ሒሳብ ያለባቸው አቅራቢዎችን ብቻ አሳይ",
+      "balance": "ቀሪ፦ {{amount}}"
     },
     "payment": {
       "dialogTitle": "ክፍያ ይመዝግቡ",
       "amount": "መጠን",
-      "method": "የክፍያ ዘዴ",
+      "method": "የክፍያ ዓይነት",
       "date": "የክፍያ ቀን",
       "note": "ማስታወሻ",
       "noteHelper": "አማራጭ።",
-      "submit": "ክፍያ ይመዝግቡ",
+      "submit": "ክፍያ ምዝግብ",
       "success": "ክፍያ ተመዝግቧል",
-      "balanceDue": "ቀሪ ሂሳብ: {{amount}}",
+      "balanceDue": "ቀሪ ሒሳብ፦ {{amount}}",
       "paidFull": "ሙሉ ተከፍሏል",
       "historyTitle": "የክፍያ ታሪክ",
       "noHistory": "እስካሁን ምንም ክፍያ አልተመዘገበም።",
-      "overpay": "መጠኑ ቀሪ ሂሳቡን ያልፋል።",
+      "overpay": "የገቡት መጠን ቀሪ ሒሳቡን ያልፋል።",
       "col": {
         "date": "ቀን",
         "amount": "መጠን",
-        "method": "ዘዴ",
+        "method": "ዓይነት",
         "note": "ማስታወሻ"
       }
     }
@@ -858,42 +886,42 @@
     "todaySales": "የዛሬ ሽያጭ",
     "todayExpenses": "የዛሬ ወጪ",
     "profit": "ግምታዊ ትርፍ",
-    "netProfitHint": "ገቢ ሲቀነስ የምርት ወጪ እና ሥራ ወጪ",
+    "netProfitHint": "ገቢ ሲቀነስ የምርት ወጪ እና የሥራ ወጪ",
     "newSale": "አዲስ ሽያጭ",
     "quickExpense": "ወጪ ጨምር",
     "quickSales": "የሽያጭ ታሪክ",
     "quickReport": "ሪፖርቶች",
     "quickSuppliers": "አቅራቢዎች",
-    "quickReceiveStock": "ክምችት ቀበል",
-    "pendingBanner": "{{amount}} ያልተከፈለ ሂሳብ አለ",
-    "lowStockBanner": "{{count}} ምርት ክምችት አነሰ",
+    "quickReceiveStock": "ዕቃ ቀበል",
+    "pendingBanner": "{{amount}} ያልተከፈለ ሒሳብ አለ",
+    "lowStockBanner": "{{count}} ምርት ዕቃ አነሰ",
     "moreDetails": "ዝርዝር ትንታኔ ለማየት",
     "viewFullReport": "ሙሉ ሪፖርት ይመልከቱ",
     "recentServices": "የቅርብ ጊዜ ሽያጮች",
     "newServiceSale": "ሽያጭ ይመዝግቡ",
     "quickActions": "ፈጣን እርምጃዎች",
-    "inventorySection": "የክምችት ዋጋ",
-    "inventoryCostValue": "የክምችት ወጪ ዋጋ",
-    "inventoryCostHint": "አሁን ያለ ክምችት × የመጨረሻ ግዢ ወጪ",
+    "inventorySection": "የዕቃ ዋጋ",
+    "inventoryCostValue": "የዕቃ ወጪ ዋጋ",
+    "inventoryCostHint": "አሁን ያለ ዕቃ × የመጨረሻ ግዢ ወጪ",
     "inventoryRetailValue": "ሊሸጥ የሚችለው ዋጋ",
-    "inventoryRetailHint": "አሁን ያለ ክምችት × አሁን ያለ የሽያጭ ዋጋ",
+    "inventoryRetailHint": "አሁን ያለ ዕቃ × አሁን ያለ የሽያጭ ዋጋ",
     "inventoryPartial": "አንዳንድ ምርቶች ወጪ ዋጋ የላቸውም",
     "receivablesSection": "ተቀቢ / ተከፋይ",
-    "customersOwe": "ደንበኞች ይጠይቁዎታል",
-    "customersOweHint": "ጠቅላላ ያልተከፈለ የደንበኛ ሂሳብ",
-    "youOweSuppliers": "ለአቅራቢዎች ይጠይቃሉ",
-    "youOweSuppliersHint": "ጠቅላላ ያልተከፈለ የአቅራቢ ሂሳብ",
+    "customersOwe": "ደንበኞች ሒሳብ አለባቸው",
+    "customersOweHint": "ጠቅላላ ያልተከፈለ የደንበኛ ሒሳብ",
+    "youOweSuppliers": "ለአቅራቢዎች ዕዳ አለ",
+    "youOweSuppliersHint": "ጠቅላላ ያልተከፈለ የአቅራቢ ሒሳብ",
     "noneOutstanding": "ምንም ያልተከፈለ የለም"
   },
   "stock": {
     "title": "ክምችት",
-    "subtitle": "ምርቶችዎን እና ክምችት ደረጃዎችን ያስተዳድሩ።",
+    "subtitle": "ምርቶቻቸውን እና ዕቃ ደረጃዎቸን ያስተዳድሩ።",
     "products": "ምርቶች",
     "search": "ምርቶችን ይፈልጉ…",
     "showAll": "ሁሉንም አሳይ",
-    "viewHistory": "የክምችት ታሪክ",
+    "viewHistory": "የዕቃ ታሪክ",
     "viewPurchases": "የግዢ ታሪክ",
-    "manageProducts": "የምርት ዝርዝር ለማስተካከል?",
+    "manageProducts": "ምርቶቸን ለማስተካከል?",
     "manageProductsLink": "ምርቶችን ያስተዳድሩ",
     "manageSuppliers": "አቅራቢዎችን ያስተዳድሩ →",
     "addService": "አገልግሎት ጨምር",
@@ -902,31 +930,31 @@
   },
   "more": {
     "title": "ተጨማሪ",
-    "settings": "የመለያ ቅንጅቶች",
+    "settings": "የመለያ ቅንብሮች",
     "desc": {
-      "purchases": "ከአቅራቢዎች ክምችት ይቀበሉ",
+      "purchases": "ከአቅራቢዎች ዕቃ ይቀበሉ",
       "customers": "የደንበኞችን ዝርዝር ያስተዳድሩ",
       "suppliers": "የአቅራቢዎችን ዝርዝር ያስተዳድሩ",
-      "inventory": "ሁሉም የክምችት እንቅስቃሴ",
+      "inventory": "ሁሉም የዕቃ እንቅስቃሴ",
       "reports": "ዝርዝር የፋይናንስ ሪፖርቶች",
-      "products": "ምርቶችን እና ዋጋዎችን አርትዕ",
-      "settings": "መለያ እና ንግድ ቅንጅቶች",
-      "clients": "የደንበኞችዎን ዝርዝር ያስተዳድሩ",
-      "stock": "የዕቃ ክምችት ደረጃዎችን ይመልከቱ እና ያስተካክሉ",
-      "staff": "ሰራተኞችን እና ፈቃዶቻቸውን ያስተዳድሩ",
-      "clientsService": "የደንበኞችዎን ዝርዝር ያስተዳድሩ"
+      "products": "ምርቶቸን እና ዋጋዎቸን አርትዕ",
+      "settings": "የመለያ እና ንግድ ቅንብሮች",
+      "clients": "የደንበኞቸን ዝርዝር ያስተዳድሩ",
+      "stock": "ዕቃ ደረጃዎቸን ይመልከቱ እና ያስተካክሉ",
+      "staff": "ሠራተኞቸን እና ፈቃዶቻቸውን ያስተዳድሩ",
+      "clientsService": "የደንበኞቸን ዝርዝር ያስተዳድሩ"
     }
   },
   "sync": {
     "online": "ኢንተርኔት አለ",
-    "offline": "ከኔት ወጣ",
+    "offline": "ከኢንተርኔት ተቋርጧል",
     "syncing": "እየተመሳሰለ ነው…",
-    "pending": "{{count}} በመጠባበቅ",
+    "pending": "{{count}} በመጠበቅ ላይ",
     "failed": "{{count}} አልተሳካም",
     "retryLabel": "እንደገና ሞክር",
     "pendingLabel": "{{count}} ያልተላኩ ግብይቶች",
-    "savedOffline": "ከኦፍላይን ተቀምጧል",
-    "savedOfflineDesc": "ግንኙነት ሲፈጠር ራሱ ይመሳሰላል።"
+    "savedOffline": "ያለ ኢንተርኔት ተቀምጧል",
+    "savedOfflineDesc": "ኢንተርኔት ሲገኝ ራሱ ይምሳሰላል።"
   },
   "businessTypes": {
     "retail": "ሱቅ",
@@ -936,13 +964,13 @@
     "fnb": "ካፌ / ቡናቤት",
     "fnb_desc": "ቡና፣ መጠጦች፣ ጭማቂ እና ቀላል መክሰስ",
     "fastfood": "ፈጣን ምግብ / ሬስቶራንት",
-    "fastfood_desc": "ምግቦች፣ ምርኮ ምግብ፣ ቴክ አዌይ",
+    "fastfood_desc": "ምርኮ ምግብ፣ ቴክ አዌይ",
     "bakery": "ዳቦ ቤት / ፓስትሪ",
     "bakery_desc": "ዳቦ፣ ፓስትሪ፣ ኬክ",
     "service": "አገልግሎት",
     "service_desc": "ጥገና፣ ሙያዊ አገልግሎቶች",
-    "salon": "Beauty Salon & Spa",
-    "salon_desc": "ፀጉር፣ ጥፍር፣ ማሳጅ፣ ስፓ እና የቆዳ ህክምና",
+    "salon": "የውበት ሳሎን እና ስፓ",
+    "salon_desc": "ፀጉር፣ ጥፍር፣ ማሳጅ፣ ስፓ እና የቆዳ ሕክምና",
     "baltina": "ባልቲና / ቅመም ቤት",
     "baltina_desc": "በርበሬ፣ ሽሮ፣ ሚጥሚጣ እና ዱቄቶች",
     "personal": "ግል",
@@ -950,13 +978,13 @@
   },
   "onboarding": {
     "pickType": {
-      "title": "ሜላን እንዴት ይጠቀሙበታል?",
+      "title": "MELAን እንዴት ይጠቀሙበታል?",
       "subtitle": "ለንግድ ወይም ለግል — ይምረጡ።",
       "continue": "ቀጥል"
     },
     "details": {
       "title": "ንግድዎን ያቋቁሙ",
-      "subtitle": "ሁለት ደቂቃ ያህል ይወስዳል።",
+      "subtitle": "ሁለት ደቂቃ ያህል ይወስዳሉ።",
       "back": "ዓይነት ቀይር"
     },
     "step": "ደረጃ {{current}} ከ {{total}}",
@@ -974,9 +1002,9 @@
     "subtype": {
       "subtitle": "ሥራዎን የሚገልጸውን ይምረጡ።",
       "title": {
-        "service":  "ምን ዓይነት አገልግሎት ይሰጣሉ?",
-        "fnb":      "ምን ዓይነት ቡናቤት ወይም ካፌ ያካሂዳሉ?",
-        "retail":   "ምን ዓይነት ሱቅ ያካሂዳሉ?",
+        "service": "ምን ዓይነት አገልግሎት ይሰጣሉ?",
+        "fnb": "ምን ዓይነት ካፌ ወይም ቡናቤት ያካሂዳሉ?",
+        "retail": "ምን ዓይነት ሱቅ ያካሂዳሉ?",
         "fastfood": "ምን ዓይነት ምግብ ያቀርባሉ?"
       }
     },
@@ -990,23 +1018,23 @@
     "subtitle": "ዕቅድዎን፣ አጠቃቀምዎን እና ክፍያዎን ያስተዳድሩ።",
     "plan": {
       "free": "ነፃ",
-      "premium": "ፕሪሚየም"
+      "premium": "Premium"
     },
     "status": {
       "free": "ነፃ ዕቅድ",
       "active": "ንቁ",
-      "pending_payment": "ክፍያ በመጠባበቅ",
-      "grace": "የደፍ ጊዜ",
+      "pending_payment": "ክፍያ በመጠበቅ ላይ",
+      "grace": "ማራዘሚያ ጊዜ",
       "expired": "ጊዜው አልፏል",
       "cancelled": "ተሰርዟል",
       "unknown": "አልታወቀም"
     },
     "currentPlan": {
       "heading": "አሁን ያለዎት ዕቅድ",
-      "periodEnd": "የአሁኑ ጊዜ ያበቃል:",
+      "periodEnd": "አሁን ያለው ወቅት ያበቃል፦",
       "periodEndSeeHistory": "ከዚህ በታች ያለውን የክፍያ ታሪክ ይመልከቱ።",
-      "graceNotice": "ደንበኝነትዎ የደፍ ጊዜ ላይ ነው። መዳረሻ ለማስቀጠል እባክዎ ያድሱ።",
-      "pendingPaymentNotice": "ክፍያዎ እየታየ ነው። ከጸደቀ በኋላ መዳረሻ ይሰጣል።"
+      "graceNotice": "ደንበኝነትዎ ማራዘሚያ ጊዜ ላይ ነው። ያለ መቋረጥ ለመቀጠል እባክዎ ያድሱ።",
+      "pendingPaymentNotice": "ክፍያዎ እየታየ ነው። ከጸደቀ በኋላ ሙሉ መዳረሻ ይሰጣሎታል።"
     },
     "pricing": {
       "heading": "ዕቅዶች",
@@ -1017,7 +1045,7 @@
       "perMonth": "/ ወር",
       "perYear": "/ ዓመት",
       "billingToggleLabel": "የክፍያ ዑደት",
-      "upgrade": "ወደ ፕሪሚየም አሳድጉ",
+      "upgrade": "ወደ Premium አሳድጉ",
       "currentPlanLabel": "አሁን ያለ ዕቅድ"
     },
     "features": {
@@ -1026,31 +1054,31 @@
       "customers50": "50 ደንበኞች",
       "suppliers5": "5 አቅራቢዎች",
       "purchases10": "10 ግዢዎች በወር",
-      "basicReports": "መሰረታዊ ሪፖርቶች",
-      "history30": "30 ቀን የክምችት ታሪክ",
+      "basicReports": "መሠረታዊ ሪፖርቶች",
+      "history30": "30 ቀን የዕቃ ታሪክ",
       "unlimitedProducts": "ያልተወሰኑ ምርቶች",
       "unlimitedSales": "ያልተወሰኑ ሽያጮች",
       "unlimitedCustomers": "ያልተወሰኑ ደንበኞች",
       "unlimitedSuppliers": "ያልተወሰኑ አቅራቢዎች",
       "unlimitedPurchases": "ያልተወሰኑ ግዢዎች",
-      "advancedReports": "የተሻሻሉ ሪፖርቶች",
-      "fullHistory": "ሙሉ የክምችት ታሪክ"
+      "advancedReports": "የላቀ ሪፖርቶች",
+      "fullHistory": "ሙሉ የዕቃ ታሪክ"
     },
     "form": {
       "heading": "ክፍያ ያስገቡ",
       "amount": "የሚከፈለው መጠን",
-      "paymentMethod": "የክፍያ ዘዴ",
+      "paymentMethod": "የክፍያ ዓይነት",
       "bankTransfer": "የባንክ ዝውውር",
       "txRef": "የግብይት ማጣቀሻ",
-      "txRefHelper": "ከቴሌብር፣ CBE Birr ወይም ባንክ ዝውውር ያገኙትን ማጣቀሻ ቁጥር ያስገቡ (4–100 ቁምፊዎች)።",
+      "txRefHelper": "ከTelebirr፣ CBE Birr ወይም የባንክ ዝውውር ያገኙትን ማጣቀሻ ቁጥር ያስገቡ (4–100 ቁምፊዎች)።",
       "txRefError": "የግብይት ማጣቀሻ ከ4 እስከ 100 ቁምፊዎች መሆን አለበት።",
       "submit": "ክፍያ ያስገቡ",
-      "submitSuccess": "ክፍያ ቀርቧል — ለፍተሻ ጠብቁ",
+      "submitSuccess": "ክፍያ ቀርቧል — ለፍተሻ ይጠብቁ",
       "submitError": "ክፍያ ማስገባት አልተቻለም",
       "submitErrorDesc": "ችግር ተፈጥሯል። እባክዎ እንደገና ይሞክሩ።",
       "payTo": "ክፍያ ወደዚህ ይላኩ",
-      "accountName": "የሂሳብ ስም",
-      "accountNum": "የሂሳብ ቁጥር",
+      "accountName": "የሒሳብ ስም",
+      "accountNum": "የሒሳብ ቁጥር",
       "bankName": "ባንክ",
       "phoneNumber": "ስልክ ቁጥር",
       "copy": "ቅዳ",
@@ -1059,10 +1087,10 @@
       "screenshot": "የክፍያ ስክሪንሾት አያይዝ",
       "screenshotHelper": "ስክሪንሾቱን ወስደው እዚህ ይጫኑ።",
       "screenshotRequired": "እባክዎ የክፍያ ስክሪንሾት ያያይዙ።",
-      "uploadScreenshot": "ስክሪንሾት ለመጫን ይጫኑ"
+      "uploadScreenshot": "ስክሪንሾት ለመጫን ጠቅ ያድርጉ"
     },
     "usage": {
-      "heading": "ነፃ ዕቅድ አጠቃቀም",
+      "heading": "የነፃ ዕቅድ አጠቃቀም",
       "products": "ምርቶች",
       "customers": "ደንበኞች",
       "suppliers": "አቅራቢዎች",
@@ -1080,136 +1108,171 @@
         "plan": "ዕቅድ",
         "cycle": "የክፍያ ዑደት",
         "amount": "መጠን",
-        "method": "ዘዴ",
+        "method": "ዓይነት",
         "reference": "ማጣቀሻ",
         "status": "ሁኔታ"
       },
       "paymentStatus": {
-        "pending": "ይጠብቃል",
+        "pending": "ይጠበቃል",
         "approved": "ጸድቋል",
         "rejected": "ተቀባይነት አላገኘም"
       }
     },
-    "upgradeRequired": "ማሻሻል ያስፈልጋል",
-    "reportsUpgradeDesc": "የተሻሻሉ ሪፖርቶች በፕሪሚየም ዕቅድ ይገኛሉ። ዝርዝር የሽያጭ ትንታኔ፣ የወጪ ክፍፍል እና ተጨማሪ ለማግኘት ያሻሽሉ።",
-    "upgradeButton": "ወደ ፕሪሚየም አሳድጉ",
+    "upgradeRequired": "ማሻሻያ ያስፈልጋል",
+    "reportsUpgradeDesc": "የላቀ ሪፖርቶች በPremium ዕቅድ ይገኛሉ። ዝርዝር የሽያጭ ትንታኔ፣ የወጪ ክፍፍል እና ተጨማሪ ለማግኘት ያሻሽሉ።",
+    "upgradeButton": "ወደ Premium አሳድጉ",
     "productLimitReached": "የምርት ገደቡ ደርሷል። ተጨማሪ ምርቶች ለማከል ያሻሽሉ።",
     "customerLimitReached": "የደንበኛ ገደቡ ደርሷል። ተጨማሪ ደንበኞች ለማከል ያሻሽሉ።",
     "supplierLimitReached": "የአቅራቢ ገደቡ ደርሷል። ተጨማሪ አቅራቢዎች ለማከል ያሻሽሉ።",
     "purchaseLimitReached": "የወርሃዊ ግዢ ገደቡ ደርሷል። ያልተወሰኑ ግዢዎች ለማድረግ ያሻሽሉ።",
-    "salesLimitWarning": "በዚህ ወር {{used}} ከ{{max}} ሽያጮችን ተጠቅመዋል። ያልተወሰኑ ሽያጮች ለፕሪሚየም ያሻሽሉ።"
+    "salesLimitWarning": "በዚህ ወር {{used}} ከ{{max}} ሽያጮችን ተጠቅመዋል። ያልተወሰኑ ሽያጮች ለPremium ያሻሽሉ።"
   },
   "staff": {
-    "title": "ሰራተኞች",
-    "subtitle": "{{count}} ንቁ ሰራተኛ",
-    "subtitle_other": "{{count}} ንቁ ሰራተኞች",
-    "addStaff": "ሰራተኛ ጨምር",
-    "premiumRequired": "ፕሪሚየም ያስፈልጋል",
-    "premiumRequiredDesc": "የሰራተኛ አስተዳደር በፕሪሚየም እቅድ ላይ ይገኛል። ሰራተኞችን ለማከል አዘምን።",
+    "title": "ሠራተኞች",
+    "subtitle": "{{count}} ንቁ ሠራተኛ",
+    "subtitle_other": "{{count}} ንቁ ሠራተኞች",
+    "addStaff": "ሠራተኛ ጨምር",
+    "premiumRequired": "Premium ያስፈልጋል",
+    "premiumRequiredDesc": "የሠራተኛ አስተዳደር በPremium ዕቅድ ይገኛል። ሠራተኞችን ለማከል ያሻሽሉ።",
     "accessRestricted": "መዳረሻ ተገድቧል",
-    "accessRestrictedDesc": "ሰራተኞችን ለማስተዳደር ፈቃድ የለዎትም።",
+    "accessRestrictedDesc": "ሠራተኞችን ለማስተዳደር ፈቃድ የለዎትም።",
     "deactivate": "አቦ",
     "reactivate": "ንቁ አድርግ",
     "remove": "አስወግድ",
     "editPermissions": "ፈቃዶችን አርትዕ",
     "role": {
-      "manager": "ስራ አስኪያጅ",
+      "manager": "ሥራ አስኪያጅ",
       "cashier": "ካሽ",
-      "inventory": "የዕቃ ሰራተኛ",
-      "accountant": "አካውንታንት"
+      "inventory": "የዕቃ ሠራተኛ",
+      "accountant": "ሒሳብ ሠራተኛ"
     },
     "status": {
       "active": "ንቁ",
-      "deactivated": "ተሰናክሏል"
+      "deactivated": "ታግዷል"
     },
     "permission": {
       "pos": "የሽያጭ ነጥብ",
-      "cancel_sale": "ሽያጭ ሰርዝ / መልስ ስጥ",
+      "cancel_sale": "ሽያጭ ሰርዝ / ተመለስ",
       "manage_products": "ምርቶችን አስተዳድር",
-      "stock_adjustments": "የዕቃ ክምችት ማስተካከያ",
+      "stock_adjustments": "ዕቃ ማስተካከያ",
       "receive_purchases": "ግዢዎችን ተቀበል",
       "manage_customers": "ደንበኞችን አስተዳድር",
       "manage_suppliers": "አቅራቢዎችን አስተዳድር",
       "manage_expenses": "ወጪዎችን አስተዳድር",
       "view_reports": "ሪፖርቶችን ይመልከቱ",
-      "manage_staff": "ሰራተኞችን አስተዳድር",
+      "manage_staff": "ሠራተኞችን አስተዳድር",
       "manage_subscription": "ደንበኝነት እና ክፍያ",
       "manage_business_settings": "የንግድ ቅንብሮች"
     },
     "form": {
-      "titleAdd": "ሰራተኛ ጨምር",
+      "titleAdd": "ሠራተኛ ጨምር",
       "titleEditPerms": "ለ {{name}} ፈቃዶችን አርትዕ",
       "name": "ሙሉ ስም",
       "role": "ሚና",
       "permissions": "ፈቃዶች",
-      "pin": "4-አሃዝ ፒን",
-      "pinHelper": "ሰራተኛው ወደ ሂሳቡ ለመቀየር ይህን ፒን ይጠቀማል።",
-      "pinError": "ፒን ትክክለኛ 4 አሃዞች መሆን አለበት።",
-      "showPin": "ፒን አሳይ",
-      "hidePin": "ፒን ደብቅ",
-      "submit": "ሰራተኛ ጨምር"
+      "pin": "4-አሃዝ PIN",
+      "pinHelper": "ሠራተኛው ወደ ሒሳቡ ለመቀየር ይህን PIN ይጠቀማል።",
+      "pinError": "PIN ትክክለኛ 4 አሃዞች መሆን አለበት።",
+      "showPin": "PIN አሳይ",
+      "hidePin": "PIN ደብቅ",
+      "submit": "ሠራተኛ ጨምር"
     },
     "delete": {
-      "title": "ሰራተኛ አስወግድ",
-      "desc": "\"{{name}}\" ያስወግዱ? ሂሳባቸው ቋሚ ይሰረዛል።"
+      "title": "ሠራተኛ አስወግድ",
+      "desc": "\"{{name}}\" ያስወግዱ? ሒሳባቸው ቋሚ ይሰረዛል።"
     },
     "empty": {
-      "title": "እስካሁን ሰራተኞች የሉም",
-      "desc": "ሌሎች የንግድዎን ጉዳዮች እንዲያስተዳድሩ ሰራተኞችን ያክሉ።"
+      "title": "ሠራተኛ አልተጨመረም",
+      "desc": "ሌሎቹ የንግድዎን ጉዳዮች እንዲያስተዳድሩ ሠራተኞችን ያክሉ።"
     },
     "notifications": {
-      "added": "ሰራተኛ ታክሏል",
+      "added": "ሠራተኛ ታክሏል",
       "updated": "ፈቃዶች ተዘምነዋል",
-      "deleted": "ሰራተኛ ተወግዷል",
-      "deactivated": "ሰራተኛ ተሰናክሏል",
-      "reactivated": "ሰራተኛ ንቁ ሆኗል"
+      "deleted": "ሠራተኛ ተወግዷል",
+      "deactivated": "ሠራተኛ ታግዷል",
+      "reactivated": "ሠራተኛ ንቁ ሆኗል"
     },
     "switcher": {
       "title": "መለያ ቀይር",
       "ownerRole": "ባለቤት (ሙሉ መዳረሻ)",
-      "enterPin": "ለ {{name}} ፒን ያስገቡ",
-      "wrongPin": "ፒን ትክክል አይደለም። እንደገና ይሞክሩ።",
+      "enterPin": "ለ {{name}} PIN ያስገቡ",
+      "wrongPin": "PIN ትክክል አይደለም። እንደገና ይሞክሩ።",
       "deleteDigit": "አሃዝ ሰርዝ",
-      "noStaff": "ምንም ንቁ ሰራተኞች የሉም።"
+      "noStaff": "ምንም ንቁ ሠራተኞች የሉም።"
     },
     "activityLog": {
       "title": "የቅርብ ጊዜ እንቅስቃሴ",
       "empty": "እስካሁን ምንም እንቅስቃሴ አልተመዘገበም።",
       "owner": "ባለቤት",
-      "unknownStaff": "ያልታወቀ ሰራተኛ",
+      "unknownStaff": "ያልታወቀ ሠራተኛ",
       "action": {
         "sale": "ሽያጭ ተመዝግቧል",
         "expense": "ወጪ ታክሏል",
         "stock_adjustment": "ዕቃ ተስተካክሏል",
         "purchase": "ግዢ ተቀብሏል",
         "sale_cancellation": "ሽያጭ ተሰርዟል",
-        "staff_created": "ሰራተኛ ታክሏል",
-        "staff_deactivated": "ሰራተኛ ተሰናክሏል",
-        "staff_deleted": "ሰራተኛ ተወግዷል"
+        "staff_created": "ሠራተኛ ታክሏል",
+        "staff_deactivated": "ሠራተኛ ታግዷል",
+        "staff_deleted": "ሠራተኛ ተወግዷል"
       }
     }
   },
   "notifications": {
     "title": "ማሳወቂያዎች",
-    "markAllRead": "ሁሉንም እንደተነበበ ምልክት አድርግ",
+    "markAllRead": "ሁሉንም እንደ ተነበበ ምልክት አድርግ",
     "delete": "ማሳወቂያ ሰርዝ",
     "empty": {
       "title": "ምንም ማሳወቂያ የለም",
-      "desc": "የዕለት ማጠቃለያዎ እና ማስጠንቀቂያዎ እዚህ ይታያሉ።"
+      "desc": "ዕለታዊ ማጠቃለያዎ እና ማስጠንቀቂያዎ እዚህ ይታያሉ።"
     }
   },
   "pwa": {
     "installTitle": "MELA ጫን",
-    "installDesc": "ለተሻለ ልምድ ወደ ቤት ማያ ቁልፍ ያክሉ።",
+    "installDesc": "ለተሻለ ልምድ ወደ ቤት ማያ ፈጣን መዳረሻ ያክሉ።",
     "install": "ጫን"
   },
   "trial": {
-    "bannerDays": "በ30 ቀን ሙከራዎ {{count}} ቀን ቀርቷል — ለቀጣይ አዘምኑ",
-    "bannerDays_other": "በ30 ቀን ሙከራዎ {{count}} ቀናት ቀርቷቸዋል — ለቀጣይ አዘምኑ",
-    "graceWarning": "ሙከራዎ ጊዜው አልፏል። ከ3 ቀናት በኋላ ይዘጋጃል።",
-    "expiredTitle": "30 ቀን ነጻ ሙከራዎ አብቅቷል",
-    "expiredDesc": "MELA ለንግድዎ መጠቀም ለመቀጠል ፕሪሚየም ይደንቡ።",
-    "subscribeNow": "ወደ ፕሪሚየም ይደንቡ"
+    "bannerDays": "ከ30 ቀን ሙከራ {{count}} ቀን ቀርቷል — ሙሉ አገልግሎት ለማስቀጠል ያሻሽሉ",
+    "bannerDays_other": "ከ30 ቀን ሙከራ {{count}} ቀናት ቀርቷቸዋል — ሙሉ አገልግሎት ለማስቀጠል ያሻሽሉ",
+    "graceWarning": "ሙከራ ጊዜዎ አብቅቷል። ከ3 ቀናት በኋላ መዳረሻ ይዘጋጋል።",
+    "expiredTitle": "30 ቀን ነፃ ሙከራዎ አብቅቷል",
+    "expiredDesc": "MELAን ለንግድዎ ለማስቀጠል Premium ይደንቡ።",
+    "subscribeNow": "ወደ Premium ይደንቡ"
+  },
+  "income": {
+    "title": "ገቢ",
+    "subtitle": "ገቢዎቸን እዚህ ይመዝግቡ።",
+    "addIncome": "ገቢ ጨምር",
+    "totalIncome": "ጠቅላላ ገቢ",
+    "totalLabel": "ጠቅላላ፦ {{amount}}",
+    "entryCount_one": "{{count}} ግቤት",
+    "entryCount_other": "{{count}} ግቤቶች",
+    "pickSource": "ገንዘቡ ከየት መጣ?",
+    "amount": "መጠን",
+    "noteHelper": "አማራጭ — ለምሳሌ 'የህዳር ደሞዝ'",
+    "notePlaceholder": "ማስታወሻ ጨምር…",
+    "deleteEntry": "ሰርዝ",
+    "sources": {
+      "salary": "ደሞዝ",
+      "freelance": "ፍሪላንስ",
+      "business": "ንግድ",
+      "rental": "ኪራይ",
+      "investment": "ኢንቨስትመንት",
+      "gift": "ስጦታ",
+      "other": "ሌላ"
+    },
+    "empty": {
+      "title": "ምንም ገቢ አልተመዘገበም",
+      "desc": "'ገቢ ጨምር' ይጫኑ።"
+    },
+    "notifications": {
+      "added": "ገቢ ተመዝግቧል",
+      "deleted": "ተሰርዟል"
+    },
+    "delete": {
+      "title": "ይሰርዙ?",
+      "desc": "{{source}} — {{amount}} ቋሚ ይሰረዛል።"
+    }
   },
   "selectBusiness": {
     "title": "ንግድ ይምረጡ",
@@ -1217,7 +1280,7 @@
     "addBusiness": "ሌላ ንግድ ይመዝግቡ",
     "remaining_one": "{{count}} ቦታ ቀርቷል",
     "remaining_other": "{{count}} ቦታዎች ቀርቷቸዋል",
-    "atLimit": "በዚህ መለያ ከ3 ንግዶች መብለጥ አይቻልም።",
+    "atLimit": "በዚህ መለያ ከሦስት ንግዶች ማከል አይቻልም።",
     "continue": "{{name}} ቀጥሉ"
   }
 }

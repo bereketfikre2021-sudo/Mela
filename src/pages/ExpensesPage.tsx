@@ -16,6 +16,7 @@ import { createExpense, deleteExpense, updateExpense } from '../modules/expenses
 import { enqueueExpense } from '../lib/offlineQueue'
 import { useSyncContext } from '../context/SyncContext'
 import { ExpenseForm } from '../modules/expenses/ExpenseForm'
+import { QuickExpenseForm } from '../modules/expenses/QuickExpenseForm'
 import { EXPENSE_CATEGORIES, type Expense, type ExpenseCategory } from '../modules/expenses/types'
 import { useExpenses } from '../modules/expenses/useExpenses'
 
@@ -34,10 +35,12 @@ function fmtDate(iso: string) {
 
 /** Expense management page — Phase 3.1. */
 export function ExpensesPage() {
-  const { t }    = useTranslation()
-  const { user } = useAuth()
+  const { t }             = useTranslation()
+  const { user, profile } = useAuth()
   const { expenses, status, errorMessage, reload } = useExpenses()
   const { notify } = useNotification()
+
+  const isPersonal = profile?.type === 'personal'
 
   const [dialogMode, setDialogMode] = useState<DialogMode>(null)
   const [selected,   setSelected]   = useState<Expense | null>(null)
@@ -216,7 +219,7 @@ export function ExpensesPage() {
         </div>
         <Dialog open={dialogMode === 'add'} onOpenChange={o => { if (!o) closeDialog() }}
           title={t('expenses.form.titleAdd')} closeLabel={t('common.close')}>
-          <ExpenseForm mode="add" onSubmit={handleAdd} onCancel={closeDialog} submitting={submitting} />
+          <QuickExpenseForm onSubmit={handleAdd} onCancel={closeDialog} submitting={submitting} personalMode={isPersonal} />
         </Dialog>
       </>
     )
@@ -303,7 +306,7 @@ export function ExpensesPage() {
       {/* ── Add ─────────────────────────────────────────────────────────────── */}
       <Dialog open={dialogMode === 'add'} onOpenChange={o => { if (!o) closeDialog() }}
         title={t('expenses.form.titleAdd')} closeLabel={t('common.close')}>
-        <ExpenseForm mode="add" onSubmit={handleAdd} onCancel={closeDialog} submitting={submitting} />
+        <QuickExpenseForm onSubmit={handleAdd} onCancel={closeDialog} submitting={submitting} personalMode={isPersonal} />
       </Dialog>
 
       {/* ── Edit ────────────────────────────────────────────────────────────── */}

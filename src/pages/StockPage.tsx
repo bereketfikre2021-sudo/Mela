@@ -6,7 +6,7 @@
  * are accessible via action buttons — nothing is removed.
  */
 import { useState } from 'react'
-import { AlertTriangle, ArrowDownUp, ClipboardList, History, PackageX, Pencil, Plus, Trash2 } from 'lucide-react'
+import { AlertTriangle, ArrowDownUp, ClipboardList, FileSpreadsheet, History, PackageX, Pencil, Plus, Trash2 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 
@@ -24,6 +24,7 @@ import { enqueueStockAdjust, enqueuePurchase } from '../lib/offlineQueue'
 import { useSyncContext } from '../context/SyncContext'
 import { createProduct, updateProduct, deleteProduct } from '../modules/retail/api'
 import { ProductForm } from '../modules/retail/ProductForm'
+import { ProductImport } from '../modules/retail/ProductImport'
 import { MANUAL_MOVEMENT_TYPES } from '../modules/retail/inventoryTypes'
 import { useProducts } from '../modules/retail/useProducts'
 import { useSuppliers } from '../modules/suppliers/useSuppliers'
@@ -82,6 +83,9 @@ export function StockPage() {
   // Add product dialog
   const [addOpen,     setAddOpen]     = useState(false)
   const [addSubmit,   setAddSubmit]   = useState(false)
+
+  // Import dialog
+  const [importOpen,  setImportOpen]  = useState(false)
 
   // Edit product dialog
   const [editProduct,  setEditProduct]  = useState<Product | null>(null)
@@ -282,10 +286,19 @@ export function StockPage() {
               {products.length === 0 ? bizConfig.stockEmptyDesc : `${products.length} ${bizConfig.stockLabel.toLowerCase()}`}
             </p>
           </div>
-          <Button size="sm" leadingIcon={<Plus className="h-4 w-4" aria-hidden="true" />}
-            onClick={() => setAddOpen(true)}>
-            {bizConfig.isServiceBased ? t('stock.addService') : t('products.addProduct')}
-          </Button>
+          <div className="flex items-center gap-2">
+            {!bizConfig.isServiceBased && (
+              <Button size="sm" variant="secondary"
+                leadingIcon={<FileSpreadsheet className="h-4 w-4" aria-hidden="true" />}
+                onClick={() => setImportOpen(true)}>
+                {t('products.import.button')}
+              </Button>
+            )}
+            <Button size="sm" leadingIcon={<Plus className="h-4 w-4" aria-hidden="true" />}
+              onClick={() => setAddOpen(true)}>
+              {bizConfig.isServiceBased ? t('stock.addService') : t('products.addProduct')}
+            </Button>
+          </div>
         </div>
 
         {/* Alert strip — only for non-service businesses */}
@@ -549,6 +562,21 @@ export function StockPage() {
           </>
         }
       />
+
+      {/* ── Import products dialog ─────────────────────────────────────────── */}
+      <Dialog
+        open={importOpen}
+        onOpenChange={o => { if (!o) setImportOpen(false) }}
+        title={t('products.import.title')}
+        closeLabel={t('common.close')}
+      >
+        <ProductImport
+          userId={user?.id ?? ''}
+          isServiceBased={bizConfig.isServiceBased}
+          onDone={async () => { setImportOpen(false); await reload() }}
+          onCancel={() => setImportOpen(false)}
+        />
+      </Dialog>
     </>
   )
 }

@@ -162,10 +162,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [fetchData])
 
-  // ── Language: apply active business language once after load ──────────────
+  // ── Language: apply active business language ONLY on initial load ───────────
+  // We track whether we've applied the language for this session so that
+  // switching businesses doesn't reset a language the user has manually chosen.
+  const languageAppliedRef = useRef(false)
   useEffect(() => {
-    if (activeBusiness && activeBusiness.language !== i18n.language) {
-      void i18n.changeLanguage(activeBusiness.language)
+    if (activeBusiness && !languageAppliedRef.current) {
+      languageAppliedRef.current = true
+      if (activeBusiness.language !== i18n.language) {
+        void i18n.changeLanguage(activeBusiness.language)
+      }
     }
   }, [activeBusiness])
 

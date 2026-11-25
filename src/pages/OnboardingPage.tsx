@@ -11,7 +11,6 @@ import { Spinner } from '../design-system/LoadingState'
 import { useAuth } from '../modules/auth/AuthContext'
 import { createBusiness } from '../modules/auth/api'
 import { createProduct, getProducts } from '../modules/retail/api'
-import { createExpense } from '../modules/expenses/api'
 import { ALL_BUSINESS_TYPES, getBusinessConfig, type BusinessType } from '../modules/auth/businessConfig'
 import {
   TYPES_WITH_SUBTYPES,
@@ -74,16 +73,21 @@ export function OnboardingPage({ addingNew = false }: { addingNew?: boolean }) {
   const { t, i18n } = useTranslation()
   const navigate    = useNavigate()
   const { notify }  = useNotification()
-  const { user, refreshProfile, switchBusiness } = useAuth()
+  const { user, businesses, refreshProfile, switchBusiness } = useAuth()
+
+  // Pre-fill owner details from the first existing business (if adding a new one)
+  const existingBusiness = businesses[0] ?? null
 
   const [step,        setStep]       = useState<Step>(1)
   const [bizType,     setBizType]    = useState<BusinessType>('retail')
   const [subtype,     setSubtype]    = useState<Subtype | null>(null)
   const [bizName,     setBizName]    = useState('')
-  const [ownerName,   setOwnerName]  = useState('')
-  const [phone,       setPhone]      = useState('')
+  const [ownerName,   setOwnerName]  = useState(addingNew ? (existingBusiness?.owner_name ?? '') : '')
+  const [phone,       setPhone]      = useState(addingNew ? (existingBusiness?.phone ?? '') : '')
   const [language,    setLanguage]   = useState<'en' | 'am'>(
-    i18n.resolvedLanguage === 'am' ? 'am' : 'en'
+    addingNew
+      ? (existingBusiness?.language ?? (i18n.resolvedLanguage === 'am' ? 'am' : 'en'))
+      : (i18n.resolvedLanguage === 'am' ? 'am' : 'en')
   )
   const [closingTime, setClosingTime] = useState('')
   const [errors,      setErrors]     = useState<Record<string, string>>({})
@@ -112,7 +116,6 @@ export function OnboardingPage({ addingNew = false }: { addingNew?: boolean }) {
   function next() {
     if (step === 1) {
       if (hasSubtypes) {
-        // Pre-select the first sub-type so the picker always has a value
         if (!subtype) setSubtype(subtypeOptions[0]?.subtype ?? null)
         setStep(1.5)
       } else {
@@ -123,7 +126,15 @@ export function OnboardingPage({ addingNew = false }: { addingNew?: boolean }) {
     }
     if (step === 1.5) { setStep(2); return }
     if (step === 2 && !validateStep2()) return
-    if (step === 2) { setStep(3); return }
+    if (step === 2) {
+      // Skip step 3 when adding a secondary business — owner details already known
+      if (addingNew && existingBusiness) {
+        void handleSubmit()
+      } else {
+        setStep(3)
+      }
+      return
+    }
   }
 
   function back() {
@@ -174,11 +185,14 @@ export function OnboardingPage({ addingNew = false }: { addingNew?: boolean }) {
     const subtypeConf  = subtype ? getSubtypeConfig(subtype) : null
     const parentConfig = getBusinessConfig(bizType)
     const products     = subtypeConf?.starterProducts ?? parentConfig.starterProducts
-    const expenses     = subtypeConf?.starterExpenses ?? parentConfig.starterExpenses
     const isService    = parentConfig.isServiceBased
 
+    // Always seed starter products for a new business (addingNew).
+    // For the first business only skip if products already exist (idempotent guard).
+    // Starter expenses are no longer seeded — users add expenses via the quick picker.
     const { data: existing } = await getProducts()
-    if (!existing || existing.length === 0) {
+    const shouldSeed = addingNew || !existing || existing.length === 0
+    if (shouldSeed) {
       await Promise.allSettled(
         products.map(p =>
           createProduct({
@@ -191,19 +205,6 @@ export function OnboardingPage({ addingNew = false }: { addingNew?: boolean }) {
             low_stock_threshold: null,
             image_url:         null,
             barcode:           null,
-          }, user.id)
-        )
-      )
-
-      const today = new Date().toISOString().slice(0, 10)
-      await Promise.allSettled(
-        expenses.map(e =>
-          createExpense({
-            title:        e.title,
-            amount:       0,
-            category:     e.category,
-            description:  'Starter template — update with your actual amount.',
-            expense_date: today,
           }, user.id)
         )
       )

@@ -3,7 +3,6 @@
     "name": "MELA",
     "tagline": "Small business management, built for Ethiopia.",
     "home": {
-      "greeting": "Welcome, {{name}}",
       "editProfile": "Edit business profile",
       "logout": "Log out",
       "loadingProfile": "Loading your profile…"
@@ -35,7 +34,10 @@
     "jobs": "Jobs",
     "newJob": "New job",
     "jobHistory": "Job history",
-    "catalogue": "Catalogue"
+    "catalogue": "Catalogue",
+    "income": "Income",
+    "contacts": "Contacts",
+    "budget": "Budget"
   },
   "welcome": {
     "eyebrow": "MADE FOR ETHIOPIAN BUSINESSES",
@@ -168,6 +170,26 @@
     "price": "ETB {{price}}",
     "retry": "Try again",
     "addProduct": "Add product",
+    "import": {
+      "button": "Import from Excel",
+      "title": "Import products",
+      "subtitle": "Upload an Excel or CSV file to add multiple products at once.",
+      "downloadTemplate": "Download template (.xlsx)",
+      "dropzone": "Drop your file here or click to browse",
+      "browse": "Browse file",
+      "rows": "rows found",
+      "willImport": "Will import",
+      "willSkip": "Will skip",
+      "preview": "Preview (first 5 rows)",
+      "moreRows": "more rows",
+      "noValidRows": "No valid rows found. Check that your file has 'name' and 'price' columns.",
+      "importBtn": "Import {{count}} products",
+      "importing": "Importing products…",
+      "pleaseWait": "Please wait, this may take a moment.",
+      "doneTitle": "Imported {{imported}} of {{total}} products",
+      "skippedTitle": "{{count}} rows skipped",
+      "close": "Done"
+    },
     "empty": {
       "title": "No products yet",
       "desc": "Your product catalogue is empty. Add your first product to get started."
@@ -452,6 +474,14 @@
     "count_other": "{{count}} expenses",
     "filteredCount": "{{count}} of {{total}} expenses",
     "addExpense": "Add expense",
+    "quick": {
+      "pickCategory": "What did you spend on?",
+      "recordedAt": "Recorded:",
+      "note": "Note",
+      "noteHelper": "Optional — e.g. 'paid to Abebe', 'monthly fee'",
+      "notePlaceholder": "Add a note…",
+      "add": "Add expense"
+    },
     "empty": {
       "title": "No expenses yet",
       "desc": "Record your first business expense to get started.",
@@ -856,6 +886,7 @@
   },
   "home": {
     "todaySales": "Today's sales",
+    "todaySummary": "Today: {{sales}} revenue · {{expenses}} expenses",
     "todayExpenses": "Today's expenses",
     "profit": "Est. net profit",
     "netProfitHint": "Revenue minus cost of goods sold and operating expenses",
@@ -1210,6 +1241,41 @@
     "expiredTitle": "Your 30-day free trial has ended",
     "expiredDesc": "Subscribe to Premium to continue using MELA for your business.",
     "subscribeNow": "Subscribe to Premium"
+  },
+  "income": {
+    "title": "Income",
+    "subtitle": "Record your income sources here.",
+    "addIncome": "Add income",
+    "totalIncome": "Total income",
+    "totalLabel": "Total recorded: {{amount}}",
+    "entryCount_one": "{{count}} entry",
+    "entryCount_other": "{{count}} entries",
+    "pickSource": "Where did the money come from?",
+    "amount": "Amount",
+    "noteHelper": "Optional — e.g. 'November salary', 'Yohannes project'",
+    "notePlaceholder": "Add a note…",
+    "deleteEntry": "Delete entry",
+    "sources": {
+      "salary":     "Salary",
+      "freelance":  "Freelance",
+      "business":   "Business",
+      "rental":     "Rental",
+      "investment": "Investment",
+      "gift":       "Gift",
+      "other":      "Other"
+    },
+    "empty": {
+      "title": "No income recorded yet",
+      "desc": "Tap 'Add income' to record your first income entry."
+    },
+    "notifications": {
+      "added":   "Income recorded",
+      "deleted": "Entry deleted"
+    },
+    "delete": {
+      "title": "Delete income entry?",
+      "desc":  "This will permanently remove the {{source}} entry of {{amount}}."
+    }
   },
   "selectBusiness": {
     "title": "Choose a business",

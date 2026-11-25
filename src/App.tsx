@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { BrowserRouter, Navigate, Route, Routes, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { BarChart2, ClipboardList, Home, Package, PackageSearch, Receipt, Users, Wallet } from 'lucide-react'
+import { BarChart2, ClipboardList, Home, Package, PackageSearch, Receipt, TrendingUp, Users, Wallet } from 'lucide-react'
 
 import { NotificationProvider } from './design-system/Notification'
 import type { NavItem } from './design-system/BottomNav'
@@ -46,6 +46,7 @@ const WelcomePage             = lazy(() => import('./pages/WelcomePage').then(m 
 const SubscriptionPage        = lazy(() => import('./pages/SubscriptionPage').then(m => ({ default: m.SubscriptionPage })))
 const StaffPage               = lazy(() => import('./pages/StaffPage').then(m => ({ default: m.StaffPage })))
 const SelectBusinessPage      = lazy(() => import('./pages/SelectBusinessPage').then(m => ({ default: m.SelectBusinessPage })))
+const IncomePage              = lazy(() => import('./pages/IncomePage').then(m => ({ default: m.IncomePage })))
 
 function PageLoader() {
   return (
@@ -103,13 +104,20 @@ function AppRoutes() {
   /**
    * Product businesses:
    *   retail/cosmetics: Home | Sales | Stock | Customers | Expenses
-   *   fnb/bakery:       Home | Sales | Menu/Stock | Sales History | Reports
-   *     (stock is crucial; customers are walk-in; expenses via home quick action)
+   *   fnb/bakery:       Home | Sales | Menu/Stock | Purchases | Reports
    * Service businesses: Home | Sales | Expenses | Services | Clients | Reports
+   * Personal:           Home | Income | Expenses | Contacts | Budget
    */
   const isFnbOrBakery = profile?.type === 'fnb' || profile?.type === 'bakery'
+  const isPersonal    = profile?.type === 'personal'
 
-  const appNav: NavItem[] = isService ? [
+  const appNav: NavItem[] = isPersonal ? [
+    { id: '/app',          label: t('nav.home'),     icon: Home      },
+    { id: '/app/income',   label: t('nav.income'),   icon: TrendingUp },
+    { id: '/app/expenses', label: t('nav.expenses'), icon: Wallet    },
+    { id: '/app/customers',label: t('nav.contacts'), icon: Users     },
+    { id: '/app/reports',  label: t('nav.budget'),   icon: BarChart2 },
+  ] : isService ? [
     { id: '/app',           label: t('nav.home'),     icon: Home },
     { id: '/app/sales',     label: t('nav.sales'),    icon: Receipt },
     { id: '/app/expenses',  label: t('nav.expenses'), icon: Wallet },
@@ -117,17 +125,17 @@ function AppRoutes() {
     { id: '/app/customers', label: t('nav.clients'),  icon: Users },
     { id: '/app/reports',   label: t('nav.reports'),  icon: BarChart2 },
   ] : isFnbOrBakery ? [
-    { id: '/app',           label: t('nav.home'),        icon: Home },
-    { id: '/app/sales',     label: t('nav.sales'),       icon: Receipt },
-    { id: '/app/stock',     label: bizConfig.stockLabel, icon: Package },
-    { id: '/app/purchases', label: t('nav.purchases'),   icon: ClipboardList },
-    { id: '/app/reports',   label: t('nav.reports'),     icon: BarChart2 },
+    { id: '/app',           label: t('nav.home'),                    icon: Home },
+    { id: '/app/sales',     label: t('nav.sales'),                   icon: Receipt },
+    { id: '/app/stock',     label: t(bizConfig.stockLabelKey),       icon: Package },
+    { id: '/app/purchases', label: t('nav.purchases'),               icon: ClipboardList },
+    { id: '/app/reports',   label: t('nav.reports'),                 icon: BarChart2 },
   ] : [
-    { id: '/app',           label: t('nav.home'),        icon: Home },
-    { id: '/app/sales',     label: t('nav.sales'),       icon: Receipt },
-    { id: '/app/stock',     label: bizConfig.stockLabel, icon: Package },
-    { id: '/app/customers', label: t('nav.customers'),   icon: Users },
-    { id: '/app/expenses',  label: t('nav.expenses'),    icon: Wallet },
+    { id: '/app',           label: t('nav.home'),                    icon: Home },
+    { id: '/app/sales',     label: t('nav.sales'),                   icon: Receipt },
+    { id: '/app/stock',     label: t(bizConfig.stockLabelKey),       icon: Package },
+    { id: '/app/customers', label: t('nav.customers'),               icon: Users },
+    { id: '/app/expenses',  label: t('nav.expenses'),                icon: Wallet },
   ]
 
   const publicShell = (children: React.ReactNode) => (
@@ -171,10 +179,14 @@ function AppRoutes() {
         element={appShell(<RequireBusiness><OverviewPage /></RequireBusiness>, '/app')} />
 
       <Route path="/app/pos"
-        element={appShell(<RequireBusiness><PosPage /></RequireBusiness>, '/app/sales')} />
+        element={isPersonal
+          ? <Navigate to="/app/income" replace />
+          : appShell(<RequireBusiness><PosPage /></RequireBusiness>, '/app/sales')} />
 
       <Route path="/app/sales"
-        element={appShell(<RequireBusiness><SalesPage /></RequireBusiness>, '/app/sales')} />
+        element={isPersonal
+          ? appShell(<RequireBusiness><IncomePage /></RequireBusiness>, '/app/income')
+          : appShell(<RequireBusiness><SalesPage /></RequireBusiness>, '/app/sales')} />
 
       <Route path="/app/expenses"
         element={appShell(<RequireBusiness><ExpensesPage /></RequireBusiness>, '/app/expenses')} />
@@ -205,6 +217,9 @@ function AppRoutes() {
         element={appShell(<RequireBusiness><EditBusinessProfilePage /></RequireBusiness>, '/app')} />
       <Route path="/app/subscription"
         element={appShell(<RequireBusiness><SubscriptionPage /></RequireBusiness>, '/app')} />
+      {/* ── Personal income route ─────────────────────────────────────────── */}
+      <Route path="/app/income"
+        element={appShell(<RequireBusiness><IncomePage /></RequireBusiness>, '/app/income')} />
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

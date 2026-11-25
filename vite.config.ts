@@ -73,7 +73,12 @@ export default defineConfig({
           /^\/auth\/v1\//,
           /^\/rest\/v1\//,
           /^\/admin\//,
+          /\.webmanifest$/,
+          /\/sw\.js$/,
+          /\/workbox-.*\.js$/,
         ],
+        skipWaiting: true,
+        clientsClaim: true,
         runtimeCaching: [
           {
             urlPattern: /\/fonts\/Outfit\/.*\.ttf$/,
