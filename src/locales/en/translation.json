@@ -124,6 +124,30 @@
       "success": "Profile updated",
       "successDesc": "Your business profile was saved."
     },
+    "delete": {
+      "dangerZone": "Danger zone",
+      "dangerDesc": "Permanently delete this business profile. This cannot be undone.",
+      "lastBusinessWarning": "This is your only business. Deleting it will take you back to onboarding.",
+      "button": "Delete {{name}}",
+      "dialogTitle": "Delete this business?",
+      "willDelete": "This will permanently delete:",
+      "willNotDelete": "This will NOT delete (data stays on your account):",
+      "item": {
+        "profile": "Business profile and settings",
+        "subscription": "Subscription and payment history",
+        "staff": "All staff members and activity logs",
+        "payments": "Payment submissions",
+        "products": "{{count}} products",
+        "sales": "{{count}} sales",
+        "expenses": "{{count}} expenses",
+        "customers": "{{count}} customers"
+      },
+      "dataNote": "These records remain on your account but will no longer be accessible from this business.",
+      "typeToConfirm": "Type the business name to confirm: \"{{name}}\"",
+      "nameMismatch": "Name does not match.",
+      "confirmButton": "Delete permanently",
+      "success": "Business deleted"
+    },
     "createSuccess": {
       "title": "Business created",
       "desc": "Your business profile is ready."

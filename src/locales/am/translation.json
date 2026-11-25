@@ -124,6 +124,30 @@
       "success": "መረጃ ተስተካክሏል",
       "successDesc": "ለውጦቹ ተቀምጠዋል።"
     },
+    "delete": {
+      "dangerZone": "አደገኛ ቦታ",
+      "dangerDesc": "ይህን ንግድ ቋሚ ይሰርዙ። ይህ ተግባር ሊቀለበስ አይችልም።",
+      "lastBusinessWarning": "ይህ ብቸኛ ንግድዎ ነው። ከሰረዙ ወደ ምዝገባ ይመለሳሉ።",
+      "button": "{{name}} ሰርዝ",
+      "dialogTitle": "ይህን ንግድ ይሰርዙ?",
+      "willDelete": "ቋሚ የሚሰረዙ ነገሮች፦",
+      "willNotDelete": "የማይሰረዙ (ሒሳብዎ ላይ ይቀራሉ)፦",
+      "item": {
+        "profile": "የንግድ መረጃ እና ቅንብሮች",
+        "subscription": "ደንበኝነት እና የክፍያ ታሪክ",
+        "staff": "ሁሉም ሠራተኞች እና የእንቅስቃሴ ዝርዝር",
+        "payments": "የክፍያ ማስረጃዎች",
+        "products": "{{count}} ምርቶች",
+        "sales": "{{count}} ሽያጮች",
+        "expenses": "{{count}} ወጪዎች",
+        "customers": "{{count}} ደንበኞች"
+      },
+      "dataNote": "እነዚህ መዝገቦች በሒሳብዎ ይቀራሉ ነገር ግን ከዚህ ንግድ ማግኘት አይቻልም።",
+      "typeToConfirm": "ለማረጋገጥ የንግድ ስሙን ይፃፉ፦ \"{{name}}\"",
+      "nameMismatch": "ስሙ አይዛመድም።",
+      "confirmButton": "ቋሚ ሰርዝ",
+      "success": "ንግድ ተሰርዟል"
+    },
     "createSuccess": {
       "title": "ንግድ ተፈጥሯል",
       "desc": "የንግድ መለያዎ ዝግጁ ነው።"

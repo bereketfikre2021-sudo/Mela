@@ -17,6 +17,7 @@ import {
   setActiveBusiness,
   signOut as signOutApi,
   updateBusiness,
+  deleteBusiness as deleteBusinessApi,
 } from './api'
 import type { Business } from './types'
 
@@ -33,6 +34,8 @@ interface AuthContextValue {
   profileStatus:  ProfileStatus
   // Switch the active business – persists to cloud via user_profiles
   switchBusiness: (businessId: string) => Promise<void>
+  // Delete a business – removes it from the list and switches to another
+  deleteBusiness: (businessId: string) => Promise<{ error: { message: string } | null }>
   refreshProfile: () => Promise<void>
   signOut:        () => Promise<void>
   // Convenience alias kept for components that only care about one profile
@@ -198,9 +201,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const target = businesses.find(b => b.id === businessId)
     if (!target || !userRef.current) return
     setActiveBusiness_(target)
-    // Persist to cloud (fire and forget – UI is already updated)
     void setActiveBusiness(userRef.current.id, businessId)
   }, [businesses])
+
+  // ── deleteBusiness ────────────────────────────────────────────────────────
+  const deleteBusiness = useCallback(async (businessId: string) => {
+    if (!userRef.current) return { error: { message: 'Not authenticated' } }
+    const result = await deleteBusinessApi(businessId, userRef.current.id)
+    if (result.error) return result
+    // Remove from local state
+    const remaining = businesses.filter(b => b.id !== businessId)
+    setBusinesses(remaining)
+    if (activeBusiness?.id === businessId) {
+      const next = remaining[0] ?? null
+      setActiveBusiness_(next)
+      if (next && userRef.current) {
+        void setActiveBusiness(userRef.current.id, next.id)
+      }
+    }
+    return { error: null }
+  }, [businesses, activeBusiness])
 
   // ── signOut ───────────────────────────────────────────────────────────────
   const signOut = useCallback(async () => {
@@ -215,12 +235,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       activeBusiness,
       profileStatus,
       switchBusiness,
+      deleteBusiness,
       refreshProfile,
       signOut,
-      // Alias for components that haven't been migrated yet
       profile: activeBusiness,
     }),
-    [status, user, businesses, activeBusiness, profileStatus, switchBusiness, refreshProfile, signOut]
+    [status, user, businesses, activeBusiness, profileStatus, switchBusiness, deleteBusiness, refreshProfile, signOut]
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

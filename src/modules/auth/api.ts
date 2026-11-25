@@ -159,7 +159,10 @@ export async function sendMagicLink(
   return { error: error ? { message: error.message } : null }
 }
 
-/** Map a raw Supabase auth error message to a localized user-facing string. */
+// ---------------------------------------------------------------------------
+// Legacy single-business helper kept for backward-compat during transition.
+// Returns the first business in the list (or null). Prefer getBusinesses().
+// ---------------------------------------------------------------------------
 export function mapAuthError(t: (key: string) => string, message: string): string {
   const msg = message.toLowerCase()
   if (msg.includes('invalid login') || msg.includes('invalid credentials')) return t('auth.errors.invalidCredentials')
@@ -170,10 +173,43 @@ export function mapAuthError(t: (key: string) => string, message: string): strin
   return t('auth.errors.generic')
 }
 
-// ---------------------------------------------------------------------------
-// Legacy single-business helper kept for backward-compat during transition.
-// Returns the first business in the list (or null). Prefer getBusinesses().
-// ---------------------------------------------------------------------------
+/** Delete a business row. Cascades to subscriptions, staff, and payment_submissions.
+ *  Products, sales, expenses etc. are keyed to owner_id and are NOT deleted.
+ *  RLS requires owner_id = auth.uid(). */
+export async function deleteBusiness(
+  id: string,
+  userId: string
+): Promise<{ error: { message: string } | null }> {
+  if (!supabase) return { error: { message: clientUnavailableError().error.message } }
+  const { error } = await supabase
+    .from('businesses')
+    .delete()
+    .eq('id', id)
+    .eq('owner_id', userId)
+  return { error: error ? { message: error.message } : null }
+}
+
+/** Fetch a count summary for the business's data (for the deletion warning). */
+export async function getBusinessDataSummary(userId: string): Promise<{
+  products: number
+  sales: number
+  expenses: number
+  customers: number
+}> {
+  if (!supabase) return { products: 0, sales: 0, expenses: 0, customers: 0 }
+  const [p, s, e, c] = await Promise.all([
+    supabase.from('products').select('id', { count: 'exact', head: true }).eq('owner_id', userId),
+    supabase.from('sales').select('id', { count: 'exact', head: true }).eq('owner_id', userId),
+    supabase.from('expenses').select('id', { count: 'exact', head: true }).eq('owner_id', userId),
+    supabase.from('customers').select('id', { count: 'exact', head: true }).eq('owner_id', userId),
+  ])
+  return {
+    products:  p.count ?? 0,
+    sales:     s.count ?? 0,
+    expenses:  e.count ?? 0,
+    customers: c.count ?? 0,
+  }
+}
 export async function getBusiness(
   userId: string
 ): Promise<{ data: Business | null; error: { message: string } | null }> {
