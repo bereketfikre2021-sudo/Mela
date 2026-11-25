@@ -76,12 +76,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const fetchData = useCallback(async (userId: string) => {
     setProfileStatus('loading')
 
+    // Fetch businesses and user profile in parallel.
+    // getUserProfile is best-effort – a missing row is not an error.
     const [bizResult, profileResult] = await Promise.all([
       getBusinesses(userId),
       getUserProfile(userId),
     ])
 
     if (bizResult.error) {
+      // Log so it shows up in the console instead of failing silently.
+      console.error('[AuthContext] getBusinesses error:', bizResult.error.message)
       setBusinesses([])
       setActiveBusiness_(null)
       setProfileStatus('error')

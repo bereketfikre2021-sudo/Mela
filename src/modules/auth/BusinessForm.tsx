@@ -22,17 +22,20 @@ interface BusinessFormProps {
 export function BusinessForm({ mode, initial, preselectedType, hasData = false, onSubmit, submitting }: BusinessFormProps) {
   const { t, i18n } = useTranslation()
 
-  const [name,      setName]      = useState(initial?.name ?? '')
-  const [type,      setType]      = useState<BusinessType>(
+  const [name,         setName]        = useState(initial?.name ?? '')
+  const [type,         setType]        = useState<BusinessType>(
     (initial?.type as BusinessType) ?? preselectedType ?? 'retail'
   )
-  const [ownerName,    setOwnerName]    = useState(initial?.owner_name ?? '')
-  const [phone,        setPhone]        = useState(initial?.phone ?? '')
-  const [language,     setLanguage]     = useState<'en' | 'am'>(
+  const [ownerName,    setOwnerName]   = useState(initial?.owner_name ?? '')
+  const [phone,        setPhone]       = useState(initial?.phone ?? '')
+  const [language,     setLanguage]    = useState<'en' | 'am'>(
     initial?.language ?? (i18n.resolvedLanguage === 'am' ? 'am' : 'en')
   )
-  const [closingTime,  setClosingTime]  = useState(initial?.closing_time ?? '')
+  const [closingTime,  setClosingTime] = useState(initial?.closing_time ?? '')
   const [errors, setErrors] = useState<Record<string, string>>({})
+
+  // Personal accounts have no shop — no closing time needed
+  const isPersonal = type === 'personal'
 
   const typeOptions: SelectOption[] = ALL_BUSINESS_TYPES.map(c => ({
     value: c.type,
@@ -54,31 +57,41 @@ export function BusinessForm({ mode, initial, preselectedType, hasData = false, 
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
+    // For personal accounts the displayed name IS the owner name
+    const effectiveOwnerName = isPersonal ? name : ownerName
     const next = {
       name:      validate('name',      name),
-      ownerName: validate('ownerName', ownerName),
+      ownerName: validate('ownerName', effectiveOwnerName),
       phone:     validate('phone',     phone),
     }
     setErrors(next)
     if (Object.values(next).some(Boolean)) return
-    await onSubmit({ name: name.trim(), type, owner_name: ownerName.trim(), phone: phone.trim(), language, closing_time: closingTime || null })
+    await onSubmit({
+      name:         name.trim(),
+      type,
+      owner_name:   effectiveOwnerName.trim(),
+      phone:        phone.trim(),
+      language,
+      closing_time: isPersonal ? null : (closingTime || null),
+    })
   }
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
+      {/* Business / account name */}
       <Input
-        label={t('business.form.businessName')}
-        helperText={t('business.form.businessNameHelper')}
+        label={isPersonal ? t('business.form.ownerName') : t('business.form.businessName')}
+        helperText={isPersonal ? t('business.form.ownerNameHelper') : t('business.form.businessNameHelper')}
         value={name}
         onChange={e => setName(e.target.value)}
         onBlur={e => blur('name', e.target.value)}
         error={errors.name}
-        autoComplete="organization"
+        autoComplete={isPersonal ? 'name' : 'organization'}
         maxLength={100}
         autoFocus
       />
 
-      {/* Only show type selector in edit mode — onboarding uses the visual picker */}
+      {/* Type selector in edit mode only — onboarding uses the visual picker */}
       {mode === 'edit' && (
         hasData ? (
           <div>
@@ -100,19 +113,36 @@ export function BusinessForm({ mode, initial, preselectedType, hasData = false, 
       )}
 
       <section className="flex flex-col gap-4">
-        <p className="text-xs font-semibold uppercase tracking-wide text-secondary">
-          {t('business.form.ownerSectionTitle')}
-        </p>
-        <Input
-          label={t('business.form.ownerName')}
-          helperText={t('business.form.ownerNameHelper')}
-          value={ownerName}
-          onChange={e => setOwnerName(e.target.value)}
-          onBlur={e => blur('ownerName', e.target.value)}
-          error={errors.ownerName}
-          autoComplete="name"
-          maxLength={100}
-        />
+        {/* Only show the "Owner / Contact" section header for non-personal types */}
+        {!isPersonal && (
+          <p className="text-xs font-semibold uppercase tracking-wide text-secondary">
+            {t('business.form.ownerSectionTitle')}
+          </p>
+        )}
+
+        {/* For personal accounts the name IS the account name, shown above.
+            For business types show owner name as a separate contact field. */}
+        {!isPersonal && (
+          <Input
+            label={t('business.form.ownerName')}
+            helperText={t('business.form.ownerNameHelper')}
+            value={ownerName}
+            onChange={e => setOwnerName(e.target.value)}
+            onBlur={e => blur('ownerName', e.target.value)}
+            error={errors.ownerName}
+            autoComplete="name"
+            maxLength={100}
+          />
+        )}
+
+        {/* Personal: owner_name mirrors the account name field */}
+        {isPersonal && (
+          // Hidden — we'll copy `name` into owner_name on submit via the
+          // ownerName state being kept in sync below.
+          // We render a visible phone + language only.
+          null
+        )}
+
         <Input
           label={t('business.form.phone')}
           helperText={t('business.form.phoneHelper')}
@@ -131,13 +161,17 @@ export function BusinessForm({ mode, initial, preselectedType, hasData = false, 
           value={language}
           onChange={e => setLanguage(e.target.value as 'en' | 'am')}
         />
-        <Input
-          label={t('business.form.closingTime')}
-          helperText={t('business.form.closingTimeHelper')}
-          type="time"
-          value={closingTime}
-          onChange={e => setClosingTime(e.target.value)}
-        />
+
+        {/* Closing time only for shop/service businesses, not personal */}
+        {!isPersonal && (
+          <Input
+            label={t('business.form.closingTime')}
+            helperText={t('business.form.closingTimeHelper')}
+            type="time"
+            value={closingTime}
+            onChange={e => setClosingTime(e.target.value)}
+          />
+        )}
       </section>
 
       <Button type="submit" size="lg" loading={submitting} fullWidth>

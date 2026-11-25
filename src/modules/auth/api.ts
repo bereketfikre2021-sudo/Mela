@@ -53,11 +53,17 @@ export async function getBusinesses(
   if (!supabase) return { data: [], error: { message: clientUnavailableError().error.message } }
   const { data, error } = await supabase
     .from('businesses')
-    .select('*')
+    .select('id, owner_id, name, type, owner_name, phone, language, closing_time, created_at, updated_at')
     .eq('owner_id', userId)
-    .order('created_at', { ascending: true })
-  if (error) return { data: [], error: { message: error.message } }
-  return { data: (data as Business[]) ?? [], error: null }
+  if (error) {
+    console.error('[api] getBusinesses error:', error.message, error)
+    return { data: [], error: { message: error.message } }
+  }
+  // Sort client-side by created_at ascending to avoid PostgREST order issues
+  const sorted = ((data as Business[]) ?? []).sort(
+    (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+  )
+  return { data: sorted, error: null }
 }
 
 /** Load the user_profiles row (active_business_id). */

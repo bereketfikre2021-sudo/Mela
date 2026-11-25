@@ -102,8 +102,9 @@ export function OnboardingPage({ addingNew = false }: { addingNew?: boolean }) {
 
   function validateStep3() {
     const next: Record<string, string> = {}
-    if (ownerName.trim().length < 2) next.ownerName = t('validation.nameMin')
-    if (phone.trim().length < 7)     next.phone     = t('validation.phone')
+    // Personal: name was collected in step 2 (bizName), no separate owner name
+    if (bizType !== 'personal' && ownerName.trim().length < 2) next.ownerName = t('validation.nameMin')
+    if (phone.trim().length < 7) next.phone = t('validation.phone')
     setErrors(next)
     return Object.keys(next).length === 0
   }
@@ -139,10 +140,12 @@ export function OnboardingPage({ addingNew = false }: { addingNew?: boolean }) {
     const input: BusinessInput = {
       name:         bizName.trim(),
       type:         bizType,
-      owner_name:   ownerName.trim(),
+      // Personal: name IS the person's name, no separate owner name field
+      owner_name:   bizType === 'personal' ? bizName.trim() : ownerName.trim(),
       phone:        phone.trim(),
       language,
-      closing_time: closingTime || null,
+      // Personal accounts have no shop hours
+      closing_time: bizType === 'personal' ? null : (closingTime || null),
     }
 
     const { data: newBiz, error } = await createBusiness(input, user.id)
@@ -360,14 +363,14 @@ export function OnboardingPage({ addingNew = false }: { addingNew?: boolean }) {
 
           <div className="mt-6 space-y-4">
             <Input
-              label={bizType === 'personal' ? t('business.form.accountName') : t('business.form.businessName')}
-              helperText={bizType === 'personal' ? t('business.form.accountNameHelper') : t('business.form.businessNameHelper')}
+              label={bizType === 'personal' ? t('business.form.ownerName') : t('business.form.businessName')}
+              helperText={bizType === 'personal' ? t('business.form.ownerNameHelper') : t('business.form.businessNameHelper')}
               value={bizName}
               onChange={e => setBizName(e.target.value)}
               onBlur={() => bizName.trim().length < 2 && setErrors(p => ({ ...p, bizName: t('validation.nameMin') }))}
               error={errors.bizName}
               autoFocus
-              autoComplete="organization"
+              autoComplete={bizType === 'personal' ? 'name' : 'organization'}
               maxLength={100}
             />
           </div>
@@ -390,16 +393,19 @@ export function OnboardingPage({ addingNew = false }: { addingNew?: boolean }) {
           <p className="mt-1 text-sm text-secondary">{t('onboarding.step3.subtitle')}</p>
 
           <div className="mt-6 space-y-4">
-            <Input
-              label={t('business.form.ownerName')}
-              helperText={t('business.form.ownerNameHelper')}
-              value={ownerName}
-              onChange={e => setOwnerName(e.target.value)}
-              error={errors.ownerName}
-              autoComplete="name"
-              maxLength={100}
-              autoFocus
-            />
+            {/* Personal: name was collected in step 2, skip separate owner name */}
+            {bizType !== 'personal' && (
+              <Input
+                label={t('business.form.ownerName')}
+                helperText={t('business.form.ownerNameHelper')}
+                value={ownerName}
+                onChange={e => setOwnerName(e.target.value)}
+                error={errors.ownerName}
+                autoComplete="name"
+                maxLength={100}
+                autoFocus
+              />
+            )}
             <Input
               label={t('business.form.phone')}
               helperText={t('business.form.phoneHelper')}
@@ -409,6 +415,7 @@ export function OnboardingPage({ addingNew = false }: { addingNew?: boolean }) {
               inputMode="tel"
               autoComplete="tel"
               maxLength={20}
+              autoFocus={bizType === 'personal'}
             />
             <Select
               label={t('business.form.language')}
@@ -417,13 +424,16 @@ export function OnboardingPage({ addingNew = false }: { addingNew?: boolean }) {
               value={language}
               onChange={e => setLanguage(e.target.value as 'en' | 'am')}
             />
-            <Input
-              label={t('business.form.closingTime')}
-              helperText={t('business.form.closingTimeHelper')}
-              type="time"
-              value={closingTime}
-              onChange={e => setClosingTime(e.target.value)}
-            />
+            {/* Closing time only for shop / service businesses */}
+            {bizType !== 'personal' && (
+              <Input
+                label={t('business.form.closingTime')}
+                helperText={t('business.form.closingTimeHelper')}
+                type="time"
+                value={closingTime}
+                onChange={e => setClosingTime(e.target.value)}
+              />
+            )}
           </div>
 
           <div className="mt-8 flex gap-3">
