@@ -100,12 +100,12 @@ export function SuppliersPage() {
 
   if (status === 'loading') {
     return (
-      <div className="py-6 md:py-10">
-        <div className="mb-6 flex items-center justify-between">
+      <div className="py-4 md:py-8">
+        <div className="page-header">
           <Skeleton className="h-8 w-40" />
           <Skeleton className="h-9 w-32 rounded-md" />
         </div>
-        <div className="space-y-px rounded-lg border border-border overflow-hidden">
+        <div className="space-y-px rounded-xl border border-border overflow-hidden">
           {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-16 w-full rounded-none" />)}
         </div>
       </div>
@@ -114,7 +114,7 @@ export function SuppliersPage() {
 
   if (status === 'error') {
     return (
-      <div className="py-6 md:py-10">
+      <div className="py-4 md:py-8">
         <EmptyState icon={Truck} title={t('notification.error.title')} description={errorMessage}
           action={<Button variant="secondary" onClick={() => void reload()}>{t('products.retry')}</Button>} />
       </div>
@@ -123,9 +123,9 @@ export function SuppliersPage() {
 
   return (
     <>
-      <div className="py-6 md:py-10">
+      <div className="py-4 md:py-8">
         {/* Header */}
-        <div className="mb-6 flex items-start justify-between gap-4">
+        <div className="page-header">
           <div>
             <h1 className="heading text-2xl md:text-3xl">{t('suppliers.title')}</h1>
             <p className="mt-1 text-sm text-secondary">
@@ -187,7 +187,7 @@ export function SuppliersPage() {
         ) : filtered.length === 0 ? (
           <EmptyState icon={Truck} title={t('contacts.noResults')} description={t('contacts.noResultsDesc')} />
         ) : (
-          <div className="divide-y divide-border rounded-lg border border-border overflow-hidden">
+          <div className="divide-y divide-border rounded-xl border border-border overflow-hidden">
             {filtered.map(s => (
               <div key={s.id} className="flex items-start justify-between gap-3 bg-surface px-4 py-3">
                 <div className="min-w-0 flex-1">

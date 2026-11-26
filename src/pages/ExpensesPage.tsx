@@ -119,12 +119,12 @@ export function ExpensesPage() {
   // ── Loading ────────────────────────────────────────────────────────────────
   if (status === 'loading') {
     return (
-      <div className="py-6 md:py-10">
-        <div className="mb-6 flex items-center justify-between">
+      <div className="py-4 md:py-8">
+        <div className="page-header">
           <Skeleton className="h-8 w-40" />
           <Skeleton className="h-9 w-32 rounded-md" />
         </div>
-        <div className="space-y-px rounded-lg border border-border overflow-hidden">
+        <div className="space-y-px rounded-xl border border-border overflow-hidden">
           {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-12 w-full rounded-none" />)}
         </div>
       </div>
@@ -134,7 +134,7 @@ export function ExpensesPage() {
   // ── Error ──────────────────────────────────────────────────────────────────
   if (status === 'error') {
     return (
-      <div className="py-6 md:py-10">
+      <div className="py-4 md:py-8">
         <EmptyState
           icon={Receipt}
           title={t('notification.error.title')}
@@ -148,7 +148,7 @@ export function ExpensesPage() {
   // ── Header + filters ───────────────────────────────────────────────────────
   const header = (
     <div className="mb-6">
-      <div className="flex items-start justify-between gap-4">
+      <div className="page-header">
         <div>
           <Breadcrumb items={[{ label: t('expenses.title') }]} />
           <h1 className="heading text-2xl md:text-3xl">{t('expenses.title')}</h1>
@@ -204,7 +204,7 @@ export function ExpensesPage() {
   if (expenses.length === 0) {
     return (
       <>
-        <div className="py-6 md:py-10">
+        <div className="py-4 md:py-8">
           {header}
           <EmptyState
             icon={Receipt}
@@ -230,7 +230,7 @@ export function ExpensesPage() {
 
   return (
     <>
-      <div className="py-6 md:py-10">
+      <div className="py-4 md:py-8">
         {header}
 
         {noResults ? (
@@ -251,7 +251,7 @@ export function ExpensesPage() {
               <span className="text-figures font-semibold">{fmtAmount(totalFiltered)}</span>
             </div>
 
-            <div className="overflow-x-auto rounded-lg border border-border">
+            <div className="overflow-x-auto rounded-xl border border-border">
               <Table>
                 <TableHeader>
                   <TableRow>

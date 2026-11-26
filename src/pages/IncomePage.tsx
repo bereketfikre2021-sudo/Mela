@@ -165,7 +165,7 @@ export function IncomePage() {
   // ── Error ──────────────────────────────────────────────────────────────────
   if (status === 'error') {
     return (
-      <div className="py-6 md:py-10">
+      <div className="py-4 md:py-8">
         <EmptyState
           icon={TrendingUp}
           title={t('notification.error.title')}
@@ -178,9 +178,9 @@ export function IncomePage() {
 
   return (
     <>
-      <div className="py-6 md:py-10">
+      <div className="py-4 md:py-8">
         {/* Header */}
-        <div className="mb-6 flex items-start justify-between gap-4">
+        <div className="page-header">
           <div>
             <h1 className="heading text-2xl md:text-3xl">{t('income.title')}</h1>
             <p className="mt-1 text-sm text-secondary">

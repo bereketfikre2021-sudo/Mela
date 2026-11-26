@@ -70,7 +70,7 @@ function StockIndicator({ status, qty, unit }: { status: 'out' | 'low' | 'ok'; q
 export function StockPage() {
   const { t }    = useTranslation()
   const navigate = useNavigate()
-  const { user, profile } = useAuth()
+  const { user, profile, activeBusiness } = useAuth()
   const bizConfig = getBusinessConfig(profile?.type ?? 'retail')
   const { isOnline, refreshCount } = useSyncContext()
   const { products, status, errorMessage, reload } = useProducts()
@@ -128,7 +128,7 @@ export function StockPage() {
   async function handleAdd(input: ProductInput) {
     if (!user) return
     setAddSubmit(true)
-    const { error } = await createProduct(input, user.id)
+    const { error } = await createProduct(input, user.id, activeBusiness?.id)
     setAddSubmit(false)
     if (error) { notify({ tone: 'danger', title: t('notification.error.title'), description: error.message }); return }
     notify({ tone: 'success', title: t('products.notifications.added') })
@@ -216,6 +216,7 @@ export function StockPage() {
 
     const payload = {
       owner_id:        user.id,
+      business_id:     activeBusiness?.id,
       supplier_id:     rstSupplier || null,
       purchase_date:   new Date().toISOString().slice(0, 10),
       notes:           `Restock: ${rstProduct.name}`,
@@ -267,7 +268,7 @@ export function StockPage() {
 
   if (status === 'error') {
     return (
-      <div className="py-6 md:py-10">
+      <div className="py-4 md:py-8">
         <EmptyState icon={AlertTriangle} title={t('notification.error.title')} description={errorMessage}
           action={<Button variant="secondary" onClick={() => void reload()}>{t('products.retry')}</Button>} />
       </div>
@@ -279,14 +280,14 @@ export function StockPage() {
       <div className="py-6 md:py-10 space-y-4">
 
         {/* Header */}
-        <div className="flex items-start justify-between gap-3">
-          <div>
+        <div className="page-header">
+          <div className="page-header-title">
             <h1 className="heading text-2xl md:text-3xl">{bizConfig.stockPageTitle}</h1>
             <p className="mt-1 text-sm text-secondary">
               {products.length === 0 ? bizConfig.stockEmptyDesc : `${products.length} ${bizConfig.stockLabel.toLowerCase()}`}
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="page-header-actions">
             {!bizConfig.isServiceBased && (
               <Button size="sm" variant="secondary"
                 leadingIcon={<FileSpreadsheet className="h-4 w-4" aria-hidden="true" />}
@@ -471,7 +472,7 @@ export function StockPage() {
         title={t('inventory.adjust.title')} closeLabel={t('common.cancel')}>
         {adjProduct && (
           <div className="flex flex-col gap-4">
-            <div className="rounded-lg border border-border bg-background p-3 text-sm">
+            <div className="rounded-xl border border-border bg-background p-3 text-sm">
               <p className="text-secondary">{t('inventory.adjust.currentStock')}</p>
               <p className="mt-0.5 text-xl font-semibold text-figures text-text">
                 {fmtQty(adjProduct.stock_quantity)} {adjProduct.unit}
@@ -499,7 +500,7 @@ export function StockPage() {
         title={t('inventory.restock.title')} closeLabel={t('common.cancel')}>
         {rstProduct && (
           <div className="flex flex-col gap-4">
-            <div className="rounded-lg border border-border bg-background p-3 text-sm">
+            <div className="rounded-xl border border-border bg-background p-3 text-sm">
               <p className="font-semibold text-text">{rstProduct.name}</p>
               <p className="mt-0.5 text-secondary">
                 {t('inventory.restock.currentStock')}{' '}

@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { BrowserRouter, Navigate, Route, Routes, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { BarChart2, ClipboardList, Home, Package, PackageSearch, Receipt, TrendingUp, Users, Wallet } from 'lucide-react'
+import { BarChart2, Home, Package, PackageSearch, Receipt, TrendingUp, Users, Wallet } from 'lucide-react'
 
 import { NotificationProvider } from './design-system/Notification'
 import type { NavItem } from './design-system/BottomNav'
@@ -128,7 +128,7 @@ function AppRoutes() {
     { id: '/app',           label: t('nav.home'),                    icon: Home },
     { id: '/app/sales',     label: t('nav.sales'),                   icon: Receipt },
     { id: '/app/stock',     label: t(bizConfig.stockLabelKey),       icon: Package },
-    { id: '/app/purchases', label: t('nav.purchases'),               icon: ClipboardList },
+    { id: '/app/expenses',  label: t('nav.expenses'),                icon: Wallet },
     { id: '/app/reports',   label: t('nav.reports'),                 icon: BarChart2 },
   ] : [
     { id: '/app',           label: t('nav.home'),                    icon: Home },

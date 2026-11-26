@@ -34,7 +34,7 @@ function fmtPrice(n: number) {
 /** Point-of-sale screen — Phase 2.3. */
 export function PosPage() {
   const { t } = useTranslation()
-  const { user, profile } = useAuth()
+  const { user, profile, activeBusiness } = useAuth()
   const bizConfig = getBusinessConfig(profile?.type ?? 'retail')
   const isService = bizConfig.isServiceBased
   const { products, status, reload: reloadProducts } = useProducts()
@@ -149,6 +149,7 @@ export function PosPage() {
 
     const payload = {
       owner_id:        user.id,
+      business_id:     activeBusiness?.id,
       sale_number:     genSaleNumber(),
       payment_method:  paymentMethod,
       idempotency_key: idempotencyKey,

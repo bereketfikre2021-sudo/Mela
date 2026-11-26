@@ -24,6 +24,7 @@ export async function completeSale(
   if (!supabase) return noClient()
   const { data, error } = await supabase.rpc('complete_sale', {
     p_owner_id:        payload.owner_id,
+    p_business_id:     payload.business_id ?? null,
     p_sale_number:     payload.sale_number,
     p_payment_method:  payload.payment_method,
     p_idempotency_key: payload.idempotency_key,

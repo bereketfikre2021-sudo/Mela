@@ -1,13 +1,6 @@
 /*
- * MELA design tokens.
- *
- * @import rules must appear first (PostCSS requirement).
- * Outfit is loaded from /public/fonts/ via @font-face below.
- * Noto Sans Ethiopic comes from @fontsource for Amharic glyph coverage.
- * Both fonts are preloaded or self-hosted so the PWA works offline with no FOUT.
+ * MELA design tokens — mobile-first, responsive.
  */
-
-/* ── Noto Sans Ethiopic (must be first — @import before @font-face) ── */
 @import '@fontsource/noto-sans-ethiopic/400.css';
 @import '@fontsource/noto-sans-ethiopic/600.css';
 
@@ -15,74 +8,53 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ── Outfit — brand font for Latin / English ── */
-@font-face {
-  font-family: 'Outfit';
-  src: url('/fonts/Outfit/Outfit-Regular.ttf') format('truetype');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Outfit';
-  src: url('/fonts/Outfit/Outfit-Medium.ttf') format('truetype');
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Outfit';
-  src: url('/fonts/Outfit/Outfit-SemiBold.ttf') format('truetype');
-  font-weight: 600;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Outfit';
-  src: url('/fonts/Outfit/Outfit-Bold.ttf') format('truetype');
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
+/* ── Outfit ── */
+@font-face { font-family: 'Outfit'; src: url('/fonts/Outfit/Outfit-Regular.ttf') format('truetype'); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Outfit'; src: url('/fonts/Outfit/Outfit-Medium.ttf') format('truetype'); font-weight: 500; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Outfit'; src: url('/fonts/Outfit/Outfit-SemiBold.ttf') format('truetype'); font-weight: 600; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Outfit'; src: url('/fonts/Outfit/Outfit-Bold.ttf') format('truetype'); font-weight: 700; font-style: normal; font-display: swap; }
 
 @layer base {
   :root {
-    /* Brand */
-    --color-primary: 18 61 53;
+    --color-primary:             18 61 53;
     --color-primary-interactive: 28 107 83;
-    --color-primary-soft: 217 240 228;
-
-    /* Surfaces & content */
-    --color-background: 247 247 242;
-    --color-surface: 255 255 255;
-    --color-border: 231 229 220;
-    --color-text: 37 42 39;
-    --color-text-secondary: 88 104 95;
-    --color-muted: 135 150 141;
-
-    /* Semantic */
-    --color-success: 28 107 83;
-    --color-success-soft: 217 240 228;
-    --color-warning: 142 90 22;
-    --color-warning-soft: 243 231 201;
-    --color-danger: 154 58 36;
-    --color-danger-soft: 241 221 211;
-    --color-info: 83 99 95;
-    --color-info-soft: 226 231 229;
-
-    /*
-     * Font stack: Outfit (brand) → Noto Sans Ethiopic (Amharic) → system.
-     */
+    --color-primary-soft:        217 240 228;
+    --color-background:          247 247 242;
+    --color-surface:             255 255 255;
+    --color-border:              231 229 220;
+    --color-text:                37 42 39;
+    --color-text-secondary:      88 104 95;
+    --color-muted:               135 150 141;
+    --color-success:             28 107 83;
+    --color-success-soft:        217 240 228;
+    --color-warning:             142 90 22;
+    --color-warning-soft:        243 231 201;
+    --color-danger:              154 58 36;
+    --color-danger-soft:         241 221 211;
+    --color-info:                83 99 95;
+    --color-info-soft:           226 231 229;
     --font-sans: 'Outfit', 'Noto Sans Ethiopic', system-ui, -apple-system, 'Segoe UI', sans-serif;
   }
 
   html {
     -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    /* Prevent horizontal scroll globally */
+    overflow-x: hidden;
   }
 
   body {
     @apply bg-background text-text font-sans antialiased;
     margin: 0;
+    overflow-x: hidden;
+    /* iOS momentum scrolling */
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Prevent any element from causing horizontal overflow */
+  #root {
+    overflow-x: hidden;
+    width: 100%;
   }
 
   :focus-visible {
@@ -107,5 +79,27 @@
   .text-figures {
     font-variant-numeric: tabular-nums;
     @apply font-semibold;
+  }
+
+  /* ── Page header: stacks on mobile, row on sm+ ── */
+  .page-header {
+    @apply mb-5 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between;
+  }
+
+  .page-header-title {
+    @apply min-w-0 flex-1;
+  }
+
+  .page-header-actions {
+    @apply flex shrink-0 flex-wrap items-center gap-2;
+  }
+
+  /* ── Card ── */
+  .card {
+    @apply rounded-2xl border border-border bg-surface p-4 shadow-sm;
+  }
+
+  .card-sm {
+    @apply rounded-xl border border-border bg-surface p-3;
   }
 }

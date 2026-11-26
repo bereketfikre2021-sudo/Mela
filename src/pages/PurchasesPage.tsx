@@ -281,12 +281,12 @@ export function PurchasesPage() {
 
   if (status === 'loading') {
     return (
-      <div className="py-6 md:py-10">
-        <div className="mb-6 flex items-center justify-between">
+      <div className="py-4 md:py-8">
+        <div className="page-header">
           <Skeleton className="h-8 w-40" />
           <Skeleton className="h-9 w-36 rounded-md" />
         </div>
-        <div className="space-y-px rounded-lg border border-border overflow-hidden">
+        <div className="space-y-px rounded-xl border border-border overflow-hidden">
           {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-14 w-full rounded-none" />)}
         </div>
       </div>
@@ -295,7 +295,7 @@ export function PurchasesPage() {
 
   if (status === 'error') {
     return (
-      <div className="py-6 md:py-10">
+      <div className="py-4 md:py-8">
         <EmptyState icon={ShoppingBag} title={t('notification.error.title')} description={errorMessage}
           action={<Button variant="secondary" onClick={() => void reload()}>{t('products.retry')}</Button>} />
       </div>
@@ -305,8 +305,8 @@ export function PurchasesPage() {
   return (
     <>
       {/* ── Main ─────────────────────────────────────────────────────────── */}
-      <div className="py-6 md:py-10">
-        <div className="mb-6 flex items-start justify-between gap-4">
+      <div className="py-4 md:py-8">
+        <div className="page-header">
           <div>
             <h1 className="heading text-2xl md:text-3xl">{t('purchases.title')}</h1>
             <p className="mt-1 text-sm text-secondary">
@@ -341,7 +341,7 @@ export function PurchasesPage() {
             }
           />
         ) : (
-          <div className="overflow-x-auto rounded-lg border border-border">
+          <div className="overflow-x-auto rounded-xl border border-border">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -447,7 +447,7 @@ export function PurchasesPage() {
           <Input label={t('purchases.form.notes')} value={notes}
             onChange={e => setNotes(e.target.value)} maxLength={1000} />
 
-          <div className="flex items-center justify-between rounded-lg border border-border bg-background px-4 py-3">
+          <div className="flex items-center justify-between rounded-xl border border-border bg-background px-4 py-3">
             <span className="text-sm font-semibold text-secondary">{t('purchases.form.total')}</span>
             <span className="text-figures font-semibold text-text">{fmtETB(grandTotal)}</span>
           </div>
@@ -492,7 +492,7 @@ export function PurchasesPage() {
             </dl>
 
             {/* Items table */}
-            <div className="overflow-x-auto rounded-lg border border-border bg-surface">
+            <div className="overflow-x-auto rounded-xl border border-border bg-surface">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-border bg-background">
@@ -529,8 +529,8 @@ export function PurchasesPage() {
               const balance = detailData.total_cost - amtPaid
               const pStatus = purchasePaymentStatus(detailData.total_cost, amtPaid)
               return (
-                <div className="rounded-lg border border-border bg-background px-4 py-3">
-                  <div className="flex items-center justify-between gap-3">
+                <div className="rounded-xl border border-border bg-background px-4 py-3">
+                  <div className="page-header">
                     <div className="flex flex-col gap-0.5">
                       <StatusBadge
                         tone={pStatus === 'paid' ? 'success' : pStatus === 'partial' ? 'warning' : 'neutral'}
@@ -570,7 +570,7 @@ export function PurchasesPage() {
               ) : payHistory.length === 0 ? (
                 <p className="text-sm text-secondary">{t('purchases.payment.noHistory')}</p>
               ) : (
-                <div className="divide-y divide-border rounded-lg border border-border overflow-hidden">
+                <div className="divide-y divide-border rounded-xl border border-border overflow-hidden">
                   {payHistory.map(pay => (
                     <div key={pay.id} className="flex items-center justify-between gap-3 bg-surface px-4 py-2.5">
                       <div>

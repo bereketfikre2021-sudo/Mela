@@ -79,6 +79,7 @@ export interface CartItem {
 /** Payload sent to the complete_sale() RPC. */
 export interface CheckoutPayload {
   owner_id: string
+  business_id?: string | null
   sale_number: string
   payment_method: PaymentMethod
   idempotency_key: string

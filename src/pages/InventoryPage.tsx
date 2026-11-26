@@ -43,7 +43,7 @@ function suggestedReorder(p: Product): number {
 /** Inventory page with low-stock alerts and movement history — Phase 6.4. */
 export function InventoryPage() {
   const { t }    = useTranslation()
-  const { user } = useAuth()
+  const { user, activeBusiness } = useAuth()
   const { movements, status: movStatus, errorMessage: movError, reload: reloadMov } = useMovements()
   const { products, reload: reloadProducts } = useProducts()
   const { suppliers } = useSuppliers()
@@ -81,6 +81,7 @@ export function InventoryPage() {
     setRestockSubmitting(true)
     const { error } = await receivePurchase({
       owner_id:        user.id,
+      business_id:     activeBusiness?.id,
       supplier_id:     restockSupplierId || null,
       purchase_date:   new Date().toISOString().slice(0, 10),
       notes:           `Restock: ${restockProduct.name}`,
@@ -136,12 +137,12 @@ export function InventoryPage() {
 
   if (movStatus === 'loading') {
     return (
-      <div className="py-6 md:py-10">
+      <div className="py-4 md:py-8">
         <Skeleton className="mb-6 h-8 w-48" />
         <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
           {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-10 rounded-md" />)}
         </div>
-        <div className="space-y-px rounded-lg border border-border overflow-hidden">
+        <div className="space-y-px rounded-xl border border-border overflow-hidden">
           {[...Array(8)].map((_, i) => <Skeleton key={i} className="h-12 w-full rounded-none" />)}
         </div>
       </div>
@@ -150,7 +151,7 @@ export function InventoryPage() {
 
   if (movStatus === 'error') {
     return (
-      <div className="py-6 md:py-10">
+      <div className="py-4 md:py-8">
         <EmptyState icon={History} title={t('notification.error.title')} description={movError}
           action={<Button variant="secondary" onClick={() => void reloadMov()}>{t('products.retry')}</Button>} />
       </div>
@@ -212,7 +213,7 @@ export function InventoryPage() {
 
             {/* Alert detail table */}
             {alertProducts.length > 0 && (
-              <div className="mt-3 overflow-x-auto rounded-lg border border-border">
+              <div className="mt-3 overflow-x-auto rounded-xl border border-border">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-border bg-background">
@@ -286,7 +287,7 @@ export function InventoryPage() {
           ) : filteredMovements.length === 0 ? (
             <EmptyState icon={History} title={t('contacts.noResults')} description={t('contacts.noResultsDesc')} />
           ) : (
-            <div className="overflow-x-auto rounded-lg border border-border">
+            <div className="overflow-x-auto rounded-xl border border-border">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -334,7 +335,7 @@ export function InventoryPage() {
         {restockProduct && (
           <div className="flex flex-col gap-4">
             {/* Product info */}
-            <div className="rounded-lg border border-border bg-background p-3 text-sm">
+            <div className="rounded-xl border border-border bg-background p-3 text-sm">
               <p className="font-semibold text-text">{restockProduct.name}</p>
               <p className="mt-0.5 text-secondary">
                 {t('inventory.restock.currentStock')}{' '}

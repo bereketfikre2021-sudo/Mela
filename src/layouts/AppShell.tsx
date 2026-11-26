@@ -135,7 +135,7 @@ export function AppShell({
   ) : null
 
   return (
-    <div className="min-h-dvh bg-background text-text">
+    <div className="min-h-dvh overflow-x-hidden bg-background text-text">
       {/* Skip to main content — keyboard/screen-reader navigation */}
       <a
         href="#main-content"
@@ -153,7 +153,13 @@ export function AppShell({
           </div>
         }
       />
-      <main id="main-content" className={fullWidth ? 'w-full' : 'mx-auto w-full max-w-5xl px-4 pb-12 pt-6 md:pt-10'}>
+      <main
+        id="main-content"
+        className={fullWidth
+          ? 'w-full'
+          : 'mx-auto w-full max-w-5xl px-3 pb-28 pt-4 sm:px-4 sm:pt-6 md:pb-14 md:pt-8'
+        }
+      >
         {children}
       </main>
       {hasNav && (

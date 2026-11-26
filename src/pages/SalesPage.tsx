@@ -164,7 +164,7 @@ export function SalesPage() {
       <div className="py-6 md:py-10 space-y-4">
         <Skeleton className="h-8 w-40" />
         <Skeleton className="h-10 w-full rounded-lg" />
-        <div className="space-y-px rounded-lg border border-border overflow-hidden">
+        <div className="space-y-px rounded-xl border border-border overflow-hidden">
           {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-12 w-full rounded-none" />)}
         </div>
       </div>
@@ -173,7 +173,7 @@ export function SalesPage() {
 
   if (status === 'error') {
     return (
-      <div className="py-6 md:py-10">
+      <div className="py-4 md:py-8">
         <EmptyState
           icon={Receipt}
           title={t('notification.error.title')}
@@ -188,7 +188,7 @@ export function SalesPage() {
     <>
       <div className="py-6 md:py-10 space-y-4">
         {/* Header */}
-        <div className="flex items-center justify-between gap-4">
+        <div className="page-header">
           <div>
             <Breadcrumb items={[{ label: t('sales.title') }]} />
             <h1 className="text-2xl font-bold text-text">{t('sales.title')}</h1>
@@ -199,7 +199,7 @@ export function SalesPage() {
         </div>
 
         {/* Period filter */}
-        <div className="flex gap-1 rounded-lg border border-border bg-background p-1">
+        <div className="flex gap-1 rounded-xl border border-border bg-background p-1">
           {periods.map(p => (
             <button key={p.key} type="button" onClick={() => setPeriod(p.key)}
               className={['flex-1 rounded-md py-1.5 text-sm font-medium transition-colors',
@@ -219,7 +219,7 @@ export function SalesPage() {
             action={<Button size="sm" leadingIcon={<Plus className="h-4 w-4" />} onClick={() => navigate('/app/pos')}>{t('nav.newSale')}</Button>}
           />
         ) : (
-          <div className="overflow-x-auto rounded-lg border border-border">
+          <div className="overflow-x-auto rounded-xl border border-border">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -303,7 +303,7 @@ export function SalesPage() {
             </dl>
 
             {/* Items */}
-            <div className="rounded-lg border border-border overflow-hidden">
+            <div className="overflow-x-auto rounded-xl border border-border">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-border bg-background">
@@ -337,8 +337,8 @@ export function SalesPage() {
               const amtPaid = selected.amount_paid ?? 0
               const balance = selected.total - amtPaid
               return (
-                <div className="rounded-lg border border-border bg-background px-4 py-3">
-                  <div className="flex items-center justify-between gap-3">
+                <div className="rounded-xl border border-border bg-background px-4 py-3">
+                  <div className="page-header">
                     <div className="text-sm text-secondary space-y-0.5">
                       {amtPaid > 0 && (
                         <p>{t('sales.amountPaid', { amount: fmtPrice(amtPaid) })}</p>
@@ -365,7 +365,7 @@ export function SalesPage() {
               ) : payHistory.length === 0 ? (
                 <p className="text-sm text-secondary">{t('sales.noPayments')}</p>
               ) : (
-                <div className="divide-y divide-border rounded-lg border border-border overflow-hidden">
+                <div className="divide-y divide-border rounded-xl border border-border overflow-hidden">
                   {payHistory.map(pay => (
                     <div key={pay.id} className="flex items-center justify-between gap-3 bg-surface px-4 py-2.5">
                       <div>
