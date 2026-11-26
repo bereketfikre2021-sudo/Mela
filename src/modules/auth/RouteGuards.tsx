@@ -16,71 +16,68 @@ function AuthLoading() {
  * Gate for authenticated app routes that require an active business profile.
  *
  * Flow:
- *   loading session       → spinner
- *   unauthenticated       → /login
- *   profile loading       → spinner
- *   no businesses at all  → /onboarding  (create first business)
- *   active business set   → render children
+ *   loading session          → spinner
+ *   unauthenticated          → /login
+ *   profile loading          → spinner
+ *   profile error            → spinner (retry in progress, never redirect to onboarding)
+ *   no businesses at all     → /onboarding  (genuinely new user)
+ *   businesses exist but
+ *     activeBusiness null    → spinner (transient: fetchData in flight, wait for it)
+ *   active business set      → render children
  */
 export function RequireBusiness({ children }: { children: ReactNode }) {
   const { status, profileStatus, businesses, activeBusiness } = useAuth()
 
-  if (status === 'loading') return <AuthLoading />
-  if (status === 'unauthenticated') return <Navigate to="/login" replace />
-  if (profileStatus === 'loading') return <AuthLoading />
-  if (businesses.length === 0) return <Navigate to="/onboarding" replace />
-  if (!activeBusiness) return <Navigate to="/select-business" replace />
+  if (status === 'loading')                           return <AuthLoading />
+  if (status === 'unauthenticated')                   return <Navigate to="/login" replace />
+  if (profileStatus === 'loading')                    return <AuthLoading />
+  // On error, show spinner rather than bouncing to onboarding — AuthContext
+  // will retry on next session event; a stale-cache 400 should not log users out.
+  if (profileStatus === 'error')                      return <AuthLoading />
+  if (businesses.length === 0)                        return <Navigate to="/onboarding" replace />
+  // businesses loaded but activeBusiness not set yet — transient, wait
+  if (!activeBusiness)                                return <AuthLoading />
   return <>{children}</>
 }
 
 /**
  * Gate for the onboarding route (creating the FIRST business).
- *
- *   loading session  → spinner
- *   unauthenticated  → /login
- *   profile loading  → spinner
- *   has businesses   → /app (already onboarded)
- *   no businesses    → render children
  */
 export function RequireProfile({ children }: { children: ReactNode }) {
   const { status, profileStatus, businesses } = useAuth()
 
-  if (status === 'loading') return <AuthLoading />
-  if (status === 'unauthenticated') return <Navigate to="/login" replace />
-  if (profileStatus === 'loading') return <AuthLoading />
-  if (businesses.length > 0) return <Navigate to="/app" replace />
+  if (status === 'loading')             return <AuthLoading />
+  if (status === 'unauthenticated')     return <Navigate to="/login" replace />
+  if (profileStatus === 'loading')      return <AuthLoading />
+  if (profileStatus === 'error')        return <AuthLoading />
+  if (businesses.length > 0)            return <Navigate to="/app" replace />
   return <>{children}</>
 }
 
 /**
  * Gate for adding a SECOND or THIRD business (/onboarding/new).
- * Requires auth but does NOT require zero existing businesses.
- *
- *   unauthenticated  → /login
- *   at limit (3)     → /select-business
- *   otherwise        → render children
  */
 export function RequireCanAddBusiness({ children }: { children: ReactNode }) {
   const { status, profileStatus, businesses } = useAuth()
 
-  if (status === 'loading') return <AuthLoading />
-  if (status === 'unauthenticated') return <Navigate to="/login" replace />
-  if (profileStatus === 'loading') return <AuthLoading />
-  if (businesses.length >= 3) return <Navigate to="/select-business" replace />
+  if (status === 'loading')             return <AuthLoading />
+  if (status === 'unauthenticated')     return <Navigate to="/login" replace />
+  if (profileStatus === 'loading')      return <AuthLoading />
+  if (profileStatus === 'error')        return <AuthLoading />
+  if (businesses.length >= 3)           return <Navigate to="/select-business" replace />
   return <>{children}</>
 }
 
 /**
  * Gate for public-only routes (login / register).
- * Authenticated users are sent to the app or business picker.
  */
 export function PublicOnly({ children }: { children: ReactNode }) {
   const { status, profileStatus, businesses, activeBusiness } = useAuth()
 
   if (status === 'loading') return <AuthLoading />
   if (status === 'authenticated') {
-    if (profileStatus === 'loading') return <AuthLoading />
-    if (businesses.length === 0) return <Navigate to="/onboarding" replace />
+    if (profileStatus === 'loading' || profileStatus === 'error') return <AuthLoading />
+    if (businesses.length === 0)    return <Navigate to="/onboarding" replace />
     if (businesses.length > 1 && !activeBusiness) return <Navigate to="/select-business" replace />
     return <Navigate to="/app" replace />
   }
