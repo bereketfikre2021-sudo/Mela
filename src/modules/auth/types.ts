@@ -15,7 +15,7 @@ export interface Business {
   phone: string
   language: 'en' | 'am'
   closing_time: string | null
-  avatar_url: string | null
+  avatar_url?: string | null
   created_at: string
   updated_at: string
 }

@@ -43,6 +43,7 @@ import { periodRange } from '../modules/overview/dateRange'
 import { useProducts } from '../modules/retail/useProducts'
 import { getOutstandingBalances } from '../modules/retail/salesApi'
 import { getSupplierOutstanding } from '../modules/suppliers/api'
+import { getIncomeForPeriod } from '../modules/income/api'
 
 // ── Formatting helpers ────────────────────────────────────────────────────────
 
@@ -160,6 +161,8 @@ export function OverviewPage() {
   const bizConfig = getBusinessConfig(profile?.type ?? 'retail')
   const { products } = useProducts()
 
+  const isPersonal = profile?.type === 'personal'
+
   const [summary,    setSummary]    = useState<FinancialSummary | null>(null)
   const [loadStatus, setLoadStatus] = useState<'loading' | 'loaded' | 'error'>('loading')
   const [errorMsg,   setErrorMsg]   = useState('')
@@ -168,12 +171,17 @@ export function OverviewPage() {
   const [customerOwing,  setCustomerOwing]  = useState<number>(0)
   const [supplierOwing,  setSupplierOwing]  = useState<number>(0)
 
+  // Personal accounts: income comes from income_entries, not sales
+  const [personalIncome, setPersonalIncome] = useState<number>(0)
+
   const loadFinancials = useCallback(async () => {
     setLoadStatus('loading')
-    const [summaryRes, customerRes, supplierRes] = await Promise.all([
-      getFinancialSummary(periodRange('today')),
+    const range = periodRange('today')
+    const [summaryRes, customerRes, supplierRes, incomeRes] = await Promise.all([
+      getFinancialSummary(range),
       getOutstandingBalances(),
       getSupplierOutstanding(),
+      isPersonal ? getIncomeForPeriod(range.fromTs, range.toTs) : Promise.resolve({ data: [], error: null }),
     ])
     if (summaryRes.error) {
       setErrorMsg(summaryRes.error.message)
@@ -181,14 +189,15 @@ export function OverviewPage() {
       return
     }
     setSummary(summaryRes.data)
-    // Sum customer outstanding balances
     const custTotal = (customerRes.data ?? []).reduce((sum, r) => sum + r.amount, 0)
     setCustomerOwing(custTotal)
-    // Sum supplier outstanding balances
     const suppTotal = (supplierRes.data ?? []).reduce((sum, r) => sum + r.amount, 0)
     setSupplierOwing(suppTotal)
+    if (isPersonal && incomeRes.data) {
+      setPersonalIncome(incomeRes.data.reduce((sum, e) => sum + e.amount, 0))
+    }
     setLoadStatus('loaded')
-  }, [])
+  }, [isPersonal])
 
   useEffect(() => { void loadFinancials() }, [loadFinancials])
 
@@ -226,7 +235,11 @@ export function OverviewPage() {
   }
 
   const s = summary!
-  const isLoss = s.netProfit < 0
+  const isLoss = (isPersonal ? personalIncome - s.totalExpenses : s.netProfit) < 0
+
+  // For personal accounts: revenue = income_entries total, profit = income - expenses
+  const displayRevenue   = isPersonal ? personalIncome      : s.paidRevenue
+  const displayNetProfit = isPersonal ? personalIncome - s.totalExpenses : s.netProfit
 
   // Inventory values — only shown for product businesses
   const showInventory = !bizConfig.isServiceBased
@@ -245,7 +258,7 @@ export function OverviewPage() {
         <h1 className="heading text-2xl">{profile?.name ?? ''}</h1>
         <p className="mt-0.5 text-sm text-secondary">
           {t('home.todaySummary', {
-            sales: fmtETBCompact(s.paidRevenue),
+            sales: fmtETBCompact(displayRevenue),
             expenses: fmtETBCompact(s.totalExpenses),
           })}
         </p>
@@ -253,13 +266,13 @@ export function OverviewPage() {
 
       {/* ── 2×2 primary stat cards ─────────────────────────────────────────── */}
       <div className="grid grid-cols-2 gap-3">
-        {/* 1. Revenue */}
+        {/* 1. Revenue / Income */}
         <StatCard
           icon={<TrendingUp className="h-4 w-4" aria-hidden="true" />}
           iconBg="bg-primary-soft"
           iconColor="text-primary"
-          label={t('home.todaySales')}
-          value={fmtETBCompact(s.paidRevenue)}
+          label={isPersonal ? t('home.todayIncome') : t('home.todaySales')}
+          value={fmtETBCompact(displayRevenue)}
         />
 
         {/* 2. Est. Net Profit (F1) */}
@@ -268,9 +281,9 @@ export function OverviewPage() {
           iconBg={isLoss ? 'bg-danger-soft' : 'bg-success-soft'}
           iconColor={isLoss ? 'text-danger' : 'text-success'}
           label={t('home.profit')}
-          value={fmtETBCompact(s.netProfit)}
+          value={fmtETBCompact(displayNetProfit)}
           hint={t('home.netProfitHint')}
-          sub={!bizConfig.isServiceBased && s.cogsIncomplete ? t('overview.metric.partial') : undefined}
+          sub={!isPersonal && !bizConfig.isServiceBased && s.cogsIncomplete ? t('overview.metric.partial') : undefined}
           subTone="warning"
         />
 

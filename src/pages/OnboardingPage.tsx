@@ -6,6 +6,7 @@ import { ArrowLeft, ArrowRight, Check } from 'lucide-react'
 import { Button } from '../design-system/Button'
 import { Input } from '../design-system/Input'
 import { Select } from '../design-system/Select'
+import { TimePicker } from '../design-system/TimePicker'
 import { useNotification } from '../design-system/Notification'
 import { Spinner } from '../design-system/LoadingState'
 import { useAuth } from '../modules/auth/AuthContext'
@@ -427,12 +428,11 @@ export function OnboardingPage({ addingNew = false }: { addingNew?: boolean }) {
             />
             {/* Closing time only for shop / service businesses */}
             {bizType !== 'personal' && (
-              <Input
+              <TimePicker
                 label={t('business.form.closingTime')}
                 helperText={t('business.form.closingTimeHelper')}
-                type="time"
                 value={closingTime}
-                onChange={e => setClosingTime(e.target.value)}
+                onChange={setClosingTime}
               />
             )}
           </div>

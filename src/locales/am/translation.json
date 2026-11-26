@@ -182,8 +182,8 @@
                                   "submitting":  "እየተቀመጠ ነው…",
                                   "typeLocked":  "ተቆልፏል",
                                   "typeLockedHelper":  "ምርቶች ወይም አገልግሎቶች ከጨመሩ በኋላ የንግድ ዓይነቱን መቀየር አይቻልም።",
-                                  "closingTime":  "የዕለት መዘጊያ ሰዓት",
-                                  "closingTimeHelper":  "በዚህ ሰዓት የዕለት ማጠቃለያ እንልክልዎታለን።",
+                                  "closingTime":  "የዕለት መዘጊያ ሰዓት (ለዕለታዊ ሪፖርት ይጠቅማል)",
+                                  "closingTimeHelper":  "የዕለታዊ ማጠቃለያ ሪፖርትዎ በዚህ ሰዓት ይዘጋጃል።",
                                   "avatar":  "የንግድ ፎቶ",
                                   "avatarHelper":  "JPG፣ PNG ወይም WebP · ከ2 MB አይበልጥ",
                                   "uploadAvatar":  "ፎቶ ስቀል",
@@ -908,6 +908,7 @@
                   },
     "home":  {
                  "todaySales":  "የዛሬ ሽያጭ",
+                 "todayIncome": "የዛሬ ገቢ",
                  "todayExpenses":  "የዛሬ ወጪ",
                  "profit":  "ግምታዊ ትርፍ",
                  "netProfitHint":  "ገቢ ሲቀነስ የምርት ወጪ እና የሥራ ወጪ",

@@ -5,6 +5,7 @@ import { Camera, X } from 'lucide-react'
 import { Button } from '../../design-system/Button'
 import { Input } from '../../design-system/Input'
 import { Select, type SelectOption } from '../../design-system/Select'
+import { TimePicker } from '../../design-system/TimePicker'
 import { supportedLanguages } from '../../locales/i18n'
 import { ALL_BUSINESS_TYPES, type BusinessType } from './businessConfig'
 import { BusinessAvatar } from '../../components/BusinessAvatar'
@@ -225,12 +226,11 @@ export function BusinessForm({ mode, initial, preselectedType, hasData = false, 
         />
 
         {!isPersonal && (
-          <Input
+          <TimePicker
             label={t('business.form.closingTime')}
             helperText={t('business.form.closingTimeHelper')}
-            type="time"
-            value={closingTime}
-            onChange={e => setClosingTime(e.target.value)}
+            value={closingTime ?? ''}
+            onChange={setClosingTime}
           />
         )}
       </section>

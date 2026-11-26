@@ -40,6 +40,26 @@ export async function createIncomeEntry(
   return { data: data as IncomeEntry, error: null }
 }
 
+/** Fetch income entries within a date range (received_at). */
+export async function getIncomeForPeriod(
+  fromTs: string,
+  toTs: string
+): Result<IncomeEntry[]> {
+  if (!supabase) return noClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { data: [], error: null }
+  const { data, error } = await supabase
+    .from('income_entries')
+    .select('*')
+    .eq('owner_id', user.id)
+    .gte('received_at', fromTs)
+    .lte('received_at', toTs)
+    .order('received_at', { ascending: false })
+    .limit(10000)
+  if (error) return { data: null, error: { message: error.message } }
+  return { data: (data as IncomeEntry[]) ?? [], error: null }
+}
+
 /** Delete an income entry. */
 export async function deleteIncomeEntry(
   id: string,

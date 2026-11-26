@@ -53,7 +53,7 @@ export async function getBusinesses(
   if (!supabase) return { data: [], error: { message: clientUnavailableError().error.message } }
   const { data, error, status, statusText } = await supabase
     .from('businesses')
-    .select('id, owner_id, name, type, owner_name, phone, language, closing_time, avatar_url, created_at, updated_at')
+    .select('id, owner_id, name, type, owner_name, phone, language, closing_time, created_at, updated_at')
     .eq('owner_id', userId)
   if (error) {
     console.error('[getBusinesses] FULL ERROR:', {

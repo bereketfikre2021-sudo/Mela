@@ -182,8 +182,8 @@
       "submitting": "Saving…",
       "typeLocked": "Locked",
       "typeLockedHelper": "Business type cannot be changed after you have added products or services.",
-      "closingTime": "Business closing time",
-      "closingTimeHelper": "We will send you a daily summary at this time.",
+      "closingTime": "Business closing time (used for daily reports)",
+      "closingTimeHelper": "Your daily summary report will be generated at this time.",
       "avatar": "Business photo",
       "avatarHelper": "JPG, PNG or WebP · Max 2 MB",
       "uploadAvatar": "Upload photo",
@@ -916,6 +916,7 @@
   },
   "home": {
     "todaySales": "Today's sales",
+    "todayIncome": "Today's income",
     "todaySummary": "Today: {{sales}} revenue · {{expenses}} expenses",
     "todayExpenses": "Today's expenses",
     "profit": "Est. net profit",
