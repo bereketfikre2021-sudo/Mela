@@ -11,16 +11,18 @@ function noClient(): { data: null; error: { message: string } } {
 }
 
 /** Fetch all income entries for the authenticated owner, newest first. */
-export async function getIncomeEntries(): Result<IncomeEntry[]> {
+export async function getIncomeEntries(businessId?: string): Result<IncomeEntry[]> {
   if (!supabase) return noClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { data: [], error: null }
-  const { data, error } = await supabase
+  let q = supabase
     .from('income_entries')
     .select('*')
     .eq('owner_id', user.id)
     .order('received_at', { ascending: false })
     .limit(1000)
+  if (businessId) q = q.eq('business_id', businessId)
+  const { data, error } = await q
   if (error) return { data: null, error: { message: error.message } }
   return { data: (data as IncomeEntry[]) ?? [], error: null }
 }
@@ -28,12 +30,13 @@ export async function getIncomeEntries(): Result<IncomeEntry[]> {
 /** Record a new income entry. */
 export async function createIncomeEntry(
   input: IncomeInput,
-  ownerId: string
+  ownerId: string,
+  businessId?: string
 ): Result<IncomeEntry> {
   if (!supabase) return noClient()
   const { data, error } = await supabase
     .from('income_entries')
-    .insert({ ...input, owner_id: ownerId })
+    .insert({ ...input, owner_id: ownerId, ...(businessId ? { business_id: businessId } : {}) })
     .select('*')
     .single()
   if (error) return { data: null, error: { message: error.message } }
@@ -43,12 +46,13 @@ export async function createIncomeEntry(
 /** Fetch income entries within a date range (received_at). */
 export async function getIncomeForPeriod(
   fromTs: string,
-  toTs: string
+  toTs: string,
+  businessId?: string
 ): Result<IncomeEntry[]> {
   if (!supabase) return noClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { data: [], error: null }
-  const { data, error } = await supabase
+  let q = supabase
     .from('income_entries')
     .select('*')
     .eq('owner_id', user.id)
@@ -56,6 +60,8 @@ export async function getIncomeForPeriod(
     .lte('received_at', toTs)
     .order('received_at', { ascending: false })
     .limit(10000)
+  if (businessId) q = q.eq('business_id', businessId)
+  const { data, error } = await q
   if (error) return { data: null, error: { message: error.message } }
   return { data: (data as IncomeEntry[]) ?? [], error: null }
 }
@@ -63,13 +69,17 @@ export async function getIncomeForPeriod(
 /** Delete an income entry. */
 export async function deleteIncomeEntry(
   id: string,
-  ownerId: string
+  ownerId: string,
+  businessId?: string
 ): Promise<{ error: { message: string } | null }> {
   if (!supabase) return { error: { message: 'Supabase is not configured.' } }
-  const { error } = await supabase
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let q: any = supabase
     .from('income_entries')
     .delete()
     .eq('id', id)
     .eq('owner_id', ownerId)
+  if (businessId) q = q.eq('business_id', businessId)
+  const { error } = await q
   return { error: error ? { message: error.message } : null }
 }

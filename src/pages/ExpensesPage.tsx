@@ -36,7 +36,7 @@ function fmtDate(iso: string) {
 /** Expense management page — Phase 3.1. */
 export function ExpensesPage() {
   const { t }             = useTranslation()
-  const { user, profile } = useAuth()
+  const { user, profile, activeBusiness } = useAuth()
   const { expenses, status, errorMessage, reload } = useExpenses()
   const { notify } = useNotification()
 
@@ -84,7 +84,7 @@ export function ExpensesPage() {
       closeDialog()
       return
     }
-    const { error } = await createExpense(input, user.id)
+    const { error } = await createExpense(input, user.id, activeBusiness?.id)
     setSubmitting(false)
     if (error) { notify({ tone: 'danger', title: t('notification.error.title'), description: error.message }); return }
     notify({ tone: 'success', title: t('expenses.notifications.added') })

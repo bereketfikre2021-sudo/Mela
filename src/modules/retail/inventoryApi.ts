@@ -14,13 +14,14 @@ function noClient(): { data: null; error: { message: string } } {
 
 /**
  * Fetch inventory movements for the owner, newest first.
- * Optional filters: product_id, movement_type, date range (ISO strings).
+ * Optional filters: product_id, movement_type, date range (ISO strings), business_id.
  */
 export async function getMovements(filters?: {
   productId?: string
   movementType?: string
   fromTs?: string
   toTs?: string
+  businessId?: string
 }): Result<InventoryMovement[]> {
   if (!supabase) return noClient()
 
@@ -34,6 +35,7 @@ export async function getMovements(filters?: {
   if (filters?.movementType) q = q.eq('movement_type', filters.movementType)
   if (filters?.fromTs)       q = q.gte('created_at', filters.fromTs)
   if (filters?.toTs)         q = q.lte('created_at', filters.toTs)
+  if (filters?.businessId)   q = q.eq('business_id', filters.businessId)
 
   const { data, error } = await q
   if (error) return { data: null, error: { message: error.message } }

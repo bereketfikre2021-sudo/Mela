@@ -105,14 +105,14 @@ function isoToLocalMonth(isoTs: string): string {
   return isoToLocalDate(isoTs).slice(0, 7)
 }
 
-export async function getReportData(range: DateRange, isPersonal = false): Result<ReportData> {
+export async function getReportData(range: DateRange, isPersonal = false, businessId?: string): Result<ReportData> {
   if (!supabase) return noClient()
 
   let incomeEntries: IncomeEntry[] = []
   if (isPersonal) {
     const { data: { user } } = await supabase.auth.getUser()
     if (user) {
-      const { data } = await supabase
+      let q = supabase
         .from('income_entries')
         .select('*')
         .eq('owner_id', user.id)
@@ -120,19 +120,24 @@ export async function getReportData(range: DateRange, isPersonal = false): Resul
         .lte('received_at', range.toTs)
         .order('received_at', { ascending: false })
         .limit(10000)
+      if (businessId) q = q.eq('business_id', businessId)
+      const { data } = await q
       incomeEntries = (data as IncomeEntry[]) ?? []
     }
   }
 
-  const [salesRes, expensesRes] = await Promise.all([
-    supabase.from('sales').select('*, sale_items(*)')
-      .gte('sold_at', range.fromTs).lte('sold_at', range.toTs)
-      .neq('payment_status', 'cancelled')
-      .order('sold_at', { ascending: false }).limit(10000),
-    supabase.from('expenses').select('*')
-      .gte('expense_date', range.fromDate).lte('expense_date', range.toDate)
-      .order('expense_date', { ascending: false }).limit(10000),
-  ])
+  let salesQ = supabase.from('sales').select('*, sale_items(*)')
+    .gte('sold_at', range.fromTs).lte('sold_at', range.toTs)
+    .neq('payment_status', 'cancelled')
+    .order('sold_at', { ascending: false }).limit(10000)
+  if (businessId) salesQ = salesQ.eq('business_id', businessId)
+
+  let expensesQ = supabase.from('expenses').select('*')
+    .gte('expense_date', range.fromDate).lte('expense_date', range.toDate)
+    .order('expense_date', { ascending: false }).limit(10000)
+  if (businessId) expensesQ = expensesQ.eq('business_id', businessId)
+
+  const [salesRes, expensesRes] = await Promise.all([salesQ, expensesQ])
 
   if (salesRes.error)    return { data: null, error: { message: salesRes.error.message } }
   if (expensesRes.error) return { data: null, error: { message: expensesRes.error.message } }

@@ -19,7 +19,7 @@ type DialogMode = 'add' | 'edit' | 'delete' | null
 
 export function SuppliersPage() {
   const { t } = useTranslation()
-  const { user } = useAuth()
+  const { user, activeBusiness } = useAuth()
   const { suppliers, status, errorMessage, reload } = useSuppliers()
   const { notify } = useNotification()
   const { canAddSupplier } = useSubscription()
@@ -34,11 +34,11 @@ export function SuppliersPage() {
   const [showOnlyOwed,   setShowOnlyOwed]   = useState(false)
 
   const loadOutstanding = useCallback(async () => {
-    const { data } = await getSupplierOutstanding()
+    const { data } = await getSupplierOutstanding(activeBusiness?.id)
     const map = new Map<string, number>()
     for (const row of data ?? []) map.set(row.supplierId, row.amount)
     setOutstanding(map)
-  }, [])
+  }, [activeBusiness?.id])
 
   useEffect(() => { void loadOutstanding() }, [loadOutstanding])
 
@@ -71,7 +71,7 @@ export function SuppliersPage() {
   async function handleAdd(input: SupplierInput) {
     if (!user) return
     setSubmitting(true)
-    const { error } = await createSupplier(input, user.id)
+    const { error } = await createSupplier(input, user.id, activeBusiness?.id)
     setSubmitting(false)
     if (error) { notify({ tone: 'danger', title: t('notification.error.title'), description: error.message }); return }
     notify({ tone: 'success', title: t('suppliers.notifications.added') })

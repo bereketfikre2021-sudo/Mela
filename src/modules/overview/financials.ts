@@ -101,34 +101,40 @@ function noClient(): { data: null; error: { message: string } } {
   return { data: null, error: { message: 'Supabase is not configured.' } }
 }
 
-export async function getFinancialSummary(range: DateRange): Result<FinancialSummary> {
+export async function getFinancialSummary(range: DateRange, businessId?: string): Result<FinancialSummary> {
   if (!supabase) return noClient()
 
-  const [salesRes, expensesRes, productsRes] = await Promise.all([
-    supabase
-      .from('sales')
-      .select('*, sale_items(*)')
-      .gte('sold_at', range.fromTs)
-      .lte('sold_at', range.toTs)
-      .neq('payment_status', 'cancelled')
-      .order('sold_at', { ascending: false })
-      .limit(10000),
-    supabase
-      .from('expenses')
-      .select('*')
-      .gte('expense_date', range.fromDate)
-      .lte('expense_date', range.toDate)
-      .order('expense_date', { ascending: false })
-      .limit(10000),
-    // F4: fetch only stocked products for inventory valuation.
-    // stock_quantity > 0 excludes sold-out and zero-qty products.
-    // We only need four fields; no need to pull all columns.
-    supabase
-      .from('products')
-      .select('id, stock_quantity, cost_price, selling_price')
-      .gte('stock_quantity', 1)
-      .limit(10000),
-  ])
+  // Build queries; apply business_id filter when present.
+  let salesQ = supabase
+    .from('sales')
+    .select('*, sale_items(*)')
+    .gte('sold_at', range.fromTs)
+    .lte('sold_at', range.toTs)
+    .neq('payment_status', 'cancelled')
+    .order('sold_at', { ascending: false })
+    .limit(10000)
+  if (businessId) salesQ = salesQ.eq('business_id', businessId)
+
+  let expensesQ = supabase
+    .from('expenses')
+    .select('*')
+    .gte('expense_date', range.fromDate)
+    .lte('expense_date', range.toDate)
+    .order('expense_date', { ascending: false })
+    .limit(10000)
+  if (businessId) expensesQ = expensesQ.eq('business_id', businessId)
+
+  // F4: fetch only stocked products for inventory valuation.
+  // stock_quantity > 0 excludes sold-out and zero-qty products.
+  // We only need four fields; no need to pull all columns.
+  let productsQ = supabase
+    .from('products')
+    .select('id, stock_quantity, cost_price, selling_price')
+    .gte('stock_quantity', 1)
+    .limit(10000)
+  if (businessId) productsQ = productsQ.eq('business_id', businessId)
+
+  const [salesRes, expensesRes, productsRes] = await Promise.all([salesQ, expensesQ, productsQ])
 
   if (salesRes.error)    return { data: null, error: { message: salesRes.error.message } }
   if (expensesRes.error) return { data: null, error: { message: expensesRes.error.message } }

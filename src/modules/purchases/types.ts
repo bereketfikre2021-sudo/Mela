@@ -41,6 +41,7 @@ export interface PurchaseLineInput {
 /** Payload sent to receive_purchase() RPC. */
 export interface ReceivePurchasePayload {
   owner_id: string
+  business_id?: string
   supplier_id: string | null
   purchase_date: string
   notes: string | null

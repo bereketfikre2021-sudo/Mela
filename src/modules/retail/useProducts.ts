@@ -1,16 +1,18 @@
 /**
- * React hook: load the authenticated owner's product list.
+ * React hook: load the authenticated owner's product list for the active business.
  * Serves cached data when offline; updates cache on successful fetch.
  */
 import { useCallback, useEffect, useState } from 'react'
 import { getProducts } from './api'
 import { cacheGet, cacheSet } from '../../lib/db'
+import { useAuth } from '../auth/AuthContext'
 import type { Product } from './types'
 
 const CACHE_KEY = 'products_list'
 type Status = 'loading' | 'loaded' | 'error'
 
 export function useProducts() {
+  const { activeBusiness } = useAuth()
   const [products, setProducts] = useState<Product[]>([])
   const [status, setStatus]     = useState<Status>('loading')
   const [errorMessage, setErrorMessage] = useState('')
@@ -20,7 +22,7 @@ export function useProducts() {
 
     // Try Supabase first
     if (navigator.onLine) {
-      const { data, error } = await getProducts()
+      const { data, error } = await getProducts(activeBusiness?.id)
       if (!error && data) {
         setProducts(data)
         setStatus('loaded')
@@ -46,11 +48,11 @@ export function useProducts() {
     }
 
     // Real error while online
-    const { data, error } = await getProducts()
+    const { data, error } = await getProducts(activeBusiness?.id)
     if (error) { setErrorMessage(error.message); setStatus('error'); return }
     setProducts(data)
     setStatus('loaded')
-  }, [])
+  }, [activeBusiness?.id])
 
   useEffect(() => { void load() }, [load])
 

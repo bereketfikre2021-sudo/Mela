@@ -60,7 +60,7 @@ type DialogMode = 'add' | 'delete' | null
 
 export function IncomePage() {
   const { t }      = useTranslation()
-  const { user }   = useAuth()
+  const { user, activeBusiness }   = useAuth()
   const { notify } = useNotification()
   const { entries, status, errorMessage, reload } = useIncome()
 
@@ -122,7 +122,8 @@ export function IncomePage() {
         note:        note.trim() || null,
         received_at: capturedAt.toISOString(),
       },
-      user.id
+      user.id,
+      activeBusiness?.id
     )
     setSubmitting(false)
     if (error) {

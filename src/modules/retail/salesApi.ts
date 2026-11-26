@@ -43,17 +43,20 @@ export async function completeSale(
  */
 export async function getSales(
   limit = 500,
-  offset = 0
+  offset = 0,
+  businessId?: string
 ): Result<SaleWithItems[]> {
   if (!supabase) return noClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { data: [], error: null }
-  const { data, error } = await supabase
+  let q = supabase
     .from('sales')
     .select('*, sale_items(*)')
     .eq('owner_id', user.id)
     .order('sold_at', { ascending: false })
     .range(offset, offset + limit - 1)
+  if (businessId) q = q.eq('business_id', businessId)
+  const { data, error } = await q
   if (error) return { data: null, error: { message: error.message } }
   return { data: (data as SaleWithItems[]) ?? [], error: null }
 }
@@ -122,14 +125,16 @@ export interface CustomerOutstanding {
  *
  * F3: now also counts 'partial' status rows using amount_paid.
  */
-export async function getOutstandingBalances(): Result<CustomerOutstanding[]> {
+export async function getOutstandingBalances(businessId?: string): Result<CustomerOutstanding[]> {
   if (!supabase) return noClient()
-  const { data, error } = await supabase
+  let q = supabase
     .from('sales')
     .select('customer_id, total, amount_paid')
     .in('payment_status', ['pending', 'partial'])
     .not('customer_id', 'is', null)
     .limit(10000)
+  if (businessId) q = q.eq('business_id', businessId)
+  const { data, error } = await q
   if (error) return { data: null, error: { message: error.message } }
   const rows = (data as { customer_id: string; total: number; amount_paid: number }[]) ?? []
   const map = new Map<string, number>()

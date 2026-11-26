@@ -125,6 +125,7 @@ export function ReportsPage() {
   const { profile }         = useAuth()
   const isService           = getBusinessConfig(profile?.type ?? 'retail').isServiceBased
   const isPersonal          = profile?.type === 'personal'
+  const { activeBusiness }  = useAuth()
 
   const [period,     setPeriod]     = useState<Period>('month')
   const [customFrom, setCustomFrom] = useState('')
@@ -137,7 +138,7 @@ export function ReportsPage() {
   function load(p: Period, cf?: string, ct?: string) {
     setLoadStatus('loading')
     const range = periodRange(p, cf, ct)
-    getReportData(range, isPersonal).then(({ data, error }) => {
+    getReportData(range, isPersonal, activeBusiness?.id).then(({ data, error }) => {
       if (error) { setErrorMsg(error.message); setLoadStatus('error'); return }
       setReport(data); setLoadStatus('loaded')
     })

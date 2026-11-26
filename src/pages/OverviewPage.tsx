@@ -158,7 +158,7 @@ function InfoRow({
 export function OverviewPage() {
   const { t }    = useTranslation()
   const navigate = useNavigate()
-  const { profile } = useAuth()
+  const { profile, activeBusiness } = useAuth()
   const bizConfig = getBusinessConfig(profile?.type ?? 'retail')
   const { products } = useProducts()
 
@@ -183,10 +183,10 @@ export function OverviewPage() {
   const loadFinancials = useCallback(async () => {
     const range = periodRange('today')
     const [summaryRes, customerRes, supplierRes, incomeRes] = await Promise.all([
-      getFinancialSummary(range),
-      getOutstandingBalances(),
-      getSupplierOutstanding(),
-      isPersonal ? getIncomeForPeriod(range.fromTs, range.toTs) : Promise.resolve({ data: [], error: null }),
+      getFinancialSummary(range, activeBusiness?.id),
+      getOutstandingBalances(activeBusiness?.id),
+      getSupplierOutstanding(activeBusiness?.id),
+      isPersonal ? getIncomeForPeriod(range.fromTs, range.toTs, activeBusiness?.id) : Promise.resolve({ data: [], error: null }),
     ])
     if (summaryRes.error) {
       setErrorMsg(summaryRes.error.message)
@@ -202,7 +202,7 @@ export function OverviewPage() {
       setPersonalIncome(incomeRes.data.reduce((sum, e) => sum + e.amount, 0))
     }
     setLoadStatus('loaded')
-  }, [isPersonal])
+  }, [isPersonal, activeBusiness?.id])
 
   useEffect(() => { void loadFinancials() }, [loadFinancials])
 

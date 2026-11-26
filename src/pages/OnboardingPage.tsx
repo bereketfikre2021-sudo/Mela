@@ -206,7 +206,7 @@ export function OnboardingPage({ addingNew = false }: { addingNew?: boolean }) {
             low_stock_threshold: null,
             image_url:         null,
             barcode:           null,
-          }, user.id)
+          }, user.id, newBiz?.id)
         )
       )
     }

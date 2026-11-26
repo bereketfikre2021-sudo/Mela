@@ -48,7 +48,7 @@ function todayISO() { return new Date().toISOString().slice(0, 10) }
 /** Purchases page — Phase 6.3 + F2. */
 export function PurchasesPage() {
   const { t }    = useTranslation()
-  const { user } = useAuth()
+  const { user, activeBusiness } = useAuth()
   const navigate = useNavigate()
   const { isOnline, refreshCount } = useSyncContext()
   const { purchases, status, errorMessage, reload } = usePurchases()
@@ -143,6 +143,7 @@ export function PurchasesPage() {
 
     const payload = {
       owner_id:        user.id,
+      business_id:     activeBusiness?.id,
       supplier_id:     supplierId || null,
       purchase_date:   purchDate,
       notes:           notes.trim() || null,

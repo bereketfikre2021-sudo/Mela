@@ -25,7 +25,7 @@ type DialogMode = 'add' | 'edit' | 'delete' | null
 
 export function CustomersPage() {
   const { t } = useTranslation()
-  const { user, profile } = useAuth()
+  const { user, profile, activeBusiness } = useAuth()
   const isService = getBusinessConfig(profile?.type ?? 'retail').isServiceBased
   const { customers, status, errorMessage, reload } = useCustomers()
   const { notify } = useNotification()
@@ -112,11 +112,11 @@ export function CustomersPage() {
   const [showOnlyOwing, setShowOnlyOwing] = useState(false)
 
   const loadOutstanding = useCallback(async () => {
-    const { data } = await getOutstandingBalances()
+    const { data } = await getOutstandingBalances(activeBusiness?.id)
     const map = new Map<string, number>()
     for (const row of data ?? []) map.set(row.customerId, row.amount)
     setOutstanding(map)
-  }, [])
+  }, [activeBusiness?.id])
 
   useEffect(() => { void loadOutstanding() }, [loadOutstanding])
 
@@ -153,7 +153,7 @@ export function CustomersPage() {
   async function handleAdd(input: CustomerInput) {
     if (!user) return
     setSubmitting(true)
-    const { error } = await createCustomer(input, user.id)
+    const { error } = await createCustomer(input, user.id, activeBusiness?.id)
     setSubmitting(false)
     if (error) { notify({ tone: 'danger', title: t('notification.error.title'), description: error.message }); return }
     notify({ tone: 'success', title: t('customers.notifications.added') })

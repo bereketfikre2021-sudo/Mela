@@ -1,48 +1,32 @@
 import { supabase } from '../../lib/supabase'
-import type {
-  Purchase,
-  PurchaseWithItems,
-  ReceivePurchasePayload,
-  RecordSupplierPaymentPayload,
-  RecordSupplierPaymentResult,
-  SupplierPayment,
-} from './types'
+import type { Purchase, PurchaseWithItems, ReceivePurchasePayload, RecordSupplierPaymentPayload, RecordSupplierPaymentResult, SupplierPayment } from './types'
 
 type Result<T> = Promise<{ data: T; error: null } | { data: null; error: { message: string } }>
-
 function noClient(): { data: null; error: { message: string } } {
   return { data: null, error: { message: 'Supabase is not configured.' } }
 }
 
-export async function getPurchases(): Result<Purchase[]> {
+export async function getPurchases(businessId?: string): Result<Purchase[]> {
   if (!supabase) return noClient()
-  const { data, error } = await supabase
-    .from('purchases')
-    .select('*')
-    .order('purchase_date', { ascending: false })
-    .order('created_at',    { ascending: false })
-    .limit(10000)
+  let q = supabase.from('purchases').select('*').order('purchase_date', { ascending: false }).order('created_at', { ascending: false }).limit(10000)
+  if (businessId) q = q.eq('business_id', businessId)
+  const { data, error } = await q
   if (error) return { data: null, error: { message: error.message } }
   return { data: (data as Purchase[]) ?? [], error: null }
 }
 
 export async function getPurchase(id: string): Result<PurchaseWithItems> {
   if (!supabase) return noClient()
-  const { data, error } = await supabase
-    .from('purchases')
-    .select('*, purchase_items(*)')
-    .eq('id', id)
-    .single()
+  const { data, error } = await supabase.from('purchases').select('*, purchase_items(*)').eq('id', id).single()
   if (error) return { data: null, error: { message: error.message } }
   return { data: data as PurchaseWithItems, error: null }
 }
 
-export async function receivePurchase(
-  payload: ReceivePurchasePayload
-): Result<{ purchase_id: string; total_cost: number; already_exists: boolean }> {
+export async function receivePurchase(payload: ReceivePurchasePayload): Result<{ purchase_id: string; total_cost: number; already_exists: boolean }> {
   if (!supabase) return noClient()
   const { data, error } = await supabase.rpc('receive_purchase', {
     p_owner_id:        payload.owner_id,
+    p_business_id:     payload.business_id,
     p_supplier_id:     payload.supplier_id,
     p_purchase_date:   payload.purchase_date,
     p_notes:           payload.notes,
@@ -50,20 +34,10 @@ export async function receivePurchase(
     p_items:           payload.items,
   })
   if (error) return { data: null, error: { message: error.message } }
-  return {
-    data: data as { purchase_id: string; total_cost: number; already_exists: boolean },
-    error: null,
-  }
+  return { data: data as { purchase_id: string; total_cost: number; already_exists: boolean }, error: null }
 }
 
-// ── Supplier payments (F2) ───────────────────────────────────────────────────
-// Recording a payment records a cash/bank outflow against a purchase and reduces
-// its balance. It never creates an expense or a new purchase, and the RPC is
-// idempotent so retries / replays never create duplicate payments.
-
-export async function recordSupplierPayment(
-  payload: RecordSupplierPaymentPayload
-): Result<RecordSupplierPaymentResult> {
+export async function recordSupplierPayment(payload: RecordSupplierPaymentPayload): Result<RecordSupplierPaymentResult> {
   if (!supabase) return noClient()
   const { data, error } = await supabase.rpc('record_supplier_payment', {
     p_owner_id:        payload.owner_id,
@@ -78,16 +52,9 @@ export async function recordSupplierPayment(
   return { data: data as RecordSupplierPaymentResult, error: null }
 }
 
-/** Payment history for a single purchase, newest first. */
 export async function getSupplierPayments(purchaseId: string): Result<SupplierPayment[]> {
   if (!supabase) return noClient()
-  const { data, error } = await supabase
-    .from('supplier_payments')
-    .select('*')
-    .eq('purchase_id', purchaseId)
-    .order('payment_date', { ascending: false })
-    .order('created_at',   { ascending: false })
-    .limit(1000)
+  const { data, error } = await supabase.from('supplier_payments').select('*').eq('purchase_id', purchaseId).order('payment_date', { ascending: false }).order('created_at', { ascending: false }).limit(1000)
   if (error) return { data: null, error: { message: error.message } }
   return { data: (data as SupplierPayment[]) ?? [], error: null }
 }
