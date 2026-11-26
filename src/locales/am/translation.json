@@ -37,7 +37,8 @@
                 "catalogue":  "ካታሎግ",
                 "income":  "ገቢ",
                 "contacts":  "አድራሻ ደብተር",
-                "budget":  "ሪፖርቶች"
+                "budget":  "ሪፖርቶች",
+                "menu":  "ምናሌ"
             },
     "welcome":  {
                     "eyebrow":  "ለኢትዮጵያ ንግዶች",
@@ -913,7 +914,7 @@
                   },
     "home":  {
                  "todaySales":  "የዛሬ ሽያጭ",
-                 "todayIncome": "የዛሬ ገቢ",
+                 "todayIncome":  "የዛሬ ገቢ",
                  "todayExpenses":  "የዛሬ ወጪ",
                  "profit":  "ግምታዊ ትርፍ",
                  "netProfitHint":  "ገቢ ሲቀነስ የምርት ወጪ እና የሥራ ወጪ",

@@ -108,7 +108,7 @@ function AppRoutes() {
    * Service businesses: Home | Sales | Expenses | Services | Clients | Reports
    * Personal:           Home | Income | Expenses | Contacts | Reports
    */
-  const isFnbOrBakery = profile?.type === 'fnb' || profile?.type === 'bakery'
+  const isFnbOrBakery = profile?.type === 'fnb' || profile?.type === 'bakery' || profile?.type === 'fastfood'
   const isPersonal    = profile?.type === 'personal'
 
   const appNav: NavItem[] = isPersonal ? [
