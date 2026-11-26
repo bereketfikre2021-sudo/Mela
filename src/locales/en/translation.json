@@ -37,7 +37,7 @@
     "catalogue": "Catalogue",
     "income": "Income",
     "contacts": "Contacts",
-    "budget": "Budget"
+    "budget": "Reports"
   },
   "welcome": {
     "eyebrow": "MADE FOR ETHIOPIAN BUSINESSES",
@@ -1030,7 +1030,7 @@
     "baltina": "Baltina / Spice Shop",
     "baltina_desc": "Berbere, shiro, mitmita & flour mixes",
     "personal": "Personal",
-    "personal_desc": "Track income, spending & budgets"
+    "personal_desc": "Track income, spending & reports"
   },
   "onboarding": {
     "pickType": {

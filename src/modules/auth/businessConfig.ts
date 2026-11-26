@@ -601,7 +601,7 @@ const CONFIGS: Record<BusinessType, BusinessConfig> = {
     type:                 'personal',
     icon:                 User,
     label:                'Personal',
-    description:          'Track personal income, spending & budgets',
+    description:          'Track personal income, spending & reports',
     newSaleLabel:         'Add income',
     stockLabel:           'Items',
     stockLabelKey:        'nav.stock',

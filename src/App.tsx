@@ -106,7 +106,7 @@ function AppRoutes() {
    *   retail/cosmetics: Home | Sales | Stock | Customers | Expenses
    *   fnb/bakery:       Home | Sales | Menu/Stock | Purchases | Reports
    * Service businesses: Home | Sales | Expenses | Services | Clients | Reports
-   * Personal:           Home | Income | Expenses | Contacts | Budget
+   * Personal:           Home | Income | Expenses | Contacts | Reports
    */
   const isFnbOrBakery = profile?.type === 'fnb' || profile?.type === 'bakery'
   const isPersonal    = profile?.type === 'personal'
@@ -116,7 +116,7 @@ function AppRoutes() {
     { id: '/app/income',   label: t('nav.income'),   icon: TrendingUp },
     { id: '/app/expenses', label: t('nav.expenses'), icon: Wallet    },
     { id: '/app/customers',label: t('nav.contacts'), icon: Users     },
-    { id: '/app/reports',  label: t('nav.budget'),   icon: BarChart2 },
+    { id: '/app/reports',  label: t('nav.reports'),  icon: BarChart2 },
   ] : isService ? [
     { id: '/app',           label: t('nav.home'),     icon: Home },
     { id: '/app/sales',     label: t('nav.sales'),    icon: Receipt },
