@@ -1,40 +1,23 @@
 /**
- * Report aggregation service — Phase 4.1.
- *
- * All aggregations are performed client-side from data already fetched via RLS
- * (sales, sale_items, expenses). No new DB queries or migrations are required.
- *
- * Honesty rules carried forward from financials.ts (see F1 — correct daily profit):
- *  - Only PAID sales contribute to revenue, COGS, and product rankings.
- *  - PENDING sales are tallied separately; CANCELLED sales are excluded entirely.
- *  - Revenue = Σ sale.total (today total === subtotal; discount-correct by
- *    construction, refund/cancellation excluded). Scoped by sold_at so debt
- *    repayments are never counted as new revenue on the repayment day.
- *  - COGS = Σ sale_items.unit_cost * quantity using the unit_cost snapshot only;
- *    NULL rows are counted as missing cost data. Current product cost is never
- *    substituted in, and inventory purchases (separate `purchases` table) are
- *    never counted as COGS or as operating expenses.
- *  - Net profit = gross profit − operating expenses (revenue − expenses when no
- *    COGS exists); costs are never invented for service businesses.
- *  - Product rankings use historical product_name and unit_price snapshots.
- *  - No current product prices or catalogue data is consulted.
+ * Report aggregation service.
+ * For personal accounts, revenue comes from income_entries (not sales).
+ * For all other business types, revenue comes from the sales table.
  */
 import { supabase } from '../../lib/supabase'
 import type { Expense, ExpenseCategory } from '../expenses/types'
 import type { DateRange } from '../overview/financials'
 import type { SaleWithItems } from '../retail/types'
-
-// ── Aggregated types ──────────────────────────────────────────────────────────
+import type { IncomeEntry, IncomeSource } from '../income/types'
 
 export interface DailySalesSummary {
-  date: string        // YYYY-MM-DD local
-  revenue: number     // paid sales
+  date: string
+  revenue: number
   pending: number
   transactionCount: number
 }
 
 export interface MonthlySalesSummary {
-  month: string       // YYYY-MM
+  month: string
   revenue: number
   transactionCount: number
 }
@@ -48,8 +31,8 @@ export interface PaymentMethodSummary {
 export interface ProductSummary {
   productName: string
   totalQuantity: number
-  totalRevenue: number       // sum of line_total from historical snapshots
-  totalCogs: number | null   // null if any item in this product's sales lacks unit_cost
+  totalRevenue: number
+  totalCogs: number | null
   cogsIncomplete: boolean
 }
 
@@ -60,12 +43,29 @@ export interface ExpenseCategorySummary {
 }
 
 export interface MonthlyExpenseSummary {
-  month: string       // YYYY-MM
+  month: string
   totalAmount: number
 }
 
+export interface IncomeSourceSummary {
+  source: IncomeSource
+  totalAmount: number
+  transactionCount: number
+}
+
+export interface DailyIncomeSummary {
+  date: string
+  totalAmount: number
+  transactionCount: number
+}
+
+export interface MonthlyIncomeSummary {
+  month: string
+  totalAmount: number
+  transactionCount: number
+}
+
 export interface ReportData {
-  // ── Profit summary ────────────────────────────────────────────────────────
   paidRevenue: number
   pendingRevenue: number
   totalExpenses: number
@@ -73,23 +73,19 @@ export interface ReportData {
   grossProfit: number | null
   netProfit: number
   cogsIncomplete: boolean
-
-  // ── Sales aggregations ────────────────────────────────────────────────────
   totalSaleTransactions: number
   pendingTransactions: number
   dailySales: DailySalesSummary[]
   monthlySales: MonthlySalesSummary[]
   salesByPaymentMethod: PaymentMethodSummary[]
-
-  // ── Product aggregations ──────────────────────────────────────────────────
-  topProductsByQuantity: ProductSummary[]    // top 10
-  topProductsByRevenue: ProductSummary[]     // top 10
-
-  // ── Expense aggregations ──────────────────────────────────────────────────
+  topProductsByQuantity: ProductSummary[]
+  topProductsByRevenue: ProductSummary[]
   expensesByCategory: ExpenseCategorySummary[]
   monthlyExpenses: MonthlyExpenseSummary[]
-
-  // ── Raw data (for detail views) ───────────────────────────────────────────
+  incomeBySource: IncomeSourceSummary[]
+  dailyIncome: DailyIncomeSummary[]
+  monthlyIncome: MonthlyIncomeSummary[]
+  incomeEntries: IncomeEntry[]
   sales: SaleWithItems[]
   expenses: Expense[]
 }
@@ -100,40 +96,42 @@ function noClient(): { data: null; error: { message: string } } {
   return { data: null, error: { message: 'Supabase is not configured.' } }
 }
 
-/** Extract YYYY-MM-DD from an ISO timestamp using local offset. */
 function isoToLocalDate(isoTs: string): string {
-  // The timestamp from Supabase may be UTC; convert to local via Date.
   const d = new Date(isoTs)
-  const y = d.getFullYear()
-  const m = String(d.getMonth() + 1).padStart(2, '0')
-  const day = String(d.getDate()).padStart(2, '0')
-  return `${y}-${m}-${day}`
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
-/** Extract YYYY-MM from an ISO timestamp using local offset. */
 function isoToLocalMonth(isoTs: string): string {
   return isoToLocalDate(isoTs).slice(0, 7)
 }
 
-export async function getReportData(range: DateRange): Result<ReportData> {
+export async function getReportData(range: DateRange, isPersonal = false): Result<ReportData> {
   if (!supabase) return noClient()
 
+  let incomeEntries: IncomeEntry[] = []
+  if (isPersonal) {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user) {
+      const { data } = await supabase
+        .from('income_entries')
+        .select('*')
+        .eq('owner_id', user.id)
+        .gte('received_at', range.fromTs)
+        .lte('received_at', range.toTs)
+        .order('received_at', { ascending: false })
+        .limit(10000)
+      incomeEntries = (data as IncomeEntry[]) ?? []
+    }
+  }
+
   const [salesRes, expensesRes] = await Promise.all([
-    supabase
-      .from('sales')
-      .select('*, sale_items(*)')
-      .gte('sold_at', range.fromTs)
-      .lte('sold_at', range.toTs)
+    supabase.from('sales').select('*, sale_items(*)')
+      .gte('sold_at', range.fromTs).lte('sold_at', range.toTs)
       .neq('payment_status', 'cancelled')
-      .order('sold_at', { ascending: false })
-      .limit(10000), // guard against PostgREST 1000-row default
-    supabase
-      .from('expenses')
-      .select('*')
-      .gte('expense_date', range.fromDate)
-      .lte('expense_date', range.toDate)
-      .order('expense_date', { ascending: false })
-      .limit(10000),
+      .order('sold_at', { ascending: false }).limit(10000),
+    supabase.from('expenses').select('*')
+      .gte('expense_date', range.fromDate).lte('expense_date', range.toDate)
+      .order('expense_date', { ascending: false }).limit(10000),
   ])
 
   if (salesRes.error)    return { data: null, error: { message: salesRes.error.message } }
@@ -141,33 +139,27 @@ export async function getReportData(range: DateRange): Result<ReportData> {
 
   const allSales    = (salesRes.data   as SaleWithItems[]) ?? []
   const allExpenses = (expensesRes.data as Expense[])      ?? []
-
   const paidSales    = allSales.filter(s => s.payment_status === 'paid')
   const pendingSales = allSales.filter(s => s.payment_status === 'pending' || s.payment_status === 'partial')
 
-  const paidRevenue    = paidSales.reduce((a, s) => a + s.total, 0)
-  // Outstanding = sum of remaining balances across unpaid + partial sales.
-  const pendingRevenue = pendingSales.reduce((a, s) => {
-    return a + (s.total - (s.amount_paid ?? 0))
-  }, 0)
+  const paidRevenue    = isPersonal
+    ? incomeEntries.reduce((a, e) => a + e.amount, 0)
+    : paidSales.reduce((a, s) => a + s.total, 0)
+  const pendingRevenue = pendingSales.reduce((a, s) => a + (s.total - (s.amount_paid ?? 0)), 0)
   const totalExpenses  = allExpenses.reduce((a, e) => a + e.amount, 0)
 
-  // ── COGS ──────────────────────────────────────────────────────────────────
   let cogsKnown = 0, hasAnyCost = false, missingCost = false
-  for (const sale of paidSales) {
-    for (const item of sale.sale_items) {
-      if (item.unit_cost !== null && item.unit_cost !== undefined) {
-        cogsKnown += item.unit_cost * item.quantity; hasAnyCost = true
-      } else { missingCost = true }
-    }
+  if (!isPersonal) {
+    for (const sale of paidSales)
+      for (const item of sale.sale_items)
+        if (item.unit_cost != null) { cogsKnown += item.unit_cost * item.quantity; hasAnyCost = true }
+        else missingCost = true
   }
   const cogs        = hasAnyCost ? cogsKnown : null
   const grossProfit = cogs !== null ? paidRevenue - cogs : null
-  // Subtract COGS when known so net profit reflects true earnings for product
-  // businesses; fall back to revenue − expenses when no cost data exists.
   const netProfit   = (grossProfit !== null ? grossProfit : paidRevenue) - totalExpenses
 
-  // ── Daily sales summary ───────────────────────────────────────────────────
+  // ── Daily sales ───────────────────────────────────────────────────────────
   const dailyMap = new Map<string, DailySalesSummary>()
   for (const sale of allSales) {
     const date = isoToLocalDate(sale.sold_at)
@@ -178,7 +170,7 @@ export async function getReportData(range: DateRange): Result<ReportData> {
   }
   const dailySales = [...dailyMap.values()].sort((a, b) => b.date.localeCompare(a.date))
 
-  // ── Monthly sales summary ─────────────────────────────────────────────────
+  // ── Monthly sales ─────────────────────────────────────────────────────────
   const monthSalesMap = new Map<string, MonthlySalesSummary>()
   for (const sale of paidSales) {
     const month = isoToLocalMonth(sale.sold_at)
@@ -188,64 +180,44 @@ export async function getReportData(range: DateRange): Result<ReportData> {
   }
   const monthlySales = [...monthSalesMap.values()].sort((a, b) => b.month.localeCompare(a.month))
 
-  // ── Sales by payment method ───────────────────────────────────────────────
+  // ── Payment methods ───────────────────────────────────────────────────────
   const pmMap = new Map<string, PaymentMethodSummary>()
   for (const sale of paidSales) {
-    const row = pmMap.get(sale.payment_method) ?? {
-      method: sale.payment_method as PaymentMethodSummary['method'],
-      revenue: 0, transactionCount: 0,
-    }
+    const row = pmMap.get(sale.payment_method) ?? { method: sale.payment_method as PaymentMethodSummary['method'], revenue: 0, transactionCount: 0 }
     row.revenue += sale.total; row.transactionCount++
     pmMap.set(sale.payment_method, row)
   }
   const salesByPaymentMethod = [...pmMap.values()].sort((a, b) => b.revenue - a.revenue)
 
-  // ── Product aggregations — historical snapshots only ──────────────────────
-  // Track per-product cost coverage separately from the global flag.
-  const productCostKnown = new Map<string, boolean>() // productName → hasAnyCost
-
+  // ── Products ──────────────────────────────────────────────────────────────
+  const productCostKnown = new Map<string, boolean>()
   const productMap = new Map<string, ProductSummary>()
   for (const sale of paidSales) {
     for (const item of sale.sale_items) {
-      const key = item.product_name   // use snapshot name; handles deleted products
-      const row = productMap.get(key) ?? {
-        productName: item.product_name,
-        totalQuantity: 0, totalRevenue: 0, totalCogs: 0, cogsIncomplete: false,
-      }
+      const row = productMap.get(item.product_name) ?? { productName: item.product_name, totalQuantity: 0, totalRevenue: 0, totalCogs: 0, cogsIncomplete: false }
       row.totalQuantity += item.quantity
       row.totalRevenue  += item.line_total
-      if (item.unit_cost !== null && item.unit_cost !== undefined) {
-        row.totalCogs = (row.totalCogs ?? 0) + item.unit_cost * item.quantity
-        productCostKnown.set(key, true)
-      } else {
-        row.cogsIncomplete = true
-      }
-      productMap.set(key, row)
+      if (item.unit_cost != null) { row.totalCogs = (row.totalCogs ?? 0) + item.unit_cost * item.quantity; productCostKnown.set(item.product_name, true) }
+      else row.cogsIncomplete = true
+      productMap.set(item.product_name, row)
     }
   }
-  // If no cost was ever known for this product, set totalCogs to null rather
-  // than 0 — zero cost is a valid real value so the two must be distinguishable.
-  for (const [key, row] of productMap) {
-    if (row.cogsIncomplete && !productCostKnown.get(key)) {
-      row.totalCogs = null
-    }
-  }
+  for (const [key, row] of productMap)
+    if (row.cogsIncomplete && !productCostKnown.get(key)) row.totalCogs = null
   const products = [...productMap.values()]
   const topProductsByQuantity = [...products].sort((a, b) => b.totalQuantity - a.totalQuantity).slice(0, 10)
   const topProductsByRevenue  = [...products].sort((a, b) => b.totalRevenue  - a.totalRevenue).slice(0, 10)
 
-  // ── Expense by category ────────────────────────────────────────────────────
+  // ── Expenses by category ──────────────────────────────────────────────────
   const catMap = new Map<string, ExpenseCategorySummary>()
   for (const exp of allExpenses) {
-    const row = catMap.get(exp.category) ?? {
-      category: exp.category as ExpenseCategory, totalAmount: 0, transactionCount: 0,
-    }
+    const row = catMap.get(exp.category) ?? { category: exp.category as ExpenseCategory, totalAmount: 0, transactionCount: 0 }
     row.totalAmount += exp.amount; row.transactionCount++
     catMap.set(exp.category, row)
   }
   const expensesByCategory = [...catMap.values()].sort((a, b) => b.totalAmount - a.totalAmount)
 
-  // ── Monthly expenses ───────────────────────────────────────────────────────
+  // ── Monthly expenses ──────────────────────────────────────────────────────
   const monthExpMap = new Map<string, MonthlyExpenseSummary>()
   for (const exp of allExpenses) {
     const month = exp.expense_date.slice(0, 7)
@@ -254,6 +226,35 @@ export async function getReportData(range: DateRange): Result<ReportData> {
     monthExpMap.set(month, row)
   }
   const monthlyExpenses = [...monthExpMap.values()].sort((a, b) => b.month.localeCompare(a.month))
+
+  // ── Income by source (personal) ───────────────────────────────────────────
+  const sourceMap = new Map<string, IncomeSourceSummary>()
+  for (const e of incomeEntries) {
+    const row = sourceMap.get(e.source) ?? { source: e.source, totalAmount: 0, transactionCount: 0 }
+    row.totalAmount += e.amount; row.transactionCount++
+    sourceMap.set(e.source, row)
+  }
+  const incomeBySource = [...sourceMap.values()].sort((a, b) => b.totalAmount - a.totalAmount)
+
+  // ── Daily income (personal) ───────────────────────────────────────────────
+  const dailyIncMap = new Map<string, DailyIncomeSummary>()
+  for (const e of incomeEntries) {
+    const date = isoToLocalDate(e.received_at)
+    const row = dailyIncMap.get(date) ?? { date, totalAmount: 0, transactionCount: 0 }
+    row.totalAmount += e.amount; row.transactionCount++
+    dailyIncMap.set(date, row)
+  }
+  const dailyIncome = [...dailyIncMap.values()].sort((a, b) => b.date.localeCompare(a.date))
+
+  // ── Monthly income (personal) ─────────────────────────────────────────────
+  const monthIncMap = new Map<string, MonthlyIncomeSummary>()
+  for (const e of incomeEntries) {
+    const month = isoToLocalMonth(e.received_at)
+    const row = monthIncMap.get(month) ?? { month, totalAmount: 0, transactionCount: 0 }
+    row.totalAmount += e.amount; row.transactionCount++
+    monthIncMap.set(month, row)
+  }
+  const monthlyIncome = [...monthIncMap.values()].sort((a, b) => b.month.localeCompare(a.month))
 
   return {
     data: {
@@ -264,6 +265,7 @@ export async function getReportData(range: DateRange): Result<ReportData> {
       dailySales, monthlySales, salesByPaymentMethod,
       topProductsByQuantity, topProductsByRevenue,
       expensesByCategory, monthlyExpenses,
+      incomeBySource, dailyIncome, monthlyIncome, incomeEntries,
       sales: paidSales, expenses: allExpenses,
     },
     error: null,

@@ -571,7 +571,10 @@
                                     "dailyServices":  "ዕለታዊ አገልግሎቶች",
                                     "monthlyServices":  "ወርሃዊ አገልግሎቶች",
                                     "topServicesByQty":  "ምርጥ አገልግሎቶች በብዛት",
-                                    "topServicesByRevenue":  "ምርጥ አገልግሎቶች በገቢ"
+                                    "topServicesByRevenue":  "ምርጥ አገልግሎቶች በገቢ",
+                                    "incomeBySource":  "ገቢ በምንጭ",
+                                    "dailyIncome":  "ዕለታዊ ገቢ",
+                                    "monthlyIncome":  "ወርሃዊ ገቢ"
                                 },
                     "sales":  {
                                   "paidTransactions":  "የተከፈሉ ግብይቶች",
@@ -603,10 +606,12 @@
                                 "services":  "አገልግሎቶች",
                                 "topProducts":  "ምርጥ ምርቶች",
                                 "topServices":  "ምርጥ አገልግሎቶች",
-                                "expenses":  "ወጪዎች"
+                                "expenses":  "ወጪዎች",
+                                "income":  "ገቢ"
                             },
                     "metric":  {
-                                   "serviceRevenue":  "የአገልግሎት ገቢ"
+                                   "serviceRevenue":  "የአገልግሎት ገቢ",
+                                   "totalIncome":  "ጠቅላላ ገቢ"
                                },
                     "services":  {
                                      "totalRecorded":  "ጠቅላላ የተመዘገቡ አገልግሎቶች"

@@ -114,7 +114,7 @@ const PRESET_PERIODS: { id: Exclude<Period, 'custom'>; labelKey: string }[] = [
 
 // ── Tab definitions ───────────────────────────────────────────────────────────
 
-type TabId = 'summary' | 'services' | 'breakdown' | 'expenses'
+type TabId = 'summary' | 'income' | 'services' | 'breakdown' | 'expenses'
 
 // ── Main page ─────────────────────────────────────────────────────────────────
 
@@ -124,6 +124,7 @@ export function ReportsPage() {
   const navigate            = useNavigate()
   const { profile }         = useAuth()
   const isService           = getBusinessConfig(profile?.type ?? 'retail').isServiceBased
+  const isPersonal          = profile?.type === 'personal'
 
   const [period,     setPeriod]     = useState<Period>('month')
   const [customFrom, setCustomFrom] = useState('')
@@ -136,7 +137,7 @@ export function ReportsPage() {
   function load(p: Period, cf?: string, ct?: string) {
     setLoadStatus('loading')
     const range = periodRange(p, cf, ct)
-    getReportData(range).then(({ data, error }) => {
+    getReportData(range, isPersonal).then(({ data, error }) => {
       if (error) { setErrorMsg(error.message); setLoadStatus('error'); return }
       setReport(data); setLoadStatus('loaded')
     })
@@ -150,7 +151,11 @@ export function ReportsPage() {
   }
 
   // Tab labels adapt to business type
-  const tabs: { id: TabId; label: string }[] = [
+  const tabs: { id: TabId; label: string }[] = isPersonal ? [
+    { id: 'summary',  label: t('reports.tab.summary')    },
+    { id: 'income',   label: t('reports.tab.income')     },
+    { id: 'expenses', label: t('reports.tab.expenses')   },
+  ] : [
     { id: 'summary',   label: t('reports.tab.summary') },
     { id: 'services',  label: isService ? t('reports.tab.services') : t('reports.tab.sales') },
     { id: 'breakdown', label: isService ? t('reports.tab.topServices') : t('reports.tab.topProducts') },
@@ -253,7 +258,10 @@ export function ReportsPage() {
       {activeTab === 'summary' && (
         <div className="space-y-4">
           <div className="divide-y divide-border rounded-xl border border-border bg-surface">
-            <SummaryRow label={isService ? t('reports.metric.serviceRevenue') : t('overview.metric.revenue')} value={fmtETB(r.paidRevenue)} />
+            <SummaryRow
+              label={isPersonal ? t('reports.metric.totalIncome') : isService ? t('reports.metric.serviceRevenue') : t('overview.metric.revenue')}
+              value={fmtETB(r.paidRevenue)}
+            />
             {r.pendingRevenue > 0 && (
               <SummaryRow label={t('overview.metric.pending')} value={fmtETB(r.pendingRevenue)} muted sub={t('overview.metric.pendingSub')} />
             )}
@@ -282,11 +290,81 @@ export function ReportsPage() {
             />
           </div>
 
-          {r.totalSaleTransactions === 0 && r.totalExpenses === 0 && (
+          {r.totalSaleTransactions === 0 && r.totalExpenses === 0 && (isPersonal ? r.incomeEntries.length === 0 : true) && (
             <div className="rounded-xl border border-border px-6 py-10 text-center">
               <p className="text-sm font-semibold text-text">{t('reports.empty.title')}</p>
               <p className="mt-1 text-sm text-secondary">{t('reports.empty.desc')}</p>
             </div>
+          )}
+        </div>
+      )}
+
+      {/* INCOME tab (personal only) */}
+      {activeTab === 'income' && isPersonal && (
+        <div className="space-y-4">
+          {!hasAdvancedReports ? <UpgradePrompt navigate={navigate} /> : (
+            <>
+              {/* Income by source */}
+              {r.incomeBySource.length > 0 && (
+                <>
+                  <h3 className="text-sm font-semibold text-text">{t('reports.section.incomeBySource')}</h3>
+                  <div className="rounded-xl border border-border bg-surface divide-y divide-border">
+                    {r.incomeBySource.map(src => {
+                      const maxSrc = r.incomeBySource[0]?.totalAmount ?? 1
+                      return (
+                        <div key={src.source} className="px-4 py-3">
+                          <div className="mb-2 flex items-baseline justify-between gap-3">
+                            <span className="text-sm font-medium text-text">{t(`income.sources.${src.source}`)}</span>
+                            <span className="shrink-0 text-xs text-secondary">
+                              {fmtETB(src.totalAmount)} · {src.transactionCount} {t('reports.expenses.entries')}
+                            </span>
+                          </div>
+                          <ProportionBar value={src.totalAmount} max={maxSrc} label={t(`income.sources.${src.source}`)} />
+                        </div>
+                      )
+                    })}
+                  </div>
+                </>
+              )}
+
+              {/* Daily income */}
+              {r.dailyIncome.length > 0 && (
+                <>
+                  <h3 className="text-sm font-semibold text-text">{t('reports.section.dailyIncome')}</h3>
+                  <ReportTable head={<><Th>{t('reports.col.date')}</Th><Th right>{t('reports.col.transactions')}</Th><Th right>{t('reports.col.amount')}</Th></>}>
+                    {r.dailyIncome.map(day => (
+                      <tr key={day.date}>
+                        <Td>{fmtDate(day.date)}</Td>
+                        <Td right figures>{day.transactionCount}</Td>
+                        <Td right figures>{fmtETB(day.totalAmount)}</Td>
+                      </tr>
+                    ))}
+                  </ReportTable>
+                </>
+              )}
+
+              {/* Monthly income */}
+              {r.monthlyIncome.length > 0 && (
+                <>
+                  <h3 className="text-sm font-semibold text-text">{t('reports.section.monthlyIncome')}</h3>
+                  <ReportTable head={<><Th>{t('reports.col.month')}</Th><Th right>{t('reports.col.transactions')}</Th><Th right>{t('reports.col.amount')}</Th></>}>
+                    {r.monthlyIncome.map(mo => (
+                      <tr key={mo.month}>
+                        <Td>{fmtMonth(mo.month)}</Td>
+                        <Td right figures>{mo.transactionCount}</Td>
+                        <Td right figures>{fmtETB(mo.totalAmount)}</Td>
+                      </tr>
+                    ))}
+                  </ReportTable>
+                </>
+              )}
+
+              {r.incomeEntries.length === 0 && (
+                <div className="rounded-xl border border-border px-6 py-10 text-center">
+                  <p className="text-sm text-secondary">{t('reports.empty.desc')}</p>
+                </div>
+              )}
+            </>
           )}
         </div>
       )}

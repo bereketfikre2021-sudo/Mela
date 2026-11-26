@@ -594,7 +594,10 @@
       "dailyServices": "Daily services",
       "monthlyServices": "Monthly services",
       "topServicesByQty": "Top services by count",
-      "topServicesByRevenue": "Top services by revenue"
+      "topServicesByRevenue": "Top services by revenue",
+      "incomeBySource": "Income by source",
+      "dailyIncome": "Daily income",
+      "monthlyIncome": "Monthly income"
     },
     "sales": {
       "paidTransactions": "Paid transactions",
@@ -626,10 +629,29 @@
       "services": "Services",
       "topProducts": "Top Products",
       "topServices": "Top Services",
-      "expenses": "Expenses"
+      "expenses": "Expenses",
+      "income": "Income"
     },
     "metric": {
-      "serviceRevenue": "Service revenue"
+      "serviceRevenue": "Service revenue",
+      "totalIncome": "Total income"
+    },
+    "section": {
+      "profitSummary": "Profit summary",
+      "salesSummary": "Sales summary",
+      "dailySales": "Daily sales",
+      "monthlySales": "Monthly sales",
+      "topProductsByQty": "Top products by quantity",
+      "topProductsByRevenue": "Top products by revenue",
+      "expensesByCategory": "Expenses by category",
+      "monthlyExpenses": "Monthly expenses",
+      "dailyServices": "Daily services",
+      "monthlyServices": "Monthly services",
+      "topServicesByQty": "Top services by count",
+      "topServicesByRevenue": "Top services by revenue",
+      "incomeBySource": "Income by source",
+      "dailyIncome": "Daily income",
+      "monthlyIncome": "Monthly income"
     },
     "services": {
       "totalRecorded": "Total services recorded"
