@@ -199,8 +199,8 @@ export function OnboardingPage({ addingNew = false }: { addingNew?: boolean }) {
           createProduct({
             name:              p.name,
             sku:               null,
-            selling_price:     p.defaultPrice,
-            cost_price:        p.costPrice ?? null,
+            selling_price:     0,
+            cost_price:        null,
             stock_quantity:    isService ? 999999 : 0,
             unit:              p.unit,
             low_stock_threshold: null,
