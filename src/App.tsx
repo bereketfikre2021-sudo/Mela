@@ -134,8 +134,8 @@ function AppRoutes() {
     { id: '/app',           label: t('nav.home'),                    icon: Home },
     { id: '/app/sales',     label: t('nav.sales'),                   icon: Receipt },
     { id: '/app/stock',     label: t(bizConfig.stockLabelKey),       icon: Package },
-    { id: '/app/customers', label: t('nav.customers'),               icon: Users },
     { id: '/app/expenses',  label: t('nav.expenses'),                icon: Wallet },
+    { id: '/app/reports',   label: t('nav.reports'),                 icon: BarChart2 },
   ]
 
   const publicShell = (children: React.ReactNode) => (

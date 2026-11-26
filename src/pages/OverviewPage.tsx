@@ -44,6 +44,7 @@ import { useProducts } from '../modules/retail/useProducts'
 import { getOutstandingBalances } from '../modules/retail/salesApi'
 import { getSupplierOutstanding } from '../modules/suppliers/api'
 import { getIncomeForPeriod } from '../modules/income/api'
+import { useAppNotifications } from '../modules/notifications/NotificationContext'
 
 // ── Formatting helpers ────────────────────────────────────────────────────────
 
@@ -174,8 +175,12 @@ export function OverviewPage() {
   // Personal accounts: income comes from income_entries, not sales
   const [personalIncome, setPersonalIncome] = useState<number>(0)
 
+  const { notifications } = useAppNotifications()
+
+  // Most recent daily summary notification — shown as a card on the dashboard
+  const latestSummary = notifications.find(n => n.kind === 'daily_summary')
+
   const loadFinancials = useCallback(async () => {
-    setLoadStatus('loading')
     const range = periodRange('today')
     const [summaryRes, customerRes, supplierRes, incomeRes] = await Promise.all([
       getFinancialSummary(range),
@@ -320,6 +325,24 @@ export function OverviewPage() {
           />
         )}
       </div>
+
+      {/* ── Daily summary card (shown after closing time) ───────────────────── */}
+      {latestSummary && (
+        <button
+          type="button"
+          onClick={() => navigate('/app/reports')}
+          className="w-full flex items-start justify-between rounded-xl border border-primary/30 bg-primary-soft px-4 py-3 text-left"
+        >
+          <div className="flex items-start gap-3">
+            <BarChart2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+            <div>
+              <p className="text-sm font-semibold text-primary">{latestSummary.title}</p>
+              <p className="mt-0.5 text-xs text-secondary">{latestSummary.body}</p>
+            </div>
+          </div>
+          <ArrowRight className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+        </button>
+      )}
 
       {/* ── Pending payments banner ─────────────────────────────────────────── */}
       {s.pendingRevenue > 0 && (
