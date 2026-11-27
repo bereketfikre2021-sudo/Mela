@@ -1,16 +1,12 @@
 ﻿/**
- * SubscriptionsPage — pricing configuration and feature flags.
- * The user subscription list has moved to the Users page.
+ * SubscriptionsPage — feature flags and app settings.
+ * Billing plan pricing has moved to Billing Plans (/admin/billing).
  */
 import { useEffect, useState } from 'react'
-import { Check } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { Check, ArrowRight, Tag } from 'lucide-react'
 import { getSiteSettings, updateSiteSetting } from '../lib/api'
 import { AdminBtn, AdminInput, Card, CardHeader } from '../components/AdminTable'
-
-const PRICING_KEYS = [
-  { key: 'plan_premium_monthly_etb', label: 'Premium — Monthly price (ETB)' },
-  { key: 'plan_premium_yearly_etb',  label: 'Premium — Yearly price (ETB)'  },
-]
 
 const FLAG_KEYS = [
   { key: 'feature_flag_staff', label: 'Staff management feature' },
@@ -18,10 +14,11 @@ const FLAG_KEYS = [
 ]
 
 export function SubscriptionsPage() {
-  const [drafts,    setDrafts]     = useState<Record<string, string>>({})
-  const [saving,    setSaving]     = useState<string | null>(null)
-  const [msgs,      setMsgs]       = useState<Record<string, string>>({})
-  const [loading,   setLoading]    = useState(true)
+  const navigate = useNavigate()
+  const [drafts,  setDrafts]  = useState<Record<string, string>>({})
+  const [saving,  setSaving]  = useState<string | null>(null)
+  const [msgs,    setMsgs]    = useState<Record<string, string>>({})
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     setLoading(true)
@@ -44,13 +41,11 @@ export function SubscriptionsPage() {
     const { error } = await updateSiteSetting(key, drafts[key] ?? '')
     setSaving(null)
     setMsgs(prev => ({ ...prev, [key]: error ? `Error: ${error.message}` : '✓ Saved' }))
-    if (!error) setDrafts(prev => ({ ...prev, [key]: drafts[key] }))
     setTimeout(() => setMsgs(prev => { const n = { ...prev }; delete n[key]; return n }), 3000)
   }
 
   async function toggleFlag(key: string) {
-    const current = drafts[key] === 'true'
-    const next    = (!current).toString()
+    const next = (drafts[key] !== 'true').toString()
     set(key, next)
     setSaving(key)
     const { error } = await updateSiteSetting(key, next)
@@ -66,38 +61,25 @@ export function SubscriptionsPage() {
     <div className="max-w-2xl space-y-6">
       <h1 className="text-2xl font-bold text-gray-900">Subscription Settings</h1>
 
-      {/* Pricing */}
-      <Card>
-        <CardHeader title="Pricing" />
-        <div className="p-5 space-y-4">
-          {PRICING_KEYS.map(({ key, label }) => (
-            <div key={key} className="flex items-end gap-3">
-              <div className="flex-1">
-                <AdminInput
-                  label={label}
-                  value={drafts[key] ?? ''}
-                  onChange={v => set(key, v)}
-                  type="number"
-                  placeholder="0"
-                />
-              </div>
-              <div className="flex items-center gap-2 pb-0.5">
-                <AdminBtn size="sm" onClick={() => void saveKey(key)} disabled={saving === key}>
-                  {saving === key ? '…' : 'Save'}
-                </AdminBtn>
-                {msgs[key] && (
-                  <span className={`text-xs whitespace-nowrap flex items-center gap-1 ${msgs[key].startsWith('Error') ? 'text-red-500' : 'text-green-600'}`}>
-                    {!msgs[key].startsWith('Error') && <Check className="h-3 w-3" />}
-                    {msgs[key]}
-                  </span>
-                )}
-              </div>
-            </div>
-          ))}
+      {/* ── Billing Plans callout ─────────────────────────────────────────── */}
+      <button
+        type="button"
+        onClick={() => navigate('/admin/billing')}
+        className="flex w-full items-center gap-4 rounded-xl border border-green-200 bg-green-50 px-5 py-4 text-left transition-colors hover:bg-green-100"
+      >
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-green-700">
+          <Tag className="h-5 w-5 text-white" />
+        </span>
+        <div className="flex-1">
+          <p className="text-sm font-semibold text-green-900">Manage Billing Plans & Pricing</p>
+          <p className="text-xs text-green-700">
+            Add, edit or deactivate subscription options. Changes reflect immediately for new purchases.
+          </p>
         </div>
-      </Card>
+        <ArrowRight className="h-4 w-4 shrink-0 text-green-700" />
+      </button>
 
-      {/* Feature flags */}
+      {/* ── Feature Flags ─────────────────────────────────────────────────── */}
       <Card>
         <CardHeader title="Feature Flags" />
         <div className="p-5 divide-y divide-gray-100">
@@ -120,19 +102,16 @@ export function SubscriptionsPage() {
                     disabled={saving === key}
                     onClick={() => void toggleFlag(key)}
                     className={[
-                      'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out disabled:opacity-50',
-                      enabled ? 'bg-primary' : 'bg-gray-200',
+                      'relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 disabled:opacity-50',
+                      enabled ? 'bg-green-700' : 'bg-gray-200',
                     ].join(' ')}
-                    style={enabled ? { backgroundColor: '#1C6B53' } : {}}
                     role="switch"
                     aria-checked={enabled}
                   >
-                    <span
-                      className={[
-                        'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out',
-                        enabled ? 'translate-x-5' : 'translate-x-0',
-                      ].join(' ')}
-                    />
+                    <span className={[
+                      'inline-block h-5 w-5 transform rounded-full bg-white shadow transition duration-200',
+                      enabled ? 'translate-x-5' : 'translate-x-0',
+                    ].join(' ')} />
                   </button>
                 </div>
               </div>
@@ -141,7 +120,7 @@ export function SubscriptionsPage() {
         </div>
       </Card>
 
-      {/* App announcement */}
+      {/* ── App Announcement ──────────────────────────────────────────────── */}
       <Card>
         <CardHeader title="App Announcement" />
         <div className="p-5 space-y-3">
@@ -159,7 +138,8 @@ export function SubscriptionsPage() {
                 {saving === 'app_announcement' ? '…' : 'Save'}
               </AdminBtn>
               {msgs['app_announcement'] && (
-                <span className={`text-xs ${msgs['app_announcement'].startsWith('Error') ? 'text-red-500' : 'text-green-600'}`}>
+                <span className={`flex items-center gap-1 text-xs ${msgs['app_announcement'].startsWith('Error') ? 'text-red-500' : 'text-green-600'}`}>
+                  {!msgs['app_announcement'].startsWith('Error') && <Check className="h-3 w-3" />}
                   {msgs['app_announcement']}
                 </span>
               )}
