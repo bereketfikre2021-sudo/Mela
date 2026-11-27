@@ -14,7 +14,61 @@ import { adminSupabase as db } from './adminSupabase'
 import type {
   AdminBusiness, AdminPaymentSubmission, AdminPlanLimits,
   AdminStaffMember, AdminSubscription, SiteSetting,
+  BillingOption, BillingOptionInput,
 } from './types'
+
+// ── Billing Options ──────────────────────────────────────────────────────────
+
+export async function getBillingOptions(): Result<BillingOption[]> {
+  if (!db) return noClient()
+  const { data, error } = await db
+    .from('subscription_billing_options')
+    .select('*')
+    .order('display_order', { ascending: true })
+  if (error) return { data: null, error: { message: error.message } }
+  return { data: data as BillingOption[], error: null }
+}
+
+export async function createBillingOption(input: BillingOptionInput): Result<BillingOption> {
+  if (!db) return noClient()
+  const { data, error } = await db
+    .from('subscription_billing_options')
+    .insert(input)
+    .select('*')
+    .single()
+  if (error) return { data: null, error: { message: error.message } }
+  return { data: data as BillingOption, error: null }
+}
+
+export async function updateBillingOption(id: string, patch: Partial<BillingOptionInput>): Result<BillingOption> {
+  if (!db) return noClient()
+  const { data, error } = await db
+    .from('subscription_billing_options')
+    .update(patch)
+    .eq('id', id)
+    .select('*')
+    .single()
+  if (error) return { data: null, error: { message: error.message } }
+  return { data: data as BillingOption, error: null }
+}
+
+export async function deleteBillingOption(id: string): Promise<{ error: { message: string } | null }> {
+  if (!db) return { error: { message: 'Not configured' } }
+  // Safety check: block if any active subscription used this option
+  const { count } = await db
+    .from('payment_submissions')
+    .select('id', { count: 'exact', head: true })
+    .eq('billing_option_id', id)
+    .eq('status', 'approved')
+  if ((count ?? 0) > 0) {
+    return { error: { message: 'Cannot delete: this option has active subscriptions attached.' } }
+  }
+  const { error } = await db
+    .from('subscription_billing_options')
+    .delete()
+    .eq('id', id)
+  return { error: error ? { message: error.message } : null }
+}
 
 type Result<T> = Promise<{ data: T; error: null } | { data: null; error: { message: string } }>
 

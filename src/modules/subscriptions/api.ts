@@ -8,6 +8,7 @@
  */
 import { supabase } from '../../lib/supabase'
 import type {
+  BillingOptionPublic,
   PaymentSubmission,
   PaymentSubmissionInput,
   PlanLimits,
@@ -86,4 +87,11 @@ export async function getSiteSettingsPublic(): Promise<Record<string, string>> {
   const { data } = await supabase.from('site_settings').select('key, value')
   if (!data) return {}
   return Object.fromEntries(data.map((r: { key: string; value: string }) => [r.key, r.value]))
+}
+
+/** Fetch active billing options via the public RPC. */
+export async function getActiveBillingOptions(): Promise<BillingOptionPublic[]> {
+  if (!supabase) return []
+  const { data } = await supabase.rpc('get_active_billing_options')
+  return (data as BillingOptionPublic[]) ?? []
 }

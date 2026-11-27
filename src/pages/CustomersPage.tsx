@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { CheckCircle2, Mail, Pencil, Phone, Plus, ShoppingBag, Trash2, Users, Wallet } from 'lucide-react'
+import { useDebounce } from '../lib/useDebounce'
 import { useTranslation } from 'react-i18next'
 
 import { Button } from '../design-system/Button'
@@ -35,6 +36,7 @@ export function CustomersPage() {
   const [selected,   setSelected]   = useState<Customer | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [search,     setSearch]     = useState('')
+  const debouncedSearch = useDebounce(search, 150)
 
   // Customer history
   const [historyCustomer, setHistoryCustomer] = useState<Customer | null>(null)
@@ -138,7 +140,7 @@ export function CustomersPage() {
   function closeDialog()          { setDialogMode(null); setSelected(null) }
 
   const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase()
+    const q = debouncedSearch.trim().toLowerCase()
     let list = customers
     if (q) {
       list = list.filter(c =>

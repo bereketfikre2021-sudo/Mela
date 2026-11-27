@@ -14,6 +14,7 @@ import { PaymentDetailPage } from './pages/PaymentDetailPage'
 import { SubscriptionsPage } from './pages/SubscriptionsPage'
 import { StaffAdminPage }    from './pages/StaffAdminPage'
 import { ActivityPage }      from './pages/ActivityPage'
+import { BillingOptionsPage } from './pages/BillingOptionsPage'
 
 function AdminCallbackPage() {
   const { status } = useAdminAuth()
@@ -52,6 +53,7 @@ export function AdminApp() {
         <Route path="/admin/payments"       element={<AdminGuard><PaymentsPage /></AdminGuard>} />
         <Route path="/admin/payments/:id"   element={<AdminGuard><PaymentDetailPage /></AdminGuard>} />
         <Route path="/admin/subscriptions"  element={<AdminGuard><SubscriptionsPage /></AdminGuard>} />
+        <Route path="/admin/billing"        element={<AdminGuard><BillingOptionsPage /></AdminGuard>} />
         <Route path="/admin/staff"          element={<AdminGuard><StaffAdminPage /></AdminGuard>} />
         <Route path="/admin/activity"       element={<AdminGuard><ActivityPage /></AdminGuard>} />
 

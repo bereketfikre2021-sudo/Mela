@@ -70,6 +70,21 @@ export interface SiteSetting {
   updated_at: string
 }
 
+export interface BillingOption {
+  id:              string
+  name:            string
+  duration_months: number
+  price_etb:       number
+  is_active:       boolean
+  is_featured:     boolean
+  display_order:   number
+  badge_text:      string | null
+  created_at:      string
+  updated_at:      string
+}
+
+export type BillingOptionInput = Omit<BillingOption, 'id' | 'created_at' | 'updated_at'>
+
 export interface AdminStaffMember {
   id: string
   owner_id: string

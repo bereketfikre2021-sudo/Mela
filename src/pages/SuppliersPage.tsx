@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Mail, Pencil, Phone, Plus, Trash2, Truck, Wallet } from 'lucide-react'
+import { useDebounce } from '../lib/useDebounce'
 import { useTranslation } from 'react-i18next'
 
 import { Button } from '../design-system/Button'
@@ -28,6 +29,7 @@ export function SuppliersPage() {
   const [selected,   setSelected]   = useState<Supplier | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [search,     setSearch]     = useState('')
+  const debouncedSearch = useDebounce(search, 150)
 
   // ── Outstanding supplier balances (F2) ────────────────────────────────────
   const [outstanding,    setOutstanding]    = useState<Map<string, number>>(new Map())
@@ -58,7 +60,7 @@ export function SuppliersPage() {
   function closeDialog()          { setDialogMode(null); setSelected(null) }
 
   const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase()
+    const q = debouncedSearch.trim().toLowerCase()
     let list = suppliers
     if (q) list = list.filter(s =>
       s.name.toLowerCase().includes(q) ||

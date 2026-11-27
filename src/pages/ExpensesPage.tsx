@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Pencil, Plus, Receipt, Trash2 } from 'lucide-react'
+import { useDebounce } from '../lib/useDebounce'
 import { useTranslation } from 'react-i18next'
 
 import { Button } from '../design-system/Button'
@@ -48,6 +49,7 @@ export function ExpensesPage() {
 
   // Filters
   const [search,      setSearch]      = useState('')
+  const debouncedSearch = useDebounce(search, 150)
   const [filterCat,   setFilterCat]   = useState<ExpenseCategory | ''>('')
   const [filterFrom,  setFilterFrom]  = useState('')
   const [filterTo,    setFilterTo]    = useState('')
@@ -62,7 +64,7 @@ export function ExpensesPage() {
   // ── Filtered list ──────────────────────────────────────────────────────────
   const filtered = useMemo(() => {
     return expenses.filter(e => {
-      if (search.trim() && !e.title.toLowerCase().includes(search.trim().toLowerCase())) return false
+      if (debouncedSearch.trim() && !e.title.toLowerCase().includes(debouncedSearch.trim().toLowerCase())) return false
       if (filterCat && e.category !== filterCat) return false
       if (filterFrom && e.expense_date < filterFrom) return false
       if (filterTo   && e.expense_date > filterTo)   return false

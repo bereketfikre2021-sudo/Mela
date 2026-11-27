@@ -211,6 +211,20 @@ export function OverviewPage() {
     p.low_stock_threshold && p.low_stock_threshold > 0 && p.stock_quantity <= p.low_stock_threshold
   )
 
+  // Expiring products — within warning window
+  const today = new Date()
+  const expiringItems = products.filter(p => {
+    if (!p.expiry_date) return false
+    const expiry  = new Date(p.expiry_date)
+    const warnDays = p.expiry_warning_days ?? 30
+    const warnDate = new Date(expiry.getTime() - warnDays * 24 * 60 * 60 * 1000)
+    return today >= warnDate && today <= expiry
+  })
+  const expiredItems = products.filter(p => {
+    if (!p.expiry_date) return false
+    return new Date(p.expiry_date) < today
+  })
+
   // ── Loading ────────────────────────────────────────────────────────────────
   if (loadStatus === 'loading') {
     return (
@@ -441,6 +455,34 @@ export function OverviewPage() {
             </span>
           </div>
           <ArrowRight className="h-4 w-4 text-danger shrink-0" aria-hidden="true" />
+        </button>
+      )}
+
+      {/* ── Expired products banner ──────────────────────────────────────────── */}
+      {expiredItems.length > 0 && (
+        <button type="button" onClick={() => navigate('/app/stock')}
+          className="w-full flex items-center justify-between rounded-xl border border-danger bg-danger-soft px-4 py-3 text-left">
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="h-4 w-4 text-danger shrink-0" aria-hidden="true" />
+            <span className="text-sm font-medium text-danger">
+              {t('home.expiredBanner', { count: expiredItems.length })}
+            </span>
+          </div>
+          <ArrowRight className="h-4 w-4 text-danger shrink-0" aria-hidden="true" />
+        </button>
+      )}
+
+      {/* ── Expiring soon banner ─────────────────────────────────────────────── */}
+      {expiredItems.length === 0 && expiringItems.length > 0 && (
+        <button type="button" onClick={() => navigate('/app/stock')}
+          className="w-full flex items-center justify-between rounded-xl border border-warning-soft bg-warning-soft px-4 py-3 text-left">
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="h-4 w-4 text-warning shrink-0" aria-hidden="true" />
+            <span className="text-sm font-medium text-text">
+              {t('home.expiringBanner', { count: expiringItems.length })}
+            </span>
+          </div>
+          <ArrowRight className="h-4 w-4 text-warning shrink-0" aria-hidden="true" />
         </button>
       )}
 

@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import {
   Activity, Bell, Building2, ChevronDown, CreditCard,
-  LayoutDashboard, LogOut, Menu, Search, Users, X,
+  LayoutDashboard, LogOut, Menu, Search, Tag, Users, X,
 } from 'lucide-react'
 import { useAdminAuth } from '../lib/AdminAuthContext'
 import { getAllPaymentSubmissions } from '../lib/api'
@@ -15,6 +15,7 @@ const NAV = [
   { href: '/admin/users',         label: 'Users',         icon: Users },
   { href: '/admin/payments',      label: 'Payments',      icon: CreditCard },
   { href: '/admin/subscriptions', label: 'Subscriptions', icon: Building2 },
+  { href: '/admin/billing',       label: 'Billing Plans', icon: Tag },
   { href: '/admin/staff',         label: 'Staff',         icon: Users },
   { href: '/admin/activity',      label: 'Activity',      icon: Activity },
 ]

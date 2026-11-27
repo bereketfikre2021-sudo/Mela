@@ -4,6 +4,17 @@
 
 export type SubscriptionPlan = 'free' | 'premium'
 
+/** Public billing option returned by get_active_billing_options() RPC. */
+export interface BillingOptionPublic {
+  id:              string
+  name:            string
+  duration_months: number
+  price_etb:       number
+  is_featured:     boolean
+  display_order:   number
+  badge_text:      string | null
+}
+
 export type SubscriptionStatus =
   | 'active'
   | 'pending_payment'
@@ -59,7 +70,7 @@ export interface PaymentSubmission {
 
 export interface PaymentSubmissionInput {
   plan: 'premium'
-  billing_cycle: 'monthly' | 'yearly'
+  billing_cycle: string
   amount_etb: number
   payment_method: string
   transaction_reference: string

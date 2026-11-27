@@ -149,8 +149,9 @@ export function QuickExpenseForm({
     }
     if (!category) return
 
-    // Use captured date (auto, no user input)
-    const expenseDate = capturedAt.toISOString().slice(0, 10)
+    // Use captured date in local timezone (not UTC)
+    const capDate = capturedAt
+    const expenseDate = `${capDate.getFullYear()}-${String(capDate.getMonth()+1).padStart(2,'0')}-${String(capDate.getDate()).padStart(2,'0')}`
 
     await onSubmit({
       title:        categoryLabel || t(`expenses.categories.${category}`),

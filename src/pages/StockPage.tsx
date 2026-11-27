@@ -8,6 +8,7 @@
 import { useState } from 'react'
 import { AlertTriangle, ArrowDownUp, ClipboardList, FileSpreadsheet, History, PackageX, Pencil, Plus, Trash2 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { useDebounce } from '../lib/useDebounce'
 import { useTranslation } from 'react-i18next'
 
 import { Button } from '../design-system/Button'
@@ -78,6 +79,7 @@ export function StockPage() {
   const { notify } = useNotification()
 
   const [search,      setSearch]      = useState('')
+  const debouncedSearch = useDebounce(search, 150)
   const [statusFilter, setStatusFilter] = useState<'all' | 'low' | 'out'>('all')
 
   // Add product dialog
@@ -112,7 +114,7 @@ export function StockPage() {
   const [rstKey]      = useState(() => crypto.randomUUID())
 
   const filtered = products.filter(p => {
-    const q = search.trim().toLowerCase()
+    const q = debouncedSearch.trim().toLowerCase()
     if (q && !p.name.toLowerCase().includes(q) && !(p.sku?.toLowerCase().includes(q))) return false
     if (statusFilter === 'out' && p.stock_quantity !== 0) return false
     if (statusFilter === 'low') {

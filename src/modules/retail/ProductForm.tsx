@@ -164,6 +164,8 @@ export function ProductForm({ mode, initial, isServiceBased = false, onSubmit, o
   const [barcode,      setBarcode]     = useState(initial?.barcode ?? '')
   const [imageUrl,     setImageUrl]    = useState(initial?.image_url ?? '')
   const [imagePreview, setImagePreview]= useState<string | null>(initial?.image_url ?? null)
+  const [expiryDate,   setExpiryDate]  = useState(initial?.expiry_date ?? '')
+  const [expiryWarn,   setExpiryWarn]  = useState(initial?.expiry_warning_days?.toString() ?? '30')
   const [errors,       setErrors]      = useState<Record<string, string>>({})
 
   function blur(field: string, value: string) {
@@ -202,6 +204,8 @@ export function ProductForm({ mode, initial, isServiceBased = false, onSubmit, o
       low_stock_threshold: isServiceBased ? null : (threshold.trim() ? parseFloat(threshold) : null),
       image_url:           isServiceBased ? null : (imageUrl.trim() || null),
       barcode:             isServiceBased ? null : (barcode.trim() || null),
+      expiry_date:         expiryDate.trim() || null,
+      expiry_warning_days: expiryWarn.trim() ? parseInt(expiryWarn) : 30,
     }
     await onSubmit(input)
   }
@@ -314,6 +318,30 @@ export function ProductForm({ mode, initial, isServiceBased = false, onSubmit, o
       {!isServiceBased && (
         <BarcodeField value={barcode} onChange={setBarcode} />
       )}
+
+      {/* Expiry date — optional for all business types */}
+      <div className="rounded-xl border border-border bg-background p-4 space-y-3">
+        <p className="text-xs font-semibold uppercase tracking-wide text-secondary">
+          {t('products.form.expirySection')}
+        </p>
+        <Input
+          label={t('products.form.expiryDate')}
+          helperText={t('products.form.expiryDateHelper')}
+          type="date"
+          value={expiryDate}
+          onChange={e => setExpiryDate(e.target.value)}
+        />
+        {expiryDate && (
+          <Input
+            label={t('products.form.expiryWarnDays')}
+            helperText={t('products.form.expiryWarnDaysHelper')}
+            inputMode="numeric"
+            value={expiryWarn}
+            onChange={e => setExpiryWarn(e.target.value)}
+            placeholder="30"
+          />
+        )}
+      </div>
 
       <div className="flex justify-end gap-2 pt-2">
         <Button type="button" variant="ghost" onClick={onCancel} disabled={submitting}>

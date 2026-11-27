@@ -15,6 +15,8 @@ export interface Product {
   low_stock_threshold: number | null
   image_url: string | null
   barcode: string | null
+  expiry_date: string | null
+  expiry_warning_days: number | null
   created_at: string
   updated_at: string
 }
@@ -30,6 +32,8 @@ export interface ProductInput {
   low_stock_threshold: number | null
   image_url: string | null
   barcode: string | null
+  expiry_date?: string | null
+  expiry_warning_days?: number | null
 }
 
 // ── Sales ─────────────────────────────────────────────────────────────────────

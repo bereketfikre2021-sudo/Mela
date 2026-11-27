@@ -19,9 +19,9 @@ import { useNotification } from '../design-system/Notification'
 import { StatusBadge } from '../design-system/StatusBadge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../design-system/Table'
 import { useAuth } from '../modules/auth/AuthContext'
-import { getPaymentHistory, submitPayment, getSiteSettingsPublic } from '../modules/subscriptions/api'
+import { getPaymentHistory, submitPayment, getSiteSettingsPublic, getActiveBillingOptions } from '../modules/subscriptions/api'
 import { useSubscription } from '../modules/subscriptions/SubscriptionContext'
-import type { PaymentSubmission } from '../modules/subscriptions/types'
+import type { BillingOptionPublic, PaymentSubmission } from '../modules/subscriptions/types'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -33,8 +33,13 @@ function fmtDate(iso: string) {
   })
 }
 
-const MONTHLY_PRICE = 299
-const YEARLY_PRICE = 2499
+// Fallback prices — overridden by site_settings loaded at runtime
+const DEFAULT_PRICES: Record<string, number> = {
+  monthly:   299,
+  quarterly: 799,
+  biannual:  1499,
+  yearly:    2499,
+}
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 
@@ -113,8 +118,12 @@ export function SubscriptionPage() {
     useSubscription()
   const { notify } = useNotification()
 
-  // Pricing toggle
-  const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly')
+  // Billing options — loaded from DB, falls back to DEFAULT_PRICES
+  const [billingOptions, setBillingOptions] = useState<BillingOptionPublic[]>([])
+  const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null)
+
+  const selectedOption = billingOptions.find(o => o.id === selectedOptionId) ?? billingOptions[0] ?? null
+  const baseMonthlyPrice = billingOptions.find(o => o.duration_months === 1)?.price_etb ?? billingOptions[0]?.price_etb ?? 399
 
   // Payment form visibility
   const [showForm, setShowForm] = useState(false)
@@ -154,11 +163,24 @@ export function SubscriptionPage() {
 
   useEffect(() => {
     getSiteSettingsPublic().then(settings => {
+      // Load prices from site_settings (admin can update without code deploy)
+      const loaded: Record<string, number> = { ...DEFAULT_PRICES }
+      if (settings.price_monthly)   loaded.monthly   = parseFloat(settings.price_monthly)
       if (settings.payment_methods_json) {
         try {
           const methods = JSON.parse(settings.payment_methods_json)
           if (Array.isArray(methods) && methods.length > 0) setPaymentMethods(methods)
         } catch { /* use defaults */ }
+      }
+    })
+
+    // Load dynamic billing options from DB
+    getActiveBillingOptions().then(opts => {
+      if (opts.length > 0) {
+        setBillingOptions(opts)
+        // Auto-select featured option or first
+        const featured = opts.find(o => o.is_featured)
+        setSelectedOptionId((featured ?? opts[0]).id)
       }
     })
   }, [])
@@ -218,11 +240,12 @@ export function SubscriptionPage() {
       }
     } catch { /* non-fatal — submit without screenshot URL */ }
 
-    const amount = billingCycle === 'monthly' ? MONTHLY_PRICE : YEARLY_PRICE
+    const amount = selectedOption?.price_etb ?? baseMonthlyPrice
+    const billingCycleName = selectedOption?.name ?? 'monthly'
     const txReference = `${screenshot.name}_${Date.now()}`
     const { error } = await submitPayment(activeBusiness?.id ?? '', user?.id ?? '', {
       plan: 'premium',
-      billing_cycle: billingCycle,
+      billing_cycle: billingCycleName,
       amount_etb: amount,
       payment_method: paymentMethod,
       transaction_reference: txReference,
@@ -269,7 +292,7 @@ export function SubscriptionPage() {
 
   // ── Derived display values ──────────────────────────────────────────────────
   const planName = plan === 'premium' ? t('subscription.plan.premium') : t('subscription.plan.free')
-  const premiumPrice = billingCycle === 'monthly' ? MONTHLY_PRICE : YEARLY_PRICE
+  const premiumPrice = selectedOption?.price_etb ?? baseMonthlyPrice
 
   function statusBadgeTone(s: string | null): 'success' | 'warning' | 'danger' | 'neutral' {
     if (s === 'active') return 'success'
@@ -297,8 +320,7 @@ export function SubscriptionPage() {
   ]
 
   const isCurrentFree = plan === 'free'
-  const isCurrentMonthly = isActive && billingCycle === 'monthly'
-  const isCurrentYearly = isActive && billingCycle === 'yearly'
+  const isCurrentSelected = isActive && selectedOption !== null
 
   return (
     <div className="py-6 md:py-10">
@@ -360,52 +382,63 @@ export function SubscriptionPage() {
           <h2 id="pricing-heading" className="text-lg font-semibold text-text">
             {t('subscription.pricing.heading')}
           </h2>
-          {/* Monthly / Yearly toggle */}
-          <div
-            className="inline-flex rounded-lg border border-border bg-surface p-0.5 text-sm"
-            role="group"
-            aria-label={t('subscription.pricing.billingToggleLabel')}
-          >
-            <button
-              type="button"
-              onClick={() => setBillingCycle('monthly')}
-              className={`rounded-md px-3 py-1.5 font-medium transition-colors ${
-                billingCycle === 'monthly'
-                  ? 'bg-primary text-white'
-                  : 'text-secondary hover:text-text'
-              }`}
-            >
-              {t('subscription.pricing.monthly')}
-            </button>
-            <button
-              type="button"
-              onClick={() => setBillingCycle('yearly')}
-              className={`rounded-md px-3 py-1.5 font-medium transition-colors ${
-                billingCycle === 'yearly'
-                  ? 'bg-primary text-white'
-                  : 'text-secondary hover:text-text'
-              }`}
-            >
-              {t('subscription.pricing.yearly')}
-              <span className="ml-1.5 rounded-full bg-success-soft px-1.5 py-0.5 text-xs text-success">
-                {t('subscription.pricing.yearlySavings')}
-              </span>
-            </button>
+          {/* Dynamic billing option tiles from DB */}
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {billingOptions.map(opt => {
+              const isSelected = opt.id === selectedOptionId
+              const monthlyEff = (opt.price_etb / opt.duration_months).toFixed(0)
+              const savings = baseMonthlyPrice > 0 && opt.duration_months > 1
+                ? Math.round(((baseMonthlyPrice * opt.duration_months - opt.price_etb) / (baseMonthlyPrice * opt.duration_months)) * 100)
+                : 0
+              return (
+                <button
+                  key={opt.id}
+                  type="button"
+                  onClick={() => setSelectedOptionId(opt.id)}
+                  className={[
+                    'relative rounded-xl border p-4 text-left transition-all',
+                    isSelected ? 'border-primary bg-primary-soft shadow-sm' : 'border-border bg-surface hover:border-primary/50',
+                  ].join(' ')}
+                >
+                  {opt.is_featured && (
+                    <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-0.5 text-[10px] font-semibold text-white">
+                      {opt.badge_text ?? 'Featured'}
+                    </span>
+                  )}
+                  {!opt.is_featured && opt.badge_text && (
+                    <span className="mb-2 inline-block rounded-full bg-success-soft px-2 py-0.5 text-[10px] font-semibold text-success">
+                      {opt.badge_text}
+                    </span>
+                  )}
+                  <p className={`text-sm font-semibold ${isSelected ? 'text-primary' : 'text-text'}`}>{opt.name}</p>
+                  <p className="mt-1 text-xl font-bold text-text">ETB {opt.price_etb.toLocaleString('en-ET')}</p>
+                  <p className="text-xs text-secondary">{opt.duration_months} month{opt.duration_months > 1 ? 's' : ''}</p>
+                  <p className="mt-1 text-xs text-secondary">≈ ETB {monthlyEff}/month</p>
+                  {savings > 0 && (
+                    <p className="mt-1 text-xs font-medium text-success">Save {savings}%</p>
+                  )}
+                  {isSelected && (
+                    <span className="absolute right-3 top-3 flex h-5 w-5 items-center justify-center rounded-full bg-primary">
+                      <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </span>
+                  )}
+                </button>
+              )
+            })}
           </div>
         </div>
 
         <div className="flex flex-col gap-4 sm:flex-row">
-          {/* Premium plan card only — Free plan removed (trial methodology) */}
           <PlanCard
             name={t('subscription.plan.premium')}
-            price={`ETB ${billingCycle === 'monthly' ? MONTHLY_PRICE : YEARLY_PRICE}`}
-            priceLabel={
-              billingCycle === 'monthly'
-                ? t('subscription.pricing.perMonth')
-                : t('subscription.pricing.perYear')
-            }
+            price={`ETB ${premiumPrice.toLocaleString('en-ET')}`}
+            priceLabel={selectedOption
+              ? `${selectedOption.duration_months} month${selectedOption.duration_months > 1 ? 's' : ''}`
+              : t('subscription.pricing.perMonth')}
             features={premiumFeatures}
-            isCurrent={billingCycle === 'monthly' ? isCurrentMonthly : isCurrentYearly}
+            isCurrent={isCurrentSelected}
             currentPlanLabel={t('subscription.pricing.currentPlanLabel')}
             isHighlighted
             onSelect={handleSelectPremium}
@@ -429,7 +462,9 @@ export function SubscriptionPage() {
                 <p className="text-xl font-bold text-figures">
                   ETB {premiumPrice.toLocaleString('en-ET')}
                   <span className="ml-1 text-sm font-normal text-secondary">
-                    {billingCycle === 'monthly' ? t('subscription.pricing.perMonth') : t('subscription.pricing.perYear')}
+                    {selectedOption
+                      ? `${selectedOption.duration_months} month${selectedOption.duration_months > 1 ? 's' : ''}`
+                      : t('subscription.pricing.perMonth')}
                   </span>
                 </p>
               </div>
